@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Kavach — Digital Money Copilot for Bharat's UPI Generation
 
 Kavach is an accessible, mobile-first money copilot designed for India's first digital-payment generation. It provides pre-transaction scam detection, irregular income budgeting, and micro-mandate audits.
@@ -56,3 +57,24 @@ npm install lucide-react
 - **Touch-First Navigation:** Minimum `48px` to `56px` tap targets for all buttons and interactive controls.
 - **Legible Typography:** 16px minimum font size for body and form fields to prevent mobile browser zoom bugs.
 - **Bilingual Toggle:** Seamless English and हिन्दी (Hindi) switcher.
+=======
+# problem_5
+
+## Problem Statement
+
+Problem Statement 5 – FinTech: Smart Personal Finance & Secure Digital Transactions
+
+## Project Overview
+
+
+
+## Team
+
+1. Meet Madhwani
+2. Shreyas Patel
+3. Sulay Shah
+4. Marut Patel
+5. Sahaj Vala
+
+## Tech Stack
+>>>>>>> db6da2f7018bddd8cd76800862830cdb5cf23aeb

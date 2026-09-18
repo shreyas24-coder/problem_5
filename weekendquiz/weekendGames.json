@@ -1,0 +1,381 @@
+{
+  "weekendGames": [
+    {
+      "gameId": 1,
+      "type": "budget",
+      "title": "Budget Battle",
+      "description": "Can you make smart choices with a limited monthly income?",
+      "estimatedTime": "2–3 minutes",
+      "learningGoal": "Understand budgeting, saving, and the trade-offs behind everyday spending.",
+      "scenario": {
+        "income": 30000,
+        "currency": "INR",
+        "intro": "You earn ₹30,000 this month. Your essential expenses are covered, but you have ₹10,000 left for flexible spending and saving."
+      },
+      "rounds": [
+        {
+          "round": 1,
+          "question": "You have ₹10,000 left. What do you do first?",
+          "options": [
+            {
+              "text": "Save ₹4,000 and keep ₹6,000 for flexible spending",
+              "score": 10,
+              "feedback": "Good balance. You are setting money aside before spending everything."
+            },
+            {
+              "text": "Spend the full ₹10,000 because the essentials are already paid",
+              "score": 2,
+              "feedback": "You can spend it, but leaving nothing for savings or unexpected needs reduces your financial buffer."
+            },
+            {
+              "text": "Invest the entire ₹10,000 immediately",
+              "score": 6,
+              "feedback": "Investing can be useful, but your short-term needs and emergency savings should also be considered."
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "question": "A friend invites you to a ₹2,500 dinner. Your flexible spending budget is getting tight.",
+          "options": [
+            {
+              "text": "Go, but reduce another non-essential expense this month",
+              "score": 10,
+              "feedback": "A planned trade-off helps you enjoy the expense without losing control of your budget."
+            },
+            {
+              "text": "Go and use credit without checking your budget",
+              "score": 3,
+              "feedback": "Credit can make spending feel easier, but the expense still has to be paid later."
+            },
+            {
+              "text": "Never spend money on anything fun",
+              "score": 5,
+              "feedback": "A budget does not mean avoiding all enjoyment. The goal is to spend intentionally."
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "question": "You have ₹3,000 remaining near the end of the month.",
+          "options": [
+            {
+              "text": "Keep most of it as savings and carry some forward",
+              "score": 10,
+              "feedback": "Unused money can strengthen your savings and give you more flexibility next month."
+            },
+            {
+              "text": "Spend it all because the month is almost over",
+              "score": 3,
+              "feedback": "A month ending does not mean unused money must be spent."
+            },
+            {
+              "text": "Lend all of it to a friend without considering your own needs",
+              "score": 4,
+              "feedback": "Helping others is a personal choice, but your own financial needs should also be considered."
+            }
+          ]
+        }
+      ],
+      "result": {
+        "maxScore": 30,
+        "messages": [
+          {
+            "minScore": 24,
+            "title": "Strong Budgeter",
+            "message": "You made choices that balanced spending, saving, and flexibility."
+          },
+          {
+            "minScore": 15,
+            "title": "Getting There",
+            "message": "You understand some budgeting basics, but a little more planning could help."
+          },
+          {
+            "minScore": 0,
+            "title": "Budget Practice Needed",
+            "message": "Small spending decisions can add up. Try planning your priorities before spending."
+          }
+        ]
+      }
+    },
+    {
+      "gameId": 2,
+      "type": "scam",
+      "title": "Scam Detective",
+      "description": "Spot the warning signs before a suspicious message catches you off guard.",
+      "estimatedTime": "2–3 minutes",
+      "learningGoal": "Recognize common financial scam signals and safer responses.",
+      "rounds": [
+        {
+          "round": 1,
+          "question": "You receive: 'Your bank account will be blocked today. Click this link immediately to update your KYC.' What should you do?",
+          "options": [
+            {
+              "text": "Click the link and update KYC quickly",
+              "score": 0,
+              "feedback": "Urgency plus an unknown link is a major warning sign. Do not click it."
+            },
+            {
+              "text": "Ignore the link and contact the bank through its official channel",
+              "score": 10,
+              "feedback": "Correct. Verify account issues directly through the bank's official app, website, or phone number."
+            },
+            {
+              "text": "Forward the message to friends to ask what they think",
+              "score": 2,
+              "feedback": "Sharing suspicious links can expose others to the same scam. Verify through an official source instead."
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "question": "Someone calls claiming to be from your bank and asks for your OTP to 'reverse a failed transaction.'",
+          "options": [
+            {
+              "text": "Give the OTP because they know your recent transaction",
+              "score": 0,
+              "feedback": "Never share an OTP. A caller knowing transaction details does not prove they are genuine."
+            },
+            {
+              "text": "Refuse and contact your bank using the official number",
+              "score": 10,
+              "feedback": "Correct. Keep OTPs, PINs, passwords, and other authentication details private."
+            },
+            {
+              "text": "Give only the last two digits of the OTP",
+              "score": 1,
+              "feedback": "Partial OTP information can still be useful to scammers. Do not share it."
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "question": "An online post promises 'guaranteed 5x returns in 30 days' with no risk.",
+          "options": [
+            {
+              "text": "Invest immediately before the offer disappears",
+              "score": 0,
+              "feedback": "Guaranteed high returns with no risk are a major red flag."
+            },
+            {
+              "text": "Research the offer and verify the entity through reliable official sources",
+              "score": 10,
+              "feedback": "Correct. Verify before sending money or sharing financial information."
+            },
+            {
+              "text": "Invest a small amount just to test it",
+              "score": 3,
+              "feedback": "Even a small payment can expose you to fraud. Verify first."
+            }
+          ]
+        }
+      ],
+      "result": {
+        "maxScore": 30,
+        "messages": [
+          {
+            "minScore": 24,
+            "title": "Scam Spotter",
+            "message": "You consistently noticed urgency, secrecy, suspicious links, and unrealistic promises."
+          },
+          {
+            "minScore": 15,
+            "title": "Stay Alert",
+            "message": "You caught some warning signs. Keep practicing safe verification habits."
+          },
+          {
+            "minScore": 0,
+            "title": "Scam Signals Missed",
+            "message": "Pause before clicking, paying, or sharing sensitive information. Verification is your first defence."
+          }
+        ]
+      }
+    },
+    {
+      "gameId": 3,
+      "type": "needs_vs_wants",
+      "title": "Needs vs Wants",
+      "description": "You have limited money. Can you prioritize what matters most?",
+      "estimatedTime": "2–3 minutes",
+      "learningGoal": "Distinguish essential expenses from optional spending and prioritize financial needs.",
+      "rounds": [
+        {
+          "round": 1,
+          "question": "You have ₹5,000 available after paying your main bills. Your phone is working fine, but a new model costs ₹4,500.",
+          "options": [
+            {
+              "text": "Buy the new phone because it is on sale",
+              "score": 2,
+              "feedback": "A discount does not automatically make something necessary."
+            },
+            {
+              "text": "Keep the money for savings or upcoming needs",
+              "score": 10,
+              "feedback": "Good choice. A working phone means the upgrade is optional, not essential."
+            },
+            {
+              "text": "Borrow money to buy the phone",
+              "score": 0,
+              "feedback": "Borrowing for an unnecessary purchase can create an avoidable financial burden."
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "question": "Your monthly transport cost is increasing. You can either pay for essential travel or spend the same amount on entertainment.",
+          "options": [
+            {
+              "text": "Prioritize the transport expense",
+              "score": 10,
+              "feedback": "Essential expenses should generally come before discretionary spending."
+            },
+            {
+              "text": "Spend on entertainment and figure out transport later",
+              "score": 1,
+              "feedback": "Delaying an essential expense can create bigger problems later."
+            },
+            {
+              "text": "Split the money equally without checking your actual needs",
+              "score": 5,
+              "feedback": "Splitting money can work sometimes, but priorities should be based on actual needs and deadlines."
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "question": "You want a ₹2,000 pair of shoes, but your current shoes are usable and you have an upcoming college fee.",
+          "options": [
+            {
+              "text": "Pay the college fee first and delay the shoes",
+              "score": 10,
+              "feedback": "You prioritized a known financial obligation over an optional purchase."
+            },
+            {
+              "text": "Buy the shoes and worry about the fee later",
+              "score": 1,
+              "feedback": "An optional purchase should not normally take priority over an upcoming essential payment."
+            },
+            {
+              "text": "Use credit for the shoes",
+              "score": 2,
+              "feedback": "Credit does not remove the cost. It can make an optional purchase more expensive if interest or fees apply."
+            }
+          ]
+        }
+      ],
+      "result": {
+        "maxScore": 30,
+        "messages": [
+          {
+            "minScore": 24,
+            "title": "Priority Pro",
+            "message": "You consistently separated essential needs from optional wants."
+          },
+          {
+            "minScore": 15,
+            "title": "Think Before You Spend",
+            "message": "You made some good priorities, but a pause before optional purchases can help."
+          },
+          {
+            "minScore": 0,
+            "title": "Needs First",
+            "message": "Start by identifying what must be paid before deciding what you can afford to spend."
+          }
+        ]
+      }
+    },
+    {
+      "gameId": 4,
+      "type": "financial_decision",
+      "title": "Money Decision Tree",
+      "description": "A surprise expense forces you to make a financial decision. What will you do?",
+      "estimatedTime": "2–3 minutes",
+      "learningGoal": "Understand how financial decisions change based on urgency, available savings, and borrowing costs.",
+      "rounds": [
+        {
+          "round": 1,
+          "question": "An unexpected ₹8,000 expense comes up. You have ₹20,000 in emergency savings.",
+          "options": [
+            {
+              "text": "Use part of your emergency savings and review your budget",
+              "score": 10,
+              "feedback": "This is one purpose of an emergency fund: handling unexpected necessary expenses."
+            },
+            {
+              "text": "Borrow immediately even though you have enough savings",
+              "score": 3,
+              "feedback": "Borrowing may add interest or fees when you already have funds available."
+            },
+            {
+              "text": "Ignore the expense completely",
+              "score": 0,
+              "feedback": "Ignoring a necessary expense can make the problem more costly."
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "question": "Your savings can cover the expense, but using them would reduce your emergency fund significantly.",
+          "options": [
+            {
+              "text": "Use only what is necessary and make a plan to rebuild the fund",
+              "score": 10,
+              "feedback": "Good approach. Use the fund for the need, then work toward restoring it."
+            },
+            {
+              "text": "Spend extra money because you have already touched your savings",
+              "score": 1,
+              "feedback": "Using savings for one need does not make additional spending free."
+            },
+            {
+              "text": "Take a high-cost loan without comparing alternatives",
+              "score": 2,
+              "feedback": "Borrowing costs matter. Compare options and understand the total repayment before borrowing."
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "question": "After the emergency, you receive ₹5,000 of extra income. What is a sensible next step?",
+          "options": [
+            {
+              "text": "Put a large part toward rebuilding your emergency savings",
+              "score": 10,
+              "feedback": "Rebuilding your financial buffer can improve your ability to handle the next unexpected expense."
+            },
+            {
+              "text": "Spend all ₹5,000 because you had a difficult month",
+              "score": 3,
+              "feedback": "Enjoyment is fine, but using all extra income may leave your emergency fund weaker."
+            },
+            {
+              "text": "Put all ₹5,000 into a random investment without researching it",
+              "score": 2,
+              "feedback": "Financial products should be understood before money is committed. Your immediate safety net may also need attention."
+            }
+          ]
+        }
+      ],
+      "result": {
+        "maxScore": 30,
+        "messages": [
+          {
+            "minScore": 24,
+            "title": "Calm Decision Maker",
+            "message": "You considered urgency, savings, and future financial resilience before acting."
+          },
+          {
+            "minScore": 15,
+            "title": "Good Instincts",
+            "message": "You showed some strong habits. Comparing costs and planning ahead can make decisions stronger."
+          },
+          {
+            "minScore": 0,
+            "title": "Pause and Plan",
+            "message": "Before borrowing or spending, check urgency, available savings, total costs, and future needs."
+          }
+        ]
+      }
+    }
+  ]
+}
