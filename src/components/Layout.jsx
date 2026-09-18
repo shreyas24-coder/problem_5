@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Shield, Wallet, Coins, Home, LayoutDashboard, Target, HelpCircle, Sparkles } from 'lucide-react';
 
-export default function Layout({ lang, setLang, user, onOpenSignUp, onSignOut }) {
+export default function Layout({ lang, setLang, user, onSignOut, onLogin }) {
   const location = useLocation();
 
   const navItems = [
@@ -33,6 +33,8 @@ export default function Layout({ lang, setLang, user, onOpenSignUp, onSignOut })
     }
   ];
 
+  const showBottomNav = user && location.pathname !== '/auth';
+
   return (
     <div className="min-h-screen bg-[#fbfbf9] text-stone-900 font-sans flex flex-col justify-between selection:bg-amber-200">
       
@@ -48,7 +50,7 @@ export default function Layout({ lang, setLang, user, onOpenSignUp, onSignOut })
         <div className="max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 h-18 py-3 flex items-center justify-between">
           
           {/* Logo */}
-          <NavLink to="/" className="flex items-center gap-2.5 group">
+          <NavLink to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shadow-stone-900/10 group-hover:scale-105 transition-transform">
               <Shield className="w-5 h-5 stroke-[2.4]" />
             </div>
@@ -63,14 +65,17 @@ export default function Layout({ lang, setLang, user, onOpenSignUp, onSignOut })
             </div>
           </NavLink>
 
-          {/* Secondary Header Navigation for Desktop */}
-          <div className="hidden md:flex items-center gap-4 text-xs font-bold text-stone-600">
-            <NavLink to="/dashboard" className="hover:text-stone-900">Dashboard</NavLink>
-            <NavLink to="/spend" className="hover:text-stone-900">Transactions</NavLink>
-            <NavLink to="/save" className="hover:text-stone-900">AutoPay Audit</NavLink>
-            <NavLink to="/goals" className="hover:text-stone-900">Goals</NavLink>
-            <NavLink to="/quiz" className="hover:text-stone-900">Daily Quiz</NavLink>
-          </div>
+          {/* Secondary Header Navigation for Desktop - Only for logged-in users */}
+          {user && (
+            <div className="hidden md:flex items-center gap-4 text-xs font-bold text-stone-600">
+              <NavLink to="/dashboard" className="hover:text-stone-900">Dashboard</NavLink>
+              <NavLink to="/shield" className="hover:text-stone-900">Shield</NavLink>
+              <NavLink to="/spend" className="hover:text-stone-900">Transactions</NavLink>
+              <NavLink to="/save" className="hover:text-stone-900">AutoPay Audit</NavLink>
+              <NavLink to="/goals" className="hover:text-stone-900">Goals</NavLink>
+              <NavLink to="/quiz" className="hover:text-stone-900">Daily Quiz</NavLink>
+            </div>
+          )}
 
           {/* Right: Sign Up / User + Language Switcher */}
           <div className="flex items-center gap-2">
@@ -90,14 +95,13 @@ export default function Layout({ lang, setLang, user, onOpenSignUp, onSignOut })
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={onOpenSignUp}
+              <NavLink
+                to="/auth"
                 className="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>{lang === 'en' ? 'Sign Up' : 'साइन अप'}</span>
-              </button>
+              </NavLink>
             )}
 
             {/* Language Switcher */}
@@ -133,50 +137,52 @@ export default function Layout({ lang, setLang, user, onOpenSignUp, onSignOut })
       </header>
 
       {/* PAGE CONTENT CONTAINER */}
-      <main className="flex-1 w-full max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 pb-28 sm:pb-32">
-        <Outlet context={{ lang, user, onOpenSignUp }} />
+      <main className={`flex-1 w-full max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 ${showBottomNav ? 'pb-28 sm:pb-32' : 'pb-12 sm:pb-16'}`}>
+        <Outlet context={{ lang, user, onLogin }} />
       </main>
 
-      {/* STICKY BOTTOM TAB BAR (Optimized for 360px Viewports) */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
-        aria-label="Bottom Navigation"
-      >
-        <div className="max-w-md md:max-w-4xl mx-auto px-1 sm:px-4 flex items-center justify-between h-20">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
+      {/* STICKY BOTTOM TAB BAR (Rendered strictly for authenticated users) */}
+      {showBottomNav && (
+        <nav 
+          className="fixed bottom-0 left-0 right-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+          aria-label="Bottom Navigation"
+        >
+          <div className="max-w-md md:max-w-4xl mx-auto px-1 sm:px-4 flex items-center justify-between h-20">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.to;
 
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={`flex flex-col items-center justify-center flex-1 min-h-[48px] min-w-[48px] py-1 rounded-2xl transition-all ${
-                  isActive
-                    ? 'text-stone-950 font-extrabold'
-                    : 'text-stone-500 hover:text-stone-800 font-medium'
-                }`}
-              >
-                <div
-                  className={`w-10 h-8 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={`flex flex-col items-center justify-center flex-1 min-h-[48px] min-w-[48px] py-1 rounded-2xl transition-all ${
                     isActive
-                      ? 'bg-stone-900 text-amber-400 shadow-sm scale-105'
-                      : 'text-stone-500 hover:bg-stone-200/60'
+                      ? 'text-stone-950 font-extrabold'
+                      : 'text-stone-500 hover:text-stone-800 font-medium'
                   }`}
                 >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
-                </div>
-                <span className="text-[10px] sm:text-[11px] tracking-tight font-bold">
-                  {item.label}
-                </span>
-                {isActive && (
-                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>
-                )}
-              </NavLink>
-            );
-          })}
-        </div>
-      </nav>
+                  <div
+                    className={`w-10 h-8 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
+                      isActive
+                        ? 'bg-stone-900 text-amber-400 shadow-sm scale-105'
+                        : 'text-stone-500 hover:bg-stone-200/60'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] tracking-tight font-bold">
+                    {item.label}
+                  </span>
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>
+                  )}
+                </NavLink>
+              );
+            })}
+          </div>
+        </nav>
+      )}
     </div>
   );
 }

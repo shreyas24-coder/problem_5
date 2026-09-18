@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './src/components/Layout';
 import LandingPage from './src/pages/Landing';
+import AuthPage from './src/pages/Auth';
 import DashboardPage from './src/pages/Dashboard';
 import ShieldPage from './src/pages/Shield';
 import SpendPage from './src/pages/Spend';
 import SavePage from './src/pages/Save';
 import GoalsPage from './src/pages/Goals';
 import QuizPage from './src/pages/Quiz';
-import SignUpModal from './src/components/SignUpModal';
+
+function ProtectedRoute({ user, children }) {
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  return children;
+}
 
 export default function App() {
   const [lang, setLang] = useState('en');
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -46,27 +52,64 @@ export default function App() {
               lang={lang}
               setLang={setLang}
               user={user}
-              onOpenSignUp={() => setIsSignUpOpen(true)}
               onSignOut={handleSignOut}
+              onLogin={handleSignUpComplete}
             />
           }
         >
-          <Route index element={<LandingPage onOpenSignUp={() => setIsSignUpOpen(true)} />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="shield" element={<ShieldPage />} />
-          <Route path="spend" element={<SpendPage />} />
-          <Route path="save" element={<SavePage />} />
-          <Route path="goals" element={<GoalsPage />} />
-          <Route path="quiz" element={<QuizPage />} />
+          <Route index element={<LandingPage />} />
+          <Route path="auth" element={<AuthPage />} />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute user={user}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="shield"
+            element={
+              <ProtectedRoute user={user}>
+                <ShieldPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="spend"
+            element={
+              <ProtectedRoute user={user}>
+                <SpendPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="save"
+            element={
+              <ProtectedRoute user={user}>
+                <SavePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="goals"
+            element={
+              <ProtectedRoute user={user}>
+                <GoalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="quiz"
+            element={
+              <ProtectedRoute user={user}>
+                <QuizPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
-
-      <SignUpModal
-        isOpen={isSignUpOpen}
-        onClose={() => setIsSignUpOpen(false)}
-        onComplete={handleSignUpComplete}
-        lang={lang}
-      />
     </BrowserRouter>
   );
 }

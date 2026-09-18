@@ -127,6 +127,13 @@
       </svg>
     );
 
+    const IconArrowLeft = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    );
+
     const IconChevronRight = ({ className = "w-4 h-4" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="9 18 15 12 9 6"/>
@@ -993,10 +1000,312 @@
     }
 
     // ==========================================
-    // 8. LANDING PAGE (With Educational News)
+    // 7B. DEDICATED AUTHENTICATION PAGE
     // ==========================================
-    function LandingPage({ lang, onNavigate, onOpenSignUp }) {
+    function AuthPage({ lang, onNavigate, onLogin }) {
+      const [step, setStep] = useState(1);
+      const [name, setName] = useState('');
+      const [phone, setPhone] = useState('');
+      const [otp, setOtp] = useState(['', '', '', '']);
+      const [selectedPersona, setSelectedPersona] = useState('student');
+      const [errorMsg, setErrorMsg] = useState('');
+      const [isVerifying, setIsVerifying] = useState(false);
+
+      const handleStep1 = (e) => {
+        e.preventDefault();
+        if (!name.trim()) {
+          setErrorMsg(lang === 'en' ? 'Please enter your name' : 'कृपया अपना नाम दर्ज करें');
+          return;
+        }
+        if (phone.replace(/\D/g, '').length < 10) {
+          setErrorMsg(lang === 'en' ? 'Please enter a valid 10-digit mobile number' : 'कृपया वैध 10-अंकीय मोबाइल नंबर दर्ज करें');
+          return;
+        }
+        setErrorMsg('');
+        setStep(2);
+      };
+
+      const handleQuickDemoFill = () => {
+        setName('Shreyas Patel');
+        setPhone('9876543210');
+        setErrorMsg('');
+      };
+
+      const handleStep2 = (e) => {
+        e.preventDefault();
+        if (otp.join('').length < 4) {
+          setErrorMsg(lang === 'en' ? 'Please enter 4 digits' : 'कृपया 4 अंक दर्ज करें');
+          return;
+        }
+        setErrorMsg('');
+        setIsVerifying(true);
+        setTimeout(() => {
+          setIsVerifying(false);
+          setStep(3);
+        }, 600);
+      };
+
+      const handleComplete = () => {
+        const userData = {
+          name: name.trim() || 'Shreyas Patel',
+          phone: phone || '9876543210',
+          persona: selectedPersona
+        };
+        onLogin(userData);
+      };
+
+      return (
+        <div className="max-w-md mx-auto py-3 sm:py-6 animate-fade-in text-left">
+          {/* Back button to Home */}
+          <button
+            onClick={() => onNavigate('/')}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 mb-5 cursor-pointer"
+          >
+            <IconArrowLeft className="w-4 h-4" />
+            <span>{lang === 'en' ? 'Back to Home' : 'होम पर वापस जाएँ'}</span>
+          </button>
+
+          <div className="bg-white rounded-3xl border-2 border-stone-300 shadow-xl p-6 sm:p-8">
+            {/* Step Indicators */}
+            <div className="flex items-center gap-2 mb-6">
+              {[1, 2, 3].map((s) => (
+                <div
+                  key={s}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    s === step
+                      ? 'w-10 bg-stone-900'
+                      : s < step
+                      ? 'w-6 bg-emerald-500'
+                      : 'w-6 bg-stone-200'
+                  }`}
+                />
+              ))}
+              <span className="text-[11px] font-bold text-stone-400 ml-auto uppercase tracking-wider">
+                Step {step} of 3
+              </span>
+            </div>
+
+            {/* STEP 1: Name & Phone */}
+            {step === 1 && (
+              <form onSubmit={handleStep1} className="space-y-4">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-3 shadow-sm">
+                    <IconShield className="w-6 h-6" />
+                  </div>
+                  <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+                    {lang === 'en' ? 'Sign Up for Kavach' : 'कवच में साइन अप करें'}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1">
+                    {lang === 'en' ? 'Enter your details to unlock Scam Shield, Spend Tracker, and Goals.' : 'स्कैम शील्ड और सभी वित्तीय टूल्स अनलॉक करने के लिए विवरण दर्ज करें।'}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    {lang === 'en' ? 'Full Name' : 'पूरा नाम'}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Shreyas Patel"
+                    className="w-full min-h-[50px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    {lang === 'en' ? 'UPI Mobile Number' : 'UPI मोबाइल नंबर'}
+                  </label>
+                  <div className="flex items-center">
+                    <span className="min-h-[50px] px-3.5 bg-stone-100 border border-r-0 border-stone-300 rounded-l-xl flex items-center text-sm font-bold text-stone-600">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="98765 43210"
+                      className="flex-1 min-h-[50px] bg-stone-50 border border-stone-300 rounded-r-xl px-4 text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={handleQuickDemoFill}
+                    className="text-xs text-stone-600 hover:text-stone-900 font-bold underline cursor-pointer"
+                  >
+                    ⚡ {lang === 'en' ? 'Auto-Fill Demo Profile (Shreyas • 9876543210)' : 'डेमो प्रोफाइल भरें'}
+                  </button>
+                </div>
+
+                {errorMsg && (
+                  <p className="text-rose-600 text-xs font-bold">{errorMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full min-h-[52px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md mt-4 active:scale-[0.98]"
+                >
+                  <span>{lang === 'en' ? 'Send 4-Digit Verification Code' : 'सत्यापन कोड भेजें'}</span>
+                  <IconArrowRight className="w-4 h-4 text-amber-400" />
+                </button>
+              </form>
+            )}
+
+            {/* STEP 2: OTP Verification */}
+            {step === 2 && (
+              <form onSubmit={handleStep2} className="space-y-5">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3 shadow-sm">
+                    <IconCheckCircle2 className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+                    {lang === 'en' ? 'Verify Mobile Number' : 'मोबाइल नंबर सत्यापित करें'}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1">
+                    {lang === 'en' ? `Enter the 4-digit code sent to +91 ${phone || '9876543210'}` : `+91 ${phone || '9876543210'} पर भेजा गया 4-अंकीय कोड दर्ज करें`}
+                  </p>
+                </div>
+
+                <div className="flex justify-between gap-3 max-w-[260px] mx-auto py-2">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`auth-otp-idx-${idx}`}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const newOtp = [...otp];
+                        newOtp[idx] = val;
+                        setOtp(newOtp);
+                        if (val && idx < 3) {
+                          document.getElementById(`auth-otp-idx-${idx + 1}`)?.focus();
+                        }
+                      }}
+                      className="w-14 h-14 text-center text-2xl font-black bg-stone-50 border-2 border-stone-300 rounded-2xl focus:bg-white focus:border-stone-900 outline-none"
+                    />
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setOtp(['2', '4', '2', '6'])}
+                    className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-xs font-bold text-stone-800 rounded-xl cursor-pointer shadow-sm"
+                  >
+                    ⚡ {lang === 'en' ? 'Auto-Fill 2426' : 'ऑटो-फिल 2426'}
+                  </button>
+                </div>
+
+                {errorMsg && (
+                  <p className="text-rose-600 text-xs font-bold text-center">{errorMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isVerifying}
+                  className="w-full min-h-[52px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isVerifying ? (
+                    <span>{lang === 'en' ? 'Verifying...' : 'सत्यापित कर रहा है...'}</span>
+                  ) : (
+                    <>
+                      <span>{lang === 'en' ? 'Verify & Continue' : 'सत्यापित करें और आगे बढ़ें'}</span>
+                      <IconArrowRight className="w-4 h-4 text-amber-400" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* STEP 3: Lifestyle Persona */}
+            {step === 3 && (
+              <div className="space-y-4">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3 shadow-sm">
+                    <IconSparkles className="w-6 h-6" />
+                  </div>
+                  <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+                    {lang === 'en' ? 'Choose Your Lifestyle' : 'अपनी जीवनशैली चुनें'}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1">
+                    {lang === 'en' ? 'Kavach personalizes your payout cycles and safety rules based on this.' : 'कवच आपके पेआउट साइकल्स को इसके आधार पर अनुकूलित करता है।'}
+                  </p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { id: 'student', title: lang === 'en' ? 'College Student / Intern' : 'कॉलेज छात्र / इंटर्न', desc: lang === 'en' ? 'Irregular stipends, allowances, college projects' : 'अनियमित स्टाइपेंड, पॉकेट मनी, कॉलेज प्रोजेक्ट्स', icon: '🎓' },
+                    { id: 'freelance', title: lang === 'en' ? 'Freelancer / Creator' : 'फ्रीलांसर / क्रिएटर', desc: lang === 'en' ? 'Gig payouts, variable client invoices, Razorpay' : 'गिग पेमेंट्स, अनियमित इनवॉइस, विभिन्न क्लाइंट्स', icon: '💻' },
+                    { id: 'junior', title: lang === 'en' ? 'Early Career Professional' : 'नवागंतुक कर्मचारी', desc: lang === 'en' ? 'First salary, rent splits, weekend spends' : 'मासिक वेतन, किराया विभाजन, सप्ताहांत के खर्च', icon: '💼' }
+                  ].map((p) => {
+                    const isSelected = selectedPersona === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPersona(p.id)}
+                        className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3.5 cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-stone-900 bg-amber-50/50 ring-2 ring-stone-900/10'
+                            : 'border-stone-200 hover:border-stone-300 bg-stone-50'
+                        }`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 ${
+                          isSelected ? 'bg-stone-900 text-white' : 'bg-stone-200'
+                        }`}>
+                          {p.icon}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-stone-900">{p.title}</h4>
+                          <p className="text-xs text-stone-500 leading-snug">{p.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleComplete}
+                  className="w-full min-h-[52px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md mt-4 active:scale-[0.98]"
+                >
+                  <span>{lang === 'en' ? 'Activate Protection & Enter App' : 'सुरक्षा सक्रिय करें और ऐप खोलें'}</span>
+                  <IconArrowRight className="w-4 h-4 text-amber-400" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 text-center text-xs text-stone-500 flex items-center justify-center gap-1.5">
+            <IconLock className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{lang === 'en' ? 'Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN access' : 'बैंक-ग्रेड 256-बिट एन्क्रिप्शन • कोई UPI पिन नहीं पूछा जाता'}</span>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 8. LANDING PAGE (Strictly Standalone)
+    // ==========================================
+    function LandingPage({ lang, user, onNavigate }) {
       const [modalArticle, setModalArticle] = useState(null);
+
+      const handleAction = (destination) => {
+        if (user) {
+          onNavigate(destination);
+        } else {
+          onNavigate('/auth');
+        }
+      };
 
       const articles = [
         {
@@ -1026,22 +1335,30 @@
           {/* Hero */}
           <section className="text-center max-w-3xl mx-auto pt-4">
             <span className="px-4 py-1.5 rounded-full bg-amber-100 text-stone-800 text-xs font-semibold inline-block mb-4">
-              ✨ India's #1 Digital Money Copilot
+              ✨ {lang === 'en' ? "India's #1 Digital Money Copilot" : "भारत का पहला डिजिटल मनी को-पायलट"}
             </span>
             <h1 className="text-4xl sm:text-6xl font-black text-stone-900 tracking-tight leading-tight mb-4">
-              Save. Spend. Stay safe.
+              {lang === 'en' ? 'Save. Spend. Stay safe.' : 'बचत। खर्च। पूर्ण सुरक्षा।'}
             </h1>
             <p className="text-base sm:text-lg text-stone-600 max-w-xl mx-auto mb-6">
-              A money copilot built for India's digital-payment generation. Pre-transaction fraud checks, stipend budgeting, and ₹99 leak detection.
+              {lang === 'en'
+                ? "A money copilot built for India's digital-payment generation. Pre-transaction fraud checks, stipend budgeting, and ₹99 leak detection."
+                : "भारत की पहली डिजिटल-पेमेंट पीढ़ी के लिए निर्मित। प्री-ट्रांजैक्शन फ्रॉड जांच, स्टाइपेंड बजटिंग और ₹99 लीक्स की रिकवरी।"}
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto mb-8">
-              <button onClick={onOpenSignUp} className="min-h-[50px] px-6 bg-stone-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-md">
-                <span>Sign Up for Free</span>
+              <button
+                onClick={() => handleAction('/dashboard')}
+                className="min-h-[50px] px-6 bg-stone-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-[0.98]"
+              >
+                <span>{user ? (lang === 'en' ? 'Open Dashboard' : 'डैशबोर्ड खोलें') : (lang === 'en' ? 'Sign Up for Free' : 'निःशुल्क साइन अप करें')}</span>
                 <IconArrowRight className="w-4 h-4 text-amber-400" />
               </button>
-              <button onClick={() => onNavigate('/dashboard')} className="min-h-[50px] px-6 bg-white border-2 border-stone-300 text-stone-900 font-bold rounded-2xl cursor-pointer">
-                View Live Dashboard
+              <button
+                onClick={() => handleAction('/shield')}
+                className="min-h-[50px] px-6 bg-white border-2 border-stone-300 text-stone-900 font-bold rounded-2xl cursor-pointer hover:bg-stone-50"
+              >
+                {user ? (lang === 'en' ? 'Open Scam Shield' : 'स्कैम शील्ड खोलें') : (lang === 'en' ? 'Sign Up to Explore' : 'सुरक्षा शुरू करें')}
               </button>
             </div>
 
@@ -1054,25 +1371,40 @@
 
           {/* Feature Pillars */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div onClick={() => onNavigate('/shield')} className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all">
+            <div
+              onClick={() => handleAction('/shield')}
+              className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all text-left"
+            >
               <span className="text-xs font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">SHIELD</span>
               <h3 className="text-base font-black mt-2 mb-1">Pre-transaction Scam Checks</h3>
               <p className="text-xs text-stone-500 mb-3">Pre-transaction scam checks in under 3 seconds.</p>
-              <span className="text-xs font-bold underline">Test Scam Shield ➔</span>
+              <span className="text-xs font-bold underline text-stone-900">
+                {user ? 'Test Scam Shield ➔' : 'Sign Up to Unlock ➔'}
+              </span>
             </div>
 
-            <div onClick={() => onNavigate('/spend')} className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all">
+            <div
+              onClick={() => handleAction('/spend')}
+              className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all text-left"
+            >
               <span className="text-xs font-mono font-bold bg-blue-100 text-blue-900 px-2 py-0.5 rounded">SPEND</span>
               <h3 className="text-base font-black mt-2 mb-1">Irregular Stipend Cashflow</h3>
               <p className="text-xs text-stone-500 mb-3">Tracks your irregular income and stipends, not just standard 30-day salaries.</p>
-              <span className="text-xs font-bold underline">Track Cashflow ➔</span>
+              <span className="text-xs font-bold underline text-stone-900">
+                {user ? 'Track Cashflow ➔' : 'Sign Up to Unlock ➔'}
+              </span>
             </div>
 
-            <div onClick={() => onNavigate('/save')} className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all">
+            <div
+              onClick={() => handleAction('/save')}
+              className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all text-left"
+            >
               <span className="text-xs font-mono font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded">SAVE</span>
               <h3 className="text-base font-black mt-2 mb-1">Audit ₹99 AutoPay Leaks</h3>
               <p className="text-xs text-stone-500 mb-3">Finds forgotten ₹99 AutoPay mandates and turns them into savings goals.</p>
-              <span className="text-xs font-bold underline">Audit Leaks ➔</span>
+              <span className="text-xs font-bold underline text-stone-900">
+                {user ? 'Audit Leaks ➔' : 'Sign Up to Unlock ➔'}
+              </span>
             </div>
           </section>
 
@@ -1094,6 +1426,23 @@
             </div>
           </section>
 
+          {/* Ready Card */}
+          <section className="bg-stone-900 text-white rounded-3xl p-7 text-center shadow-lg">
+            <div className="max-w-md mx-auto">
+              <div className="w-10 h-10 rounded-2xl bg-amber-400 text-stone-900 flex items-center justify-center mx-auto mb-3">
+                <IconSparkles className="w-5 h-5" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">Ready to take control of your digital money?</h3>
+              <p className="text-stone-300 text-xs sm:text-sm mb-5">Join thousands of students and young professionals who never worry before tapping UPI.</p>
+              <button
+                onClick={() => handleAction('/dashboard')}
+                className="px-6 py-3 rounded-xl bg-white text-stone-900 font-bold text-sm cursor-pointer hover:bg-stone-100 active:scale-[0.98]"
+              >
+                {user ? 'Open Dashboard' : 'Sign Up for Free'}
+              </button>
+            </div>
+          </section>
+
           {/* Footer Impact */}
           <footer className="p-6 bg-[#121214] text-white rounded-3xl text-center border border-stone-800">
             <p className="text-base sm:text-lg font-black mb-2">
@@ -1107,7 +1456,7 @@
           {modalArticle && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
               <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-stone-300 shadow-2xl p-6 text-stone-900">
-                <button onClick={() => setModalArticle(null)} className="absolute top-4 right-4 w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center">
+                <button onClick={() => setModalArticle(null)} className="absolute top-4 right-4 w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center cursor-pointer">
                   <IconX className="w-5 h-5" />
                 </button>
                 <span className="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">{modalArticle.badge}</span>
@@ -1124,12 +1473,18 @@
     }
 
     // ==========================================
-    // MAIN ROOT APP
+    // MAIN ROOT APP (With Authenticated Route Guarding)
     // ==========================================
     function App() {
       const [lang, setLang] = useState('en');
-      const [user, setUser] = useState(null);
-      const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+      const [user, setUser] = useState(() => {
+        try {
+          const saved = localStorage.getItem('kavach_user');
+          return saved ? JSON.parse(saved) : null;
+        } catch(e) {
+          return null;
+        }
+      });
 
       const getRoute = () => {
         const h = window.location.hash.replace(/^#/, '') || '/';
@@ -1139,15 +1494,52 @@
       const [route, setRoute] = useState(getRoute());
 
       useEffect(() => {
-        const onHash = () => setRoute(getRoute());
+        const onHash = () => {
+          const current = getRoute();
+          if (!user && current !== '/' && current !== '/auth') {
+            window.location.hash = '/auth';
+            setRoute('/auth');
+            return;
+          }
+          setRoute(current);
+        };
         window.addEventListener('hashchange', onHash);
         return () => window.removeEventListener('hashchange', onHash);
-      }, []);
+      }, [user]);
+
+      useEffect(() => {
+        if (!user && route !== '/' && route !== '/auth') {
+          window.location.hash = '/auth';
+          setRoute('/auth');
+        }
+      }, [user, route]);
 
       const navigate = (p) => {
+        if (!user && p !== '/' && p !== '/auth') {
+          window.location.hash = '/auth';
+          setRoute('/auth');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
         window.location.hash = p;
         setRoute(p);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const handleLogin = (u) => {
+        setUser(u);
+        try {
+          localStorage.setItem('kavach_user', JSON.stringify(u));
+        } catch(e) {}
+        navigate('/dashboard');
+      };
+
+      const handleSignOut = () => {
+        setUser(null);
+        try {
+          localStorage.removeItem('kavach_user');
+        } catch(e) {}
+        navigate('/');
       };
 
       const navItems = [
@@ -1170,7 +1562,7 @@
           {/* Top Header */}
           <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#fbfbf9]/90 border-b border-stone-200/80">
             <div className="max-w-md md:max-w-4xl mx-auto px-4 h-18 py-3 flex items-center justify-between">
-              <button onClick={() => navigate('/')} className="flex items-center gap-2 cursor-pointer text-left">
+              <button onClick={() => navigate(user ? '/dashboard' : '/')} className="flex items-center gap-2 cursor-pointer text-left">
                 <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md">
                   <IconShield className="w-5 h-5" />
                 </div>
@@ -1182,24 +1574,29 @@
                 </div>
               </button>
 
-              {/* Desktop quick links */}
-              <div className="hidden md:flex items-center gap-4 text-xs font-bold text-stone-600">
-                <button onClick={() => navigate('/dashboard')} className="hover:text-stone-900 cursor-pointer">Dashboard</button>
-                <button onClick={() => navigate('/spend')} className="hover:text-stone-900 cursor-pointer">Transactions</button>
-                <button onClick={() => navigate('/save')} className="hover:text-stone-900 cursor-pointer">AutoPay Audit</button>
-                <button onClick={() => navigate('/goals')} className="hover:text-stone-900 cursor-pointer">Goals</button>
-                <button onClick={() => navigate('/quiz')} className="hover:text-stone-900 cursor-pointer">Daily Quiz</button>
-              </div>
+              {/* Desktop quick links - ONLY when user is authenticated */}
+              {user && (
+                <div className="hidden md:flex items-center gap-4 text-xs font-bold text-stone-600">
+                  <button onClick={() => navigate('/dashboard')} className="hover:text-stone-900 cursor-pointer">Dashboard</button>
+                  <button onClick={() => navigate('/shield')} className="hover:text-stone-900 cursor-pointer">Shield</button>
+                  <button onClick={() => navigate('/spend')} className="hover:text-stone-900 cursor-pointer">Transactions</button>
+                  <button onClick={() => navigate('/save')} className="hover:text-stone-900 cursor-pointer">AutoPay Audit</button>
+                  <button onClick={() => navigate('/goals')} className="hover:text-stone-900 cursor-pointer">Goals</button>
+                  <button onClick={() => navigate('/quiz')} className="hover:text-stone-900 cursor-pointer">Daily Quiz</button>
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 {user ? (
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold text-emerald-950">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold text-emerald-950 shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
                     <span>{user.name.split(' ')[0]}</span>
-                    <button onClick={() => setUser(null)} className="text-[10px] underline ml-1 cursor-pointer">Exit</button>
+                    <button onClick={handleSignOut} className="text-[10px] underline ml-1 cursor-pointer font-semibold text-emerald-800">Exit</button>
                   </div>
                 ) : (
-                  <button onClick={() => setIsSignUpOpen(true)} className="min-h-[44px] px-3.5 py-1.5 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-sm">
-                    <IconSparkles className="w-3.5 h-3.5 text-amber-400" /> Sign Up
+                  <button onClick={() => navigate('/auth')} className="min-h-[44px] px-4 py-2 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm">
+                    <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{lang === 'en' ? 'Sign Up' : 'साइन अप'}</span>
                   </button>
                 )}
 
@@ -1211,50 +1608,46 @@
             </div>
           </header>
 
-          {/* Main Body */}
-          <main className="flex-1 w-full max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 pb-28">
-            {route === '/' && <LandingPage lang={lang} onNavigate={navigate} onOpenSignUp={() => setIsSignUpOpen(true)} />}
-            {route === '/dashboard' && <DashboardPage lang={lang} onNavigate={navigate} />}
-            {route === '/shield' && <ShieldPage lang={lang} />}
-            {route === '/spend' && <SpendPage lang={lang} />}
-            {route === '/save' && <SavePage lang={lang} />}
-            {route === '/goals' && <GoalsPage lang={lang} />}
-            {route === '/quiz' && <QuizPage lang={lang} onNavigate={navigate} />}
+          {/* Main Body Container */}
+          <main className={`flex-1 w-full max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 ${user && route !== '/auth' ? 'pb-28 sm:pb-32' : 'pb-12 sm:pb-16'}`}>
+            {route === '/' && <LandingPage lang={lang} user={user} onNavigate={navigate} />}
+            {route === '/auth' && <AuthPage lang={lang} onNavigate={navigate} onLogin={handleLogin} />}
+            {user && route === '/dashboard' && <DashboardPage lang={lang} onNavigate={navigate} />}
+            {user && route === '/shield' && <ShieldPage lang={lang} />}
+            {user && route === '/spend' && <SpendPage lang={lang} />}
+            {user && route === '/save' && <SavePage lang={lang} />}
+            {user && route === '/goals' && <GoalsPage lang={lang} />}
+            {user && route === '/quiz' && <QuizPage lang={lang} onNavigate={navigate} />}
           </main>
 
-          {/* 5-Tab Sticky Bottom Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-            <div className="max-w-md md:max-w-4xl mx-auto px-1 flex items-center justify-between h-20">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = route === item.to;
-                return (
-                  <button
-                    key={item.to}
-                    onClick={() => navigate(item.to)}
-                    className={`flex flex-col items-center justify-center flex-1 min-h-[48px] py-1 transition-all cursor-pointer ${
-                      isActive ? 'text-stone-950 font-extrabold' : 'text-stone-500 hover:text-stone-800'
-                    }`}
-                  >
-                    <div className={`w-9 h-7 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
-                      isActive ? 'bg-stone-900 text-amber-400 shadow-sm scale-105' : 'hover:bg-stone-200/60'
-                    }`}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
-                    {isActive && <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>}
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          <SignUpModal
-            isOpen={isSignUpOpen}
-            onClose={() => setIsSignUpOpen(false)}
-            onComplete={u => setUser(u)}
-            lang={lang}
-          />
+          {/* Sticky Bottom Tab Bar - Rendered ONLY if user is authenticated and not on /auth */}
+          {user && route !== '/auth' && (
+            <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+              <div className="max-w-md md:max-w-4xl mx-auto px-1 flex items-center justify-between h-20">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = route === item.to;
+                  return (
+                    <button
+                      key={item.to}
+                      onClick={() => navigate(item.to)}
+                      className={`flex flex-col items-center justify-center flex-1 min-h-[48px] py-1 transition-all cursor-pointer ${
+                        isActive ? 'text-stone-950 font-extrabold' : 'text-stone-500 hover:text-stone-800'
+                      }`}
+                    >
+                      <div className={`w-9 h-7 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
+                        isActive ? 'bg-stone-900 text-amber-400 shadow-sm scale-105' : 'hover:bg-stone-200/60'
+                      }`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
+                      {isActive && <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
+          )}
 
         </div>
       );

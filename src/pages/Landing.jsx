@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useOutletContext } from 'react-router-dom';
+import { NavLink, useOutletContext, useNavigate } from 'react-router-dom';
 import {
   Shield,
   Wallet,
@@ -19,9 +19,18 @@ import {
   X
 } from 'lucide-react';
 
-export default function LandingPage({ onOpenSignUp }) {
-  const { lang } = useOutletContext() || { lang: 'en' };
+export default function LandingPage() {
+  const { lang, user } = useOutletContext() || { lang: 'en', user: null };
+  const navigate = useNavigate();
   const [selectedArticle, setSelectedArticle] = useState(null);
+
+  const handleAction = (destination) => {
+    if (user) {
+      navigate(destination);
+    } else {
+      navigate('/auth');
+    }
+  };
 
   // Educational articles & News
   const educationalNews = [
@@ -146,20 +155,21 @@ export default function LandingPage({ onOpenSignUp }) {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-md mx-auto mb-10">
           <button
             type="button"
-            onClick={onOpenSignUp}
+            onClick={() => handleAction('/dashboard')}
             className="w-full sm:w-auto min-h-[52px] px-7 py-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-stone-900/15 cursor-pointer active:scale-[0.98]"
           >
-            <span>{text.ctaPrimary}</span>
+            <span>{user ? (lang === 'hi' ? 'डैशबोर्ड खोलें' : 'Open Dashboard') : text.ctaPrimary}</span>
             <ArrowRight className="w-4 h-4 text-amber-400" />
           </button>
 
-          <NavLink
-            to="/shield"
-            className="w-full sm:w-auto min-h-[52px] px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-base border-2 border-stone-300 flex items-center justify-center gap-2 shadow-sm"
+          <button
+            type="button"
+            onClick={() => handleAction('/shield')}
+            className="w-full sm:w-auto min-h-[52px] px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-base border-2 border-stone-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer"
           >
             <Shield className="w-4 h-4 text-stone-700" />
-            <span>{text.ctaSecondary}</span>
-          </NavLink>
+            <span>{user ? (lang === 'hi' ? 'स्कैम शील्ड खोलें' : 'Open Scam Shield') : (lang === 'hi' ? 'सुरक्षा शुरू करें' : 'Sign Up to Explore')}</span>
+          </button>
         </div>
 
         {/* Live Metrics */}
@@ -188,9 +198,10 @@ export default function LandingPage({ onOpenSignUp }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <NavLink
-            to="/shield"
-            className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+          <button
+            type="button"
+            onClick={() => handleAction('/shield')}
+            className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
           >
             <div>
               <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
@@ -203,14 +214,15 @@ export default function LandingPage({ onOpenSignUp }) {
               <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.shieldDesc}</p>
             </div>
             <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
-              <span>Try Scam Scanner</span>
+              <span>{user ? 'Open Scam Scanner' : 'Sign Up to Test Scanner'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </NavLink>
+          </button>
 
-          <NavLink
-            to="/spend"
-            className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+          <button
+            type="button"
+            onClick={() => handleAction('/spend')}
+            className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
           >
             <div>
               <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
@@ -223,14 +235,15 @@ export default function LandingPage({ onOpenSignUp }) {
               <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.spendDesc}</p>
             </div>
             <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
-              <span>View Payout Cycles</span>
+              <span>{user ? 'View Payout Cycles' : 'Sign Up for Cashflow Tracker'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </NavLink>
+          </button>
 
-          <NavLink
-            to="/save"
-            className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+          <button
+            type="button"
+            onClick={() => handleAction('/save')}
+            className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
           >
             <div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
@@ -243,10 +256,10 @@ export default function LandingPage({ onOpenSignUp }) {
               <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.saveDesc}</p>
             </div>
             <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
-              <span>Audit AutoPay Mandates</span>
+              <span>{user ? 'Audit AutoPay Mandates' : 'Sign Up to Audit Leaks'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </NavLink>
+          </button>
         </div>
       </section>
 
@@ -314,10 +327,10 @@ export default function LandingPage({ onOpenSignUp }) {
           </p>
           <button
             type="button"
-            onClick={onOpenSignUp}
+            onClick={() => handleAction('/dashboard')}
             className="w-full sm:w-auto min-h-[50px] px-8 py-3 rounded-xl bg-white text-stone-900 hover:bg-stone-100 font-black text-base shadow-md cursor-pointer active:scale-[0.98]"
           >
-            {text.ctaPrimary}
+            {user ? (lang === 'hi' ? 'डैशबोर्ड खोलें' : 'Go to Dashboard') : text.ctaPrimary}
           </button>
         </div>
       </section>
