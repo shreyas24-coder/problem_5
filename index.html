@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kavach — India's Money Copilot</title>
+  <title>Kavach — Multi-Page Money Copilot</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,32 +14,29 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #fbfbf9;
       color: #1c1917;
     }
-    .font-handwriting {
-      font-family: 'Caveat', cursive, sans-serif;
-    }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in {
-      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
-<body class="bg-[#fbfbf9] text-stone-900 antialiased selection:bg-amber-200 selection:text-stone-900">
+<body class="bg-[#fbfbf9] text-stone-900 antialiased selection:bg-amber-200">
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useEffect } = React;
 
-    // Lightweight icon SVG components
-    const IconShield = ({ className = "w-6 h-6" }) => (
+    // Lightweight Icons
+    const IconShield = ({ className = "w-5 h-5" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       </svg>
@@ -50,13 +47,6 @@
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         <line x1="12" y1="8" x2="12" y2="12"/>
         <line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-    );
-
-    const IconShieldCheck = ({ className = "w-7 h-7" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="m9 12 2 2 4-4"/>
       </svg>
     );
 
@@ -75,17 +65,28 @@
       </svg>
     );
 
-    const IconSearch = ({ className = "w-5 h-5" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    const IconWallet = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
       </svg>
     );
 
-    const IconCheckCircle2 = ({ className = "w-6 h-6" }) => (
+    const IconCoins = ({ className = "w-5 h-5" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="m9 12 2 2 4-4"/>
+        <circle cx="8" cy="8" r="6"/>
+        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+        <path d="M7 6h1v4"/>
+        <path d="m16.71 13.88.7.71-2.82 2.82"/>
+      </svg>
+    );
+
+    const IconUploadCloud = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+        <path d="M12 12v9"/>
+        <path d="m16 16-4-4-4 4"/>
       </svg>
     );
 
@@ -96,102 +97,130 @@
       </svg>
     );
 
-    const IconWallet = ({ className = "w-7 h-7" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
-      </svg>
-    );
-
-    const IconCoins = ({ className = "w-7 h-7" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="8" cy="8" r="6"/>
-        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
-        <path d="M7 6h1v4"/>
-        <path d="m16.71 13.88.7.71-2.82 2.82"/>
-      </svg>
-    );
-
-    const IconArrowRight = ({ className = "w-4 h-4" }) => (
+    const IconCheckCircle2 = ({ className = "w-6 h-6" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-        <polyline points="12 5 19 12 12 19"/>
+        <circle cx="12" cy="12" r="10"/>
+        <path d="m9 12 2 2 4-4"/>
       </svg>
     );
 
-    function App() {
-      const [lang, setLang] = useState('en');
+    const IconLaptop = ({ className = "w-6 h-6" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>
+      </svg>
+    );
+
+    const IconRepeat = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m17 2 4 4-4 4"/>
+        <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+        <path d="m7 22-4-4 4-4"/>
+        <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+      </svg>
+    );
+
+    const IconSparkles = ({ className = "w-3.5 h-3.5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+      </svg>
+    );
+
+    const IconXCircle = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="m15 9-6 6"/>
+        <path d="m9 9 6 6"/>
+      </svg>
+    );
+
+    const IconTrendingUp = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+        <polyline points="16 7 22 7 22 13"/>
+      </svg>
+    );
+
+    const IconShoppingBag = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+        <path d="M3 6h18"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    );
+
+    const IconCoffee = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+        <line x1="6" y1="2" x2="6" y2="4"/>
+        <line x1="10" y1="2" x2="10" y2="4"/>
+        <line x1="14" y1="2" x2="14" y2="4"/>
+      </svg>
+    );
+
+    const IconTrain = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="16" height="16" x="4" y="3" rx="2"/>
+        <path d="M4 11h16"/>
+        <path d="M12 3v8"/>
+        <path d="m8 19-2 3"/>
+        <path d="m18 22-2-3"/>
+        <circle cx="8" cy="15" r="1"/>
+        <circle cx="16" cy="15" r="1"/>
+      </svg>
+    );
+
+    // ==========================================
+    // PAGE 1: SHIELD (Hero Scam Checker)
+    // ==========================================
+    function ShieldPage({ lang }) {
       const [inputText, setInputText] = useState('');
       const [scanState, setScanState] = useState('idle'); // 'idle' | 'scanning' | 'danger' | 'safe'
       const [inputError, setInputError] = useState(false);
+      const [isDragOver, setIsDragOver] = useState(false);
 
       const TARGET_SCAM = "Urgent: Claim your ₹4,999 refund here";
 
       const t = {
         en: {
-          badge: "Built for India's Digital Generation",
-          heroHeading: "Save. Spend. Stay safe.",
-          heroSubheading: "A money copilot for India’s first digital-payment generation.",
-          placeholder: "Paste or drop anything you were asked to pay",
+          badge: "Pre-Transaction Fraud Defense",
+          headline: "Shield your UPI before you tap.",
+          subheadline: "Stop QR traps, deceptive collect requests, and fake refund links before your PIN is asked.",
+          dropPrompt: "Paste or drop anything you were asked to pay",
+          dropSubprompt: "Supports payment links, SMS text, UPI IDs, or screenshot text",
           scanBtn: "Scan for Fraud",
-          scanningHeading: "Analyzing payment request...",
-          scanningSub: "Cross-checking VPA collect patterns, fake refund triggers & sender trust scores.",
-          dangerTitle: "Fraud Alert: Payment Trap Detected",
-          dangerBadge: "CRITICAL ALERT",
+          scanningTitle: "Analyzing payment intent...",
+          scanningDesc: "Verifying VPA signatures against known UPI phishing databases...",
+          dangerTitle: "High-Risk Threat Detected",
+          dangerBadge: "COLLECT REQUEST TRAP",
           dangerBody: "This is a collect request. Approving it takes money from you. Refunds are never collect requests.",
-          dangerExplanation: "Someone sent an UPI collect request disguised as a cashback or refund link. If you enter your UPI PIN, ₹4,999 will leave your bank account immediately.",
-          resetBtn: "Reset",
-          demoPrompt: "Try a real-life scam test:",
-          safeTitle: "Looks safe for now",
-          safeBody: "No recognized malicious collect request pattern found. Always verify the recipient's name on your bank screen before entering your UPI PIN.",
-          pillarsBadge: "Three Pillars of Protection",
-          pillarsHeading: "Smart banking habits, without the banking jargon.",
-          shieldTitle: "SHIELD",
-          shieldDesc: "Pre-transaction scam checks in under 3 seconds.",
-          shieldExample: "e.g. OLX fake buyers sending QR codes to 'receive' money.",
-          spendTitle: "SPEND",
-          spendDesc: "Tracks your irregular income and stipends, not just standard 30-day salaries.",
-          spendExample: "e.g. College internship stipends, freelance payouts & gigs.",
-          saveTitle: "SAVE",
-          saveDesc: "Finds forgotten ₹99 AutoPay mandates and turns them into savings goals.",
-          saveExample: "e.g. That subscription you forgot after the 7-day free trial.",
-          footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
-          footerGuarantee: "Zero UPI PIN access • 100% On-device privacy • NPCI UPI ecosystem aware"
+          dangerSubtext: "Someone initiated a request to withdraw ₹4,999 from your bank account under the guise of an instant refund.",
+          resetBtn: "Reset & Test Another",
+          demoPrompt: "Try sample fraud prompt:",
+          safeTitle: "No malicious collect request found",
+          safeBody: "This message does not match known fraudulent UPI collect signatures. Always verify the recipient VPA before approving any payment."
         },
         hi: {
-          badge: "भारत के युवाओं के लिए समर्पित",
-          heroHeading: "बचत। खर्च। पूर्ण सुरक्षा।",
-          heroSubheading: "भारत की पहली डिजिटल-पेमेंट पीढ़ी का भरोसेमंद मनी को-पायलट।",
-          placeholder: "भुगतान का कोई भी संदेश या लिंक यहाँ पेस्ट करें",
+          badge: "प्री-ट्रांजैक्शन फ्रॉड डिफेंस",
+          headline: "पैसे कटने से पहले UPI सुरक्षित करें।",
+          subheadline: "पिन दर्ज करने से पहले फर्जी रिफंड लिंक, संदिग्ध QR कोड और कलेक्ट रिक्वेस्ट की जांच करें।",
+          dropPrompt: "भुगतान का कोई भी संदेश या लिंक यहाँ पेस्ट करें",
+          dropSubprompt: "पेमेंट लिंक, SMS मैसेज, UPI ID या स्क्रीनशॉट टेक्स्ट स्वीकार्य",
           scanBtn: "फ्रॉड स्कैन करें",
-          scanningHeading: "भुगतान संदेश की जांच हो रही है...",
-          scanningSub: "VPA कलेक्ट पैटर्न और फर्जी रिफंड ट्रिगर्स की त्वरित पहचान की जा रही है।",
-          dangerTitle: "सावधान: वित्तीय धोखाधड़ी का प्रयास",
-          dangerBadge: "गंभीर चेतावनी",
+          scanningTitle: "भुगतान की जांच हो रही है...",
+          scanningDesc: "UPI कलेक्ट रिक्वेस्ट डेटाबेस से संदेश का मिलान किया जा रहा है...",
+          dangerTitle: "गंभीर वित्तीय खतरा पाया गया",
+          dangerBadge: "कलेक्ट रिक्वेस्ट ट्रैप",
           dangerBody: "यह एक कलेक्ट रिक्वेस्ट है। इसे मंज़ूर करने पर आपके खाते से पैसे कटेंगे। रिफंड कभी भी कलेक्ट रिक्वेस्ट नहीं होते।",
-          dangerExplanation: "यह संदेश रिफंड के नाम पर आपके पैसे काटने की कोशिश कर रहा है। यदि आप UPI पिन डालेंगे तो ₹4,999 आपके खाते से कट जाएंगे।",
-          resetBtn: "रीसेट करें",
+          dangerSubtext: "रिफंड के नाम पर आपके बैंक खाते से ₹4,999 निकालने का कपटपूर्ण प्रयास किया गया है।",
+          resetBtn: "रीसेट करें और नया संदेश जांचें",
           demoPrompt: "डेमो फ्रॉड संदेश आज़माएं:",
-          safeTitle: "संदेश सुरक्षित प्रतीत होता है",
-          safeBody: "कोई संदिग्ध कलेक्ट रिक्वेस्ट नहीं मिली। फिर भी UPI पिन दर्ज करने से पहले प्राप्तकर्ता का नाम अवश्य जांचें।",
-          pillarsBadge: "सुरक्षा के तीन आधार",
-          pillarsHeading: "बिना किसी बैंक की जटिलता के सरल और सुरक्षित अनुभव।",
-          shieldTitle: "शील्ड (SHIELD)",
-          shieldDesc: "3 सेकंड के भीतर प्री-ट्रांजैक्शन स्कैम डिटेक्शन और सुरक्षा अलर्ट।",
-          shieldExample: "उदा. OLX या सोशल मीडिया पर पैसे भेजने के नाम पर भेजे गए फर्जी QR कोड।",
-          spendTitle: "स्पेंड (SPEND)",
-          spendDesc: "केवल मासिक वेतन ही नहीं, आपकी अनियमित आय और इंटर्नशिप स्टाइपेंड का भी सटीक हिसाब।",
-          spendExample: "उदा. इंटर्नशिप स्टाइपेंड, फ्रीलांस कमाई और कॉलेज प्रोजेक्ट्स।",
-          saveTitle: "सेव (SAVE)",
-          saveDesc: "भूले हुए ₹99 ऑटो-पे मैन्डेट्स को खोजकर उन्हें आपके बचत लक्ष्यों में बदलता है।",
-          saveExample: "उदा. अनचाहे ₹99 वाले OTT या ऐप सब्सक्रिप्शन जो आप भूल चुके हैं।",
-          footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
-          footerGuarantee: "कोई UPI पिन स्टोर नहीं • 100% सुरक्षित और व्यक्तिगत"
+          safeTitle: "कोई संदिग्ध कलेक्ट रिक्वेस्ट नहीं मिली",
+          safeBody: "यह संदेश ज्ञात वित्तीय धोखाधड़ी से मेल नहीं खाता। फिर भी भुगतान करने से पहले प्राप्तकर्ता का नाम अवश्य जांचें।"
         }
       };
 
-      const text = t[lang];
+      const text = t[lang] || t.en;
 
       const handleScan = (e) => {
         if (e) e.preventDefault();
@@ -202,6 +231,7 @@
         setInputError(false);
         setScanState('scanning');
 
+        // Exact 2-second loading animation
         setTimeout(() => {
           if (inputText.trim() === TARGET_SCAM) {
             setScanState('danger');
@@ -223,44 +253,757 @@
       };
 
       return (
-        <div className="min-h-screen bg-[#fbfbf9] text-stone-900 flex flex-col justify-between selection:bg-amber-200">
+        <div className="flex flex-col items-center text-center animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 border border-amber-300 text-stone-800 text-xs sm:text-sm font-semibold mb-4 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+            <span>{text.badge}</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-black text-stone-900 tracking-tight leading-[1.15] mb-3">
+            {text.headline}
+          </h1>
+
+          <p className="text-base sm:text-lg text-stone-600 font-medium max-w-lg mx-auto mb-8 leading-relaxed">
+            {text.subheadline}
+          </p>
+
+          <div className="w-full max-w-xl">
+            {scanState === 'idle' && (
+              <div className="space-y-4">
+                <form onSubmit={handleScan} className="flex flex-col gap-3">
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(false);
+                      const dt = e.dataTransfer.getData('text');
+                      setInputText(dt || TARGET_SCAM);
+                      setInputError(false);
+                    }}
+                    className={`relative bg-white rounded-3xl border-2 transition-all p-5 sm:p-6 text-left shadow-xl shadow-stone-200/60 ${
+                      isDragOver
+                        ? 'border-amber-500 bg-amber-50/50 ring-4 ring-amber-200'
+                        : 'border-stone-300 hover:border-stone-400 focus-within:border-stone-900 focus-within:ring-4 focus-within:ring-stone-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3 text-stone-600">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-700">
+                        <IconUploadCloud className="w-4 h-4 text-stone-600" />
+                        <span>Drop screenshot or paste text</span>
+                      </div>
+                      <span className="text-xs bg-stone-100 text-stone-700 font-medium px-2.5 py-0.5 rounded-md border border-stone-200">
+                        Instant Check
+                      </span>
+                    </div>
+
+                    <textarea
+                      rows={3}
+                      value={inputText}
+                      onChange={(e) => {
+                        setInputText(e.target.value);
+                        if (inputError) setInputError(false);
+                      }}
+                      placeholder={text.dropPrompt}
+                      className="w-full bg-stone-50 text-stone-900 placeholder-stone-500 text-base sm:text-lg rounded-2xl p-4 outline-none border border-stone-200 focus:bg-white focus:border-stone-400 transition-colors resize-none leading-snug"
+                    />
+
+                    <div className="mt-2 flex items-center justify-between text-xs text-stone-600 px-1">
+                      <span>{text.dropSubprompt}</span>
+                      {inputText && (
+                        <button
+                          type="button"
+                          onClick={() => setInputText('')}
+                          className="text-stone-700 font-semibold hover:underline"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {inputError && (
+                    <p className="text-rose-600 text-sm font-bold text-left px-2">
+                      Please paste or drop a message/link to scan.
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full min-h-[56px] px-6 py-3.5 rounded-2xl font-bold text-base sm:text-lg text-white bg-stone-900 hover:bg-stone-800 active:scale-[0.99] transition-all duration-150 shadow-md flex items-center justify-center gap-2.5 cursor-pointer"
+                  >
+                    <IconShieldAlert className="w-5 h-5 text-amber-400" />
+                    <span>{text.scanBtn}</span>
+                  </button>
+                </form>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-sm text-stone-600">
+                  <span className="text-stone-700 font-medium">{text.demoPrompt}</span>
+                  <button
+                    type="button"
+                    onClick={handleApplyDemoSample}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-900 font-mono text-xs sm:text-sm font-semibold transition-colors cursor-pointer text-left shadow-sm"
+                    title="Click to auto-populate test scam"
+                  >
+                    <span>&quot;{TARGET_SCAM}&quot;</span>
+                    <span className="text-emerald-700 font-sans font-bold">↵ Fill</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {scanState === 'scanning' && (
+              <div className="w-full bg-white border-2 border-stone-300 rounded-3xl p-8 sm:p-12 flex flex-col items-center justify-center text-center shadow-lg">
+                <div className="relative mb-6">
+                  <div className="w-18 h-18 rounded-full border-4 border-stone-200 border-t-stone-900 animate-spin"></div>
+                  <div className="absolute inset-0 flex items-center justify-center text-stone-900">
+                    <IconShield className="w-7 h-7" />
+                  </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-bold text-stone-900 mb-2">
+                  {text.scanningTitle}
+                </h3>
+                <p className="text-stone-500 text-sm sm:text-base max-w-sm">
+                  {text.scanningDesc}
+                </p>
+
+                <div className="w-48 h-1.5 bg-stone-100 rounded-full mt-6 overflow-hidden">
+                  <div className="h-full bg-stone-900 animate-pulse" />
+                </div>
+              </div>
+            )}
+
+            {scanState === 'danger' && (
+              <div className="w-full bg-[#b91c1c] text-white border-2 border-red-700 rounded-3xl p-6 sm:p-8 text-left shadow-2xl shadow-red-900/30 animate-fade-in">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-red-500/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white text-red-700 flex items-center justify-center shrink-0 shadow-md">
+                      <IconAlertTriangle className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <span className="inline-block px-2.5 py-0.5 rounded bg-black/30 text-white text-xs font-black tracking-wider uppercase mb-0.5">
+                        {text.dangerBadge}
+                      </span>
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                        {text.dangerTitle}
+                      </h2>
+                    </div>
+                  </div>
+
+                  <span className="self-start sm:self-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
+                    Confidence: 99.8%
+                  </span>
+                </div>
+
+                <div className="my-5 bg-black/25 rounded-2xl p-5 border border-red-400/40">
+                  <p className="text-lg sm:text-xl font-bold leading-snug text-white">
+                    &ldquo;{text.dangerBody}&rdquo;
+                  </p>
+                  <p className="text-sm text-red-100 mt-2 font-medium">
+                    {text.dangerSubtext}
+                  </p>
+                </div>
+
+                <div className="mb-6 px-3.5 py-2 rounded-xl bg-black/20 text-xs font-mono text-red-100 truncate">
+                  Scanned input: &quot;{inputText}&quot;
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between pt-2">
+                  <div className="text-xs text-red-100 flex items-center gap-1.5 font-medium">
+                    <IconLock className="w-4 h-4" />
+                    <span>UPI Intent blocked in sandbox</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="min-h-[48px] px-6 py-3 rounded-2xl font-bold text-base bg-white text-red-700 hover:bg-stone-100 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <IconRotateCcw className="w-4 h-4" />
+                    <span>{text.resetBtn}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {scanState === 'safe' && (
+              <div className="w-full bg-white border-2 border-emerald-300 rounded-3xl p-6 sm:p-8 text-stone-900 text-left shadow-lg animate-fade-in">
+                <div className="flex items-start gap-3.5 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                    <IconCheckCircle2 className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-stone-900">{text.safeTitle}</h3>
+                    <p className="text-stone-600 text-sm mt-1 leading-relaxed">{text.safeBody}</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col sm:flex-row gap-3 items-center justify-between pt-4 border-t border-stone-200">
+                  <p className="text-xs text-stone-500">
+                    Want to test the fraud scanner? Try: <button type="button" onClick={handleApplyDemoSample} className="text-stone-900 font-bold underline cursor-pointer">&quot;{TARGET_SCAM}&quot;</button>
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="min-h-[48px] px-5 py-2.5 rounded-2xl font-semibold text-sm bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+                  >
+                    <IconRotateCcw className="w-4 h-4" />
+                    <span>{text.resetBtn}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // PAGE 2: SPEND (Payout Cycles & Cashflow)
+    // ==========================================
+    function SpendPage({ lang }) {
+      const transactions = [
+        {
+          id: 1,
+          merchant: "Swiggy Food Delivery",
+          category: "Food & Dining",
+          date: "Sep 16, 2026",
+          amount: "-₹249",
+          icon: IconShoppingBag,
+          tag: "UPI Auto-Split"
+        },
+        {
+          id: 2,
+          merchant: "Zepto Quick Commerce",
+          category: "Groceries",
+          date: "Sep 15, 2026",
+          amount: "-₹185",
+          icon: IconShoppingBag,
+          tag: "10-Min Delivery"
+        },
+        {
+          id: 3,
+          merchant: "Metro Transit Smart Card",
+          category: "Commute",
+          date: "Sep 14, 2026",
+          amount: "-₹100",
+          icon: IconTrain,
+          tag: "NCMC Recharge"
+        },
+        {
+          id: 4,
+          merchant: "Chai Point UPI Tap",
+          category: "Snacks",
+          date: "Sep 13, 2026",
+          amount: "-₹40",
+          icon: IconCoffee,
+          tag: "Quick Tap"
+        }
+      ];
+
+      const t = {
+        en: {
+          badge: "Irregular Income Copilot",
+          headline: "Track Your Cashflow",
+          subheadline: "Built for stipends, creator gigs, and freelance payouts—not outdated 30-day calendar months.",
+          cyclesTitle: "Payout Cycles",
+          cyclesSubtitle: "Smart grouping anchored to when your money actually arrives.",
+          currentCycleLabel: "ACTIVE CYCLE",
+          currentCycleName: "Design Internship Stipend",
+          currentCycleInflow: "₹12,000",
+          creditedOn: "Credited Sep 10 via RazorpayX",
+          cycleLeft: "₹11,426 remaining",
+          safeSpend: "Safe Daily Burn: ₹475/day",
+          daysEstimated: "24 days until next expected payout",
+          recentHeading: "Recent Expenses in this Cycle"
+        },
+        hi: {
+          badge: "अनियमित आय ट्रैकर",
+          headline: "Track Your Cashflow",
+          subheadline: "स्टाइपेंड, फ्रीलांस प्रोजेक्ट्स और पॉकेट मनी के लिए विशेष रूप से निर्मित।",
+          cyclesTitle: "पेआउट साइकल्स (Payout Cycles)",
+          cyclesSubtitle: "महीने की 1 तारीख के बजाय आपके पैसे आने के दिन से खर्च का सटीक हिसाब।",
+          currentCycleLabel: "सक्रिय चक्र",
+          currentCycleName: "इंटर्नशिप स्टाइपेंड साइकिल",
+          currentCycleInflow: "₹12,000",
+          creditedOn: "10 सितंबर को प्राप्त (RazorpayX)",
+          cycleLeft: "₹11,426 शेष",
+          safeSpend: "सुरक्षित दैनिक खर्च: ₹475/दिन",
+          daysEstimated: "अगले स्टाइपेंड में 24 दिन शेष",
+          recentHeading: "इस साइकिल के ताज़ा खर्च"
+        }
+      };
+
+      const text = t[lang] || t.en;
+
+      return (
+        <div className="flex flex-col animate-fade-in text-left">
+          <div className="text-center sm:text-left mb-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 border border-blue-300 text-blue-900 text-xs sm:text-sm font-semibold mb-3">
+              <IconSparkles className="w-3.5 h-3.5 text-blue-700" />
+              <span>{text.badge}</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight leading-tight">
+              {text.headline}
+            </h1>
+            <p className="text-stone-600 text-sm sm:text-base font-medium mt-1 leading-relaxed">
+              {text.subheadline}
+            </p>
+          </div>
+
+          <section className="mb-8">
+            <div className="mb-3">
+              <h2 className="text-xl font-extrabold text-stone-900">
+                {text.cyclesTitle}
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                {text.cyclesSubtitle}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 border-2 border-stone-300 shadow-md">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
+                <div>
+                  <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black tracking-wider uppercase mb-1">
+                    {text.currentCycleLabel}
+                  </span>
+                  <h3 className="text-xl font-bold text-stone-900">
+                    {text.currentCycleName}
+                  </h3>
+                  <p className="text-xs text-stone-500 font-medium mt-0.5">
+                    {text.creditedOn}
+                  </p>
+                </div>
+
+                <div className="sm:text-right">
+                  <span className="text-xs text-stone-400 font-bold uppercase tracking-wider block">Inflow</span>
+                  <span className="text-2xl font-black text-emerald-700">
+                    +{text.currentCycleInflow}
+                  </span>
+                </div>
+              </div>
+
+              <div className="my-5 grid grid-cols-2 gap-4">
+                <div className="bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
+                  <span className="text-xs text-stone-500 font-medium block mb-0.5">Cycle Balance</span>
+                  <span className="text-lg sm:text-xl font-extrabold text-stone-900">{text.cycleLeft}</span>
+                </div>
+                <div className="bg-amber-50 p-3.5 rounded-2xl border border-amber-200">
+                  <span className="text-xs text-amber-800 font-medium block mb-0.5">{text.safeSpend}</span>
+                  <span className="text-xs text-amber-700 font-bold block">{text.daysEstimated}</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs text-stone-600 font-semibold mb-1.5">
+                  <span>Cycle Burn: ₹574 of ₹12,000</span>
+                  <span className="text-emerald-700 font-bold">95.2% Available</span>
+                </div>
+                <div className="w-full h-3 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: '4.8%' }}></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center justify-between mb-3.5">
+              <h2 className="text-lg font-bold text-stone-900">
+                {text.recentHeading}
+              </h2>
+              <span className="text-xs font-semibold text-stone-500">4 Payments</span>
+            </div>
+
+            <div className="bg-white rounded-3xl border-2 border-stone-200 shadow-sm overflow-hidden divide-y divide-stone-100">
+              {transactions.map((tx) => {
+                const Icon = tx.icon;
+                return (
+                  <div
+                    key={tx.id}
+                    className="p-4 flex items-center justify-between gap-3 hover:bg-stone-50/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-2xl bg-stone-100 text-stone-700 border border-stone-200 flex items-center justify-center shrink-0">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-base font-bold text-stone-900 truncate leading-snug">
+                          {tx.merchant}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-stone-500 mt-0.5">
+                          <span>{tx.date}</span>
+                          <span>•</span>
+                          <span className="bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded text-[11px] font-medium">
+                            {tx.tag}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-base sm:text-lg font-extrabold text-stone-900 block">
+                        {tx.amount}
+                      </span>
+                      <span className="text-[11px] text-stone-400 font-medium">UPI Debited</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // PAGE 3: SAVE (AutoPay Leaks & Goal)
+    // ==========================================
+    function SavePage({ lang }) {
+      const GOAL_TARGET = 15000;
+      const INITIAL_SAVED = 9600;
+
+      const [mandates, setMandates] = useState([
+        {
+          id: 1,
+          name: "FitTrack Pro App",
+          costPerMonth: 99,
+          approvedDate: "Jun 14, 2026",
+          isCancelled: false,
+          reason: "Inactive since 42 days",
+          badge: "Unused Mandate"
+        },
+        {
+          id: 2,
+          name: "StreamFlix Mobile Pass",
+          costPerMonth: 199,
+          approvedDate: "May 02, 2026",
+          isCancelled: false,
+          reason: "Duplicate video subscription",
+          badge: "AutoPay Active"
+        },
+        {
+          id: 3,
+          name: "CloudVault Extra 100GB",
+          costPerMonth: 89,
+          approvedDate: "Jul 21, 2026",
+          isCancelled: false,
+          reason: "Trial period ended",
+          badge: "AutoPay Active"
+        }
+      ]);
+
+      const toggleMandate = (id) => {
+        setMandates((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, isCancelled: !m.isCancelled } : m))
+        );
+      };
+
+      const totalLeakingMonthly = mandates
+        .filter((m) => !m.isCancelled)
+        .reduce((sum, m) => sum + m.costPerMonth, 0);
+
+      const totalRecoveredMonthly = mandates
+        .filter((m) => m.isCancelled)
+        .reduce((sum, m) => sum + m.costPerMonth, 0);
+
+      const cancelledCount = mandates.filter((m) => m.isCancelled).length;
+      const daysAccelerated = Math.round((totalRecoveredMonthly * 3) / 25);
+      const currentSaved = INITIAL_SAVED + (totalRecoveredMonthly > 0 ? 300 : 0);
+      const progressPercent = Math.min(100, Math.round((currentSaved / GOAL_TARGET) * 100));
+
+      const t = {
+        en: {
+          badge: "Silent Leak Recovery",
+          headline: "Recover Your Leaks",
+          subheadline: "Stop hidden ₹99 AutoPay mandates before they drain your next paycheck.",
+          goalTitle: "Savings Goal",
+          goalName: "₹15,000 Laptop",
+          mandatesTitle: "Active AutoPay Mandates",
+          mandatesSub: "Click 'Cancel Mandate' to simulate stopping the leak & boosting your goal.",
+          acceleratorBanner: "Mandate Cancellation Impact",
+          acceleratorMsg: `Canceling ${cancelledCount} mandate(s) frees up ₹${totalRecoveredMonthly}/mo.`,
+          acceleratorDays: `You will reach your ₹15,000 Laptop goal ~${daysAccelerated} days sooner!`,
+          activeLeakWarning: `You are currently leaking ₹${totalLeakingMonthly}/mo across active mandates.`
+        },
+        hi: {
+          badge: "साइलेंट लीक रिकवरी",
+          headline: "Recover Your Leaks",
+          subheadline: "छिपे हुए ₹99 वाले ऑटो-पे मैन्डेट्स को रोकें और अपने बचत लक्ष्यों को गति दें।",
+          goalTitle: "बचत लक्ष्य (Savings Goal)",
+          goalName: "₹15,000 नया लैपटॉप फंड",
+          mandatesTitle: "सक्रिय ऑटो-पे मैन्डेट्स (AutoPay Mandates)",
+          mandatesSub: "अनचाहे सब्सक्रिप्शन रोकें और देखें कि आपका लैपटॉप लक्ष्य कितना जल्दी पूरा होगा।",
+          acceleratorBanner: "बचत गति प्रभाव",
+          acceleratorMsg: `${cancelledCount} सब्सक्रिप्शन रद्द करने से ₹${totalRecoveredMonthly}/माह की बचत होगी।`,
+          acceleratorDays: `आपका ₹15,000 लैपटॉप लक्ष्य ~${daysAccelerated} दिन पहले पूरा हो जाएगा!`,
+          activeLeakWarning: `वर्तमान में ₹${totalLeakingMonthly}/माह ऑटो-पे के रूप में कट रहे हैं।`
+        }
+      };
+
+      const text = t[lang] || t.en;
+
+      return (
+        <div className="flex flex-col animate-fade-in text-left">
+          <div className="text-center sm:text-left mb-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-semibold mb-3">
+              <IconSparkles className="w-3.5 h-3.5 text-emerald-700" />
+              <span>{text.badge}</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight leading-tight">
+              {text.headline}
+            </h1>
+            <p className="text-stone-600 text-sm sm:text-base font-medium mt-1 leading-relaxed">
+              {text.subheadline}
+            </p>
+          </div>
+
+          <section className="mb-8">
+            <div className="bg-white rounded-3xl p-6 border-2 border-stone-300 shadow-md">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 shadow-sm">
+                    <IconLaptop className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-stone-400 block">
+                      {text.goalTitle}
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-black text-stone-900">
+                      {text.goalName}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-lg sm:text-xl font-black text-emerald-700 block">
+                    ₹{currentSaved.toLocaleString()}
+                  </span>
+                  <span className="text-xs text-stone-400 font-medium">of ₹{GOAL_TARGET.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <div className="w-full h-4 bg-stone-100 rounded-full overflow-hidden p-0.5 border border-stone-200">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs font-semibold text-stone-600">
+                <span>{progressPercent}% Achieved</span>
+                <span>₹{(GOAL_TARGET - currentSaved).toLocaleString()} to go</span>
+              </div>
+
+              {totalRecoveredMonthly > 0 ? (
+                <div className="mt-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 animate-fade-in">
+                  <div className="flex items-center gap-2 font-black text-sm mb-0.5">
+                    <IconTrendingUp className="w-4 h-4 text-emerald-700" />
+                    <span>{text.acceleratorBanner}</span>
+                  </div>
+                  <p className="text-xs sm:text-sm font-semibold">
+                    {text.acceleratorMsg}
+                  </p>
+                  <p className="text-xs text-emerald-800 font-medium mt-1">
+                    ⚡ {text.acceleratorDays}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium">
+                  {text.activeLeakWarning}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section>
+            <div className="mb-3.5">
+              <h2 className="text-xl font-extrabold text-stone-900">
+                {text.mandatesTitle}
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                {text.mandatesSub}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {mandates.map((mandate) => (
+                <div
+                  key={mandate.id}
+                  className={`p-4 sm:p-5 rounded-3xl border-2 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm ${
+                    mandate.isCancelled
+                      ? 'bg-stone-100/70 border-stone-200 opacity-80'
+                      : 'bg-white border-stone-300 hover:border-stone-400'
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5">
+                    <div
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
+                        mandate.isCancelled
+                          ? 'bg-stone-200 text-stone-400'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      <IconRepeat className="w-5 h-5" />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3
+                          className={`text-base font-bold ${
+                            mandate.isCancelled
+                              ? 'line-through text-stone-500'
+                              : 'text-stone-900'
+                          }`}
+                        >
+                          {mandate.name}
+                        </h3>
+                        {mandate.isCancelled ? (
+                          <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                            Cancelled
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-800">
+                            {mandate.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-stone-500 font-medium">
+                        {mandate.reason} • Approved: {mandate.approvedDate}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                    <div className="text-left sm:text-right">
+                      <span
+                        className={`text-base sm:text-lg font-black block ${
+                          mandate.isCancelled ? 'text-stone-400 line-through' : 'text-stone-900'
+                        }`}
+                      >
+                        ₹{mandate.costPerMonth}/mo
+                      </span>
+                      <span className="text-[11px] text-stone-400">Recurring UPI</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleMandate(mandate.id)}
+                      className={`min-h-[48px] px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer ${
+                        mandate.isCancelled
+                          ? 'bg-stone-200 hover:bg-stone-300 text-stone-800'
+                          : 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm'
+                      }`}
+                    >
+                      {mandate.isCancelled ? (
+                        <>
+                          <IconRotateCcw className="w-3.5 h-3.5" />
+                          <span>Restore</span>
+                        </>
+                      ) : (
+                        <>
+                          <IconXCircle className="w-4 h-4" />
+                          <span>Cancel Mandate</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // APP ROUTER & SHARED LAYOUT
+    // ==========================================
+    function App() {
+      const [lang, setLang] = useState('en');
+      
+      // Listen to URL hash for routing (/#/, /#/spend, /#/save)
+      const getRouteFromHash = () => {
+        const hash = window.location.hash.replace(/^#/, '') || '/';
+        return hash.startsWith('/') ? hash : '/' + hash;
+      };
+
+      const [currentRoute, setCurrentRoute] = useState(getRouteFromHash());
+
+      useEffect(() => {
+        const handleHashChange = () => {
+          setCurrentRoute(getRouteFromHash());
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+      }, []);
+
+      const navigate = (path) => {
+        window.location.hash = path;
+        setCurrentRoute(path);
+      };
+
+      const navItems = [
+        {
+          to: '/',
+          label: lang === 'en' ? 'Shield' : 'शील्ड',
+          icon: IconShield
+        },
+        {
+          to: '/spend',
+          label: lang === 'en' ? 'Spend' : 'स्पेंड',
+          icon: IconWallet
+        },
+        {
+          to: '/save',
+          label: lang === 'en' ? 'Save' : 'सेव',
+          icon: IconCoins
+        }
+      ];
+
+      return (
+        <div className="min-h-screen bg-[#fbfbf9] text-stone-900 font-sans flex flex-col justify-between selection:bg-amber-200">
           
-          {/* Warm, organic ambient background lights */}
+          {/* Ambient Background Glows */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[42rem] h-[22rem] bg-gradient-to-b from-amber-100/60 via-orange-50/40 to-transparent blur-3xl rounded-full" />
             <div className="absolute top-72 -left-20 w-80 h-80 bg-emerald-100/30 blur-3xl rounded-full" />
             <div className="absolute top-96 -right-20 w-80 h-80 bg-blue-100/30 blur-3xl rounded-full" />
           </div>
 
-          {/* 1. GLOBAL HEADER */}
-          <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#fbfbf9]/90 border-b border-stone-200/80 transition-colors">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+          {/* TOP HEADER (Shared Layout) */}
+          <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#fbfbf9]/90 border-b border-stone-200/80 transition-colors">
+            <div className="max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 h-18 py-3.5 flex items-center justify-between">
               {/* Logo */}
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shadow-stone-900/10">
-                  <IconShield className="w-6 h-6" />
+              <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left cursor-pointer">
+                <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shadow-stone-900/10">
+                  <IconShield className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-2xl font-black tracking-tight text-stone-900 flex items-center gap-1.5">
                     Kavach
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   </span>
-                  <span className="text-xs font-semibold text-stone-700 tracking-wide -mt-1 hidden sm:inline-block">
-                    Your UPI Copilot
+                  <span className="text-[11px] font-bold text-stone-500 tracking-wider -mt-1 uppercase">
+                    Money Copilot
                   </span>
                 </div>
-              </div>
+              </button>
 
               {/* Functional English / Hindi Toggle Switch */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 <div className="flex items-center bg-stone-100 p-1 rounded-full border border-stone-300 shadow-inner">
                   <button
                     type="button"
                     onClick={() => setLang('en')}
-                    className={`min-h-[48px] min-w-[76px] px-4 text-sm font-semibold rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
+                    className={`min-h-[48px] min-w-[72px] px-3.5 text-sm font-bold rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
                       lang === 'en'
                         ? 'bg-stone-900 text-white shadow-sm'
-                        : 'text-stone-700 hover:text-stone-900'
+                        : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
                     English
@@ -268,10 +1011,10 @@
                   <button
                     type="button"
                     onClick={() => setLang('hi')}
-                    className={`min-h-[48px] min-w-[76px] px-4 text-sm font-semibold rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
+                    className={`min-h-[48px] min-w-[72px] px-3.5 text-sm font-bold rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
                       lang === 'hi'
                         ? 'bg-stone-900 text-white shadow-sm'
-                        : 'text-stone-700 hover:text-stone-900'
+                        : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
                     हिन्दी
@@ -281,315 +1024,51 @@
             </div>
           </header>
 
-          {/* MAIN HERO & CONTENT */}
-          <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-20">
-            
-            {/* 2. THE HERO SECTION */}
-            <section className="text-center flex flex-col items-center max-w-3xl mx-auto mb-20 sm:mb-28">
-              
-              {/* Human badge with user community touch */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 border border-amber-300 text-stone-800 text-sm font-semibold mb-6 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                <span>{text.badge}</span>
-                <span className="text-stone-600 hidden sm:inline">•</span>
-                <span className="text-stone-700 font-normal hidden sm:inline">Crafted for everyday UPI life</span>
-              </div>
-
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-6xl font-extrabold text-stone-900 tracking-tight leading-[1.1] mb-5">
-                {text.heroHeading}
-              </h1>
-
-              <p className="text-lg sm:text-xl text-stone-700 font-medium max-w-2xl mx-auto leading-relaxed mb-8">
-                {text.heroSubheading}
-              </p>
-
-              {/* Warm human note: handwritten vibe */}
-              <div className="flex items-center justify-center gap-2 text-stone-600 mb-8">
-                <span className="font-handwriting text-xl text-stone-700">
-                  Got a weird WhatsApp refund link or suspicious QR? Check it before you approve 👇
-                </span>
-              </div>
-
-              {/* Interactive Core Scanner */}
-              <div className="w-full max-w-2xl">
-                
-                {scanState === 'idle' && (
-                  <div className="space-y-4">
-                    <form
-                      onSubmit={handleScan}
-                      className="bg-white p-2.5 sm:p-3 rounded-2xl border-2 border-stone-300 shadow-xl shadow-stone-200/60 focus-within:border-stone-900 focus-within:ring-4 focus-within:ring-stone-200 transition-all flex flex-col sm:flex-row items-stretch gap-2.5"
-                    >
-                      <div className="relative flex-1 flex items-center">
-                        <div className="absolute left-4 text-stone-400 pointer-events-none hidden sm:block">
-                          <IconSearch className="w-5 h-5" />
-                        </div>
-                        <input
-                          type="text"
-                          value={inputText}
-                          onChange={(e) => {
-                            setInputText(e.target.value);
-                            if (inputError) setInputError(false);
-                          }}
-                          placeholder={text.placeholder}
-                          className="w-full min-h-[56px] text-base sm:text-lg bg-stone-50 text-stone-900 placeholder-stone-400 rounded-xl px-4 sm:pl-12 sm:pr-4 py-3 outline-none border border-stone-200 focus:bg-white focus:border-stone-400 transition-all"
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="min-h-[56px] px-6 sm:px-7 py-3 rounded-xl font-bold text-base sm:text-lg text-white bg-stone-900 hover:bg-stone-800 active:scale-[0.98] transition-all duration-150 shadow-md flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-                      >
-                        <IconShieldAlert className="w-5 h-5 text-amber-400" />
-                        <span>{text.scanBtn}</span>
-                      </button>
-                    </form>
-
-                    {inputError && (
-                      <p className="text-rose-600 text-sm font-semibold text-left px-2">
-                        Please paste or type the message to scan.
-                      </p>
-                    )}
-
-                    {/* Human, easy 1-click test button */}
-                    <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-sm text-stone-600">
-                      <span className="text-stone-700 font-medium">{text.demoPrompt}</span>
-                      <button
-                        type="button"
-                        onClick={handleApplyDemoSample}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-900 font-mono text-xs sm:text-sm transition-colors cursor-pointer text-left font-semibold"
-                        title="Click to paste exact test case"
-                      >
-                        <span>&quot;{TARGET_SCAM}&quot;</span>
-                        <span className="text-emerald-700 font-bold font-sans">↵ Paste</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* SCANNING STATE: Sleek 2-second loading spinner */}
-                {scanState === 'scanning' && (
-                  <div className="w-full bg-white border-2 border-stone-300 rounded-2xl p-8 sm:p-11 flex flex-col items-center justify-center text-center shadow-lg animate-fade-in">
-                    <div className="relative mb-5">
-                      <div className="w-16 h-16 rounded-full border-4 border-stone-200 border-t-stone-900 animate-spin"></div>
-                      <div className="absolute inset-0 flex items-center justify-center text-stone-900">
-                        <IconShield className="w-6 h-6" />
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-bold text-stone-900 mb-1.5">
-                      {text.scanningHeading}
-                    </h3>
-                    <p className="text-stone-500 text-sm max-w-md">
-                      {text.scanningSub}
-                    </p>
-
-                    <div className="w-44 h-1.5 bg-stone-100 rounded-full mt-6 overflow-hidden">
-                      <div className="h-full bg-stone-900 animate-pulse" />
-                    </div>
-                  </div>
-                )}
-
-                {/* DANGER STATE: High-contrast RED Danger Card */}
-                {scanState === 'danger' && (
-                  <div className="w-full bg-[#b91c1c] text-white border-2 border-red-700 rounded-2xl p-6 sm:p-8 text-left shadow-2xl shadow-red-900/30 animate-fade-in">
-                    
-                    {/* Top Alert Bar */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-red-500/50">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-white text-red-700 flex items-center justify-center shrink-0 shadow-md">
-                          <IconAlertTriangle className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <span className="inline-block px-2.5 py-0.5 rounded bg-black/30 text-white text-xs font-black tracking-wider uppercase mb-0.5">
-                            {text.dangerBadge}
-                          </span>
-                          <h2 className="text-2xl font-black tracking-tight text-white">
-                            {text.dangerTitle}
-                          </h2>
-                        </div>
-                      </div>
-
-                      <span className="self-start sm:self-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
-                        Phishing Pattern Matched
-                      </span>
-                    </div>
-
-                    {/* Exact Danger Body Requirement */}
-                    <div className="my-5 bg-black/25 rounded-xl p-5 border border-red-400/40">
-                      <p className="text-lg sm:text-xl font-bold leading-snug text-white">
-                        &ldquo;{text.dangerBody}&rdquo;
-                      </p>
-                      <p className="text-sm text-red-100 mt-2 font-medium">
-                        {text.dangerExplanation}
-                      </p>
-                    </div>
-
-                    <div className="mb-6 px-3.5 py-2 rounded-lg bg-black/20 text-xs font-mono text-red-100 truncate">
-                      Scanned input: &quot;{inputText}&quot;
-                    </div>
-
-                    {/* Actions & Reset */}
-                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between pt-2">
-                      <div className="text-xs text-red-100 flex items-center gap-1.5 font-medium">
-                        <IconLock className="w-4 h-4" />
-                        <span>Kavach keeps your money safe before you click</span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleReset}
-                        className="min-h-[48px] px-6 py-2.5 rounded-xl font-bold text-base bg-white text-red-700 hover:bg-stone-100 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <IconRotateCcw className="w-4 h-4" />
-                        <span>{text.resetBtn}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* SAFE / NEUTRAL STATE */}
-                {scanState === 'safe' && (
-                  <div className="w-full bg-white border-2 border-emerald-300 rounded-2xl p-6 sm:p-8 text-stone-900 text-left shadow-lg animate-fade-in">
-                    <div className="flex items-start gap-3.5 mb-4">
-                      <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                        <IconCheckCircle2 className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-stone-900">{text.safeTitle}</h3>
-                        <p className="text-stone-600 text-sm mt-1 leading-relaxed">{text.safeBody}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex flex-col sm:flex-row gap-3 items-center justify-between pt-4 border-t border-stone-200">
-                      <p className="text-xs text-stone-500">
-                        Want to test the fraud scanner? Try: <button type="button" onClick={handleApplyDemoSample} className="text-stone-900 font-bold underline cursor-pointer">&quot;{TARGET_SCAM}&quot;</button>
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={handleReset}
-                        className="min-h-[48px] px-5 py-2 rounded-xl font-semibold text-sm bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
-                      >
-                        <IconRotateCcw className="w-4 h-4" />
-                        <span>{text.resetBtn}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            </section>
-
-            {/* 3. THE THREE PILLARS (FEATURES SECTION) */}
-            <section className="mb-24">
-              <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full mb-2.5 inline-block">
-                  {text.pillarsBadge}
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
-                  {text.pillarsHeading}
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                {/* PILLAR 1: SHIELD */}
-                <div className="bg-white rounded-2xl p-7 border-2 border-stone-200 shadow-sm hover:shadow-md hover:border-stone-300 transition-all flex flex-col justify-between">
-                  <div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center mb-5">
-                      <IconShieldCheck className="w-7 h-7" />
-                    </div>
-                    <div className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold tracking-wider mb-2">
-                      {text.shieldTitle}
-                    </div>
-                    <h3 className="text-lg font-bold text-stone-900 mb-2">Instant Threat Block</h3>
-                    <p className="text-base text-stone-700 leading-relaxed font-medium">
-                      &ldquo;{text.shieldDesc}&rdquo;
-                    </p>
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-stone-100 text-xs text-stone-700 font-medium">
-                    {text.shieldExample}
-                  </div>
-                </div>
-
-                {/* PILLAR 2: SPEND */}
-                <div className="bg-white rounded-2xl p-7 border-2 border-stone-200 shadow-sm hover:shadow-md hover:border-stone-300 transition-all flex flex-col justify-between">
-                  <div>
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center mb-5">
-                      <IconWallet className="w-7 h-7" />
-                    </div>
-                    <div className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold tracking-wider mb-2">
-                      {text.spendTitle}
-                    </div>
-                    <h3 className="text-lg font-bold text-stone-900 mb-2">Real-World Incomes</h3>
-                    <p className="text-base text-stone-700 leading-relaxed font-medium">
-                      &ldquo;{text.spendDesc}&rdquo;
-                    </p>
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-stone-100 text-xs text-stone-700 font-medium">
-                    {text.spendExample}
-                  </div>
-                </div>
-
-                {/* PILLAR 3: SAVE */}
-                <div className="bg-white rounded-2xl p-7 border-2 border-stone-200 shadow-sm hover:shadow-md hover:border-stone-300 transition-all flex flex-col justify-between">
-                  <div>
-                    <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-5">
-                      <IconCoins className="w-7 h-7" />
-                    </div>
-                    <div className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold tracking-wider mb-2">
-                      {text.saveTitle}
-                    </div>
-                    <h3 className="text-lg font-bold text-stone-900 mb-2">Passive Money Leaks</h3>
-                    <p className="text-base text-stone-700 leading-relaxed font-medium">
-                      &ldquo;{text.saveDesc}&rdquo;
-                    </p>
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-stone-100 text-xs text-stone-700 font-medium">
-                    {text.saveExample}
-                  </div>
-                </div>
-
-              </div>
-            </section>
-
+          {/* PAGE CONTENT CONTAINER */}
+          <main className="flex-1 w-full max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-28 sm:pb-32">
+            {currentRoute === '/' && <ShieldPage lang={lang} />}
+            {currentRoute === '/spend' && <SpendPage lang={lang} />}
+            {currentRoute === '/save' && <SavePage lang={lang} />}
           </main>
 
-          {/* 4. IMPACT FOOTER (Dark, serious background as required by specification) */}
-          <footer className="w-full bg-[#121214] text-stone-100 pt-16 pb-12 mt-auto border-t border-stone-800">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-              
-              {/* Stat text */}
-              <div className="max-w-2xl mx-auto mb-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-800 text-red-300 text-xs font-bold uppercase tracking-wider mb-4">
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                  Official UPI Security Notice
-                </div>
-                
-                <p className="text-2xl sm:text-3xl font-black text-white leading-snug tracking-tight">
-                  &ldquo;{text.footerStatText}&rdquo;
-                </p>
-              </div>
+          {/* BOTTOM NAVIGATION (Sticky Bottom Tab Bar) */}
+          <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            <div className="max-w-md md:max-w-4xl mx-auto px-4 flex items-center justify-around h-20">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentRoute === item.to;
 
-              {/* Security & trust notes */}
-              <div className="pt-8 border-t border-stone-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-stone-400">
-                <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-stone-800 text-amber-400 flex items-center justify-center text-xs">
-                    <IconShield className="w-4 h-4" />
-                  </span>
-                  <span className="font-bold text-stone-200">Kavach</span>
-                  <span>— India’s UPI Copilot</span>
-                </div>
-
-                <div className="text-xs text-stone-400 flex items-center gap-1.5">
-                  <IconLock className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{text.footerGuarantee}</span>
-                </div>
-              </div>
-
+                return (
+                  <button
+                    key={item.to}
+                    type="button"
+                    onClick={() => navigate(item.to)}
+                    className={`flex flex-col items-center justify-center flex-1 min-h-[48px] min-w-[48px] py-1.5 rounded-2xl transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? 'text-stone-950 font-extrabold'
+                        : 'text-stone-500 hover:text-stone-800 font-medium'
+                    }`}
+                  >
+                    <div
+                      className={`w-11 h-9 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
+                        isActive
+                          ? 'bg-stone-900 text-amber-400 shadow-sm scale-105'
+                          : 'text-stone-500 hover:bg-stone-200/60'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs tracking-tight">
+                      {item.label}
+                    </span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          </footer>
+          </nav>
 
         </div>
       );
