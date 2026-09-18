@@ -131,32 +131,9 @@ export default function GoalsPage() {
       deadlineLabelText: "Target Deadline Date",
       submitGoal: "Save Goal & Start Tracking"
     },
-    hi: {
-      badge: "भविष्य की खरीदारी योजना",
-      headline: "व्यक्तिगत बचत लक्ष्य (Goals)",
-      subheadline: "बिना किसी EMI या लोन के अपने पसंदीदा गैजेट्स, यात्रा और सपनों की खरीदारी के लिए समयबद्ध बचत करें।",
-      newGoalBtn: "नया लक्ष्य जोड़ें",
-      totalTargetLabel: "कुल लक्ष्य राशि",
-      totalSavedLabel: "अब तक की कुल बचत",
-      overallProgress: "समग्र बचत प्रगति",
-      deadlineHeader: "अंतिम तिथि (Deadline)",
-      daysLeft: "दिन शेष",
-      completedBadge: "लक्ष्य पूरा हुआ! 🎉",
-      addDeposit: "+ पैसे जोड़ें",
-      modalTitle: "नया बचत लक्ष्य निर्धारित करें",
-      modalSub: "आप क्या खरीदना चाहते हैं, कितनी राशि चाहिए और किस तारीख तक चाहिए।",
-      titleLabel: "आप क्या खरीदना चाहते हैं?",
-      titlePlaceholder: "उदा. कॉलेज नोट्स के लिए iPad Air",
-      targetLabel: "कुल लक्ष्य राशि (₹)",
-      targetPlaceholder: "45000",
-      savedLabel: "प्रारंभिक बचत (₹)",
-      savedPlaceholder: "5000",
-      deadlineLabelText: "लक्ष्य की अंतिम तिथि",
-      submitGoal: "लक्ष्य सेव करें"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in text-left">

@@ -94,24 +94,9 @@ export default function SavePage() {
       noCancellationPrompt: "Cancel unnecessary subscriptions below to accelerate your goal.",
       activeLeakWarning: `You are currently leaking ₹${totalLeakingMonthly}/mo across active mandates.`
     },
-    hi: {
-      badge: "साइलेंट लीक रिकवरी",
-      headline: "Recover Your Leaks",
-      subheadline: "छिपे हुए ₹99 वाले ऑटो-पे मैन्डेट्स को रोकें और अपने बचत लक्ष्यों को गति दें।",
-      goalTitle: "बचत लक्ष्य (Savings Goal)",
-      goalName: "₹15,000 नया लैपटॉप फंड",
-      goalTarget: "लक्ष्य: ₹15,000",
-      mandatesTitle: "सक्रिय ऑटो-पे मैन्डेट्स (AutoPay Mandates)",
-      mandatesSub: "अनचाहे सब्सक्रिप्शन रोकें और देखें कि आपका लैपटॉप लक्ष्य कितना जल्दी पूरा होगा।",
-      acceleratorBanner: "बचत गति प्रभाव",
-      acceleratorMsg: `${cancelledCount} सब्सक्रिप्शन रद्द करने से ₹${totalRecoveredMonthly}/माह की बचत होगी।`,
-      acceleratorDays: `आपका ₹15,000 लैपटॉप लक्ष्य ~${daysAccelerated} दिन पहले पूरा हो जाएगा!`,
-      noCancellationPrompt: "नीचे दिए गए अनचाहे ऑटो-पे को रद्द करके अपने लक्ष्य को तेज़ करें।",
-      activeLeakWarning: `वर्तमान में ₹${totalLeakingMonthly}/माह ऑटो-पे के रूप में कट रहे हैं।`
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   return (
     <div className="flex flex-col animate-fade-in text-left">

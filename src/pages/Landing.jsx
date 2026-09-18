@@ -103,37 +103,9 @@ export default function LandingPage() {
       readyHeading: "Ready to take control of your digital money?",
       readySub: "Join thousands of students and young professionals who never worry before tapping UPI."
     },
-    hi: {
-      badge: "भारत का पहला डिजिटल मनी को-पायलट",
-      heroHeading: "बचत। खर्च। पूर्ण सुरक्षा।",
-      heroSubheading: "भारत की पहली डिजिटल-पेमेंट पीढ़ी के लिए विशेष रूप से निर्मित। लेन-देन से पहले फ्रॉड जांच, अनियमित स्टाइपेंड बजटिंग और ₹99 ऑटो-पे लीक्स की रिकवरी।",
-      ctaPrimary: "निःशुल्क साइन अप करें",
-      ctaSecondary: "स्कैम शील्ड डेमो देखें",
-      statUsers: "48,000+",
-      statUsersLabel: "सुरक्षित भारतीय युवा",
-      statChecked: "₹18.4 करोड़",
-      statCheckedLabel: "स्कैन किए गए भुगतान",
-      statLeaks: "3.2 गुना",
-      statLeaksLabel: "तेज़ बचत गति",
-      pillarsHeading: "डिजिटल पैसे को सुरक्षित और संगठित रखने के साधन",
-      shieldTitle: "शील्ड (SHIELD)",
-      shieldSubtitle: "3 सेकंड के भीतर प्री-ट्रांजैक्शन स्कैम डिटेक्शन",
-      shieldDesc: "UPI पिन दर्ज करने से पहले फर्जी कलेक्ट रिक्वेस्ट और संदिग्ध QR कोड को तुरंत पहचान कर रोकता है।",
-      spendTitle: "स्पेंड (SPEND)",
-      spendSubtitle: "अनियमित आय और स्टाइपेंड का सटीक हिसाब",
-      spendDesc: "महीने की 1 तारीख के पारंपरिक नियम छोड़ें। जब स्टाइपेंड आए तब से खर्च और बचत का हिसाब रखें।",
-      saveTitle: "सेव (SAVE)",
-      saveSubtitle: "भूले हुए ₹99 ऑटो-पे मैन्डेट्स की रिकवरी",
-      saveDesc: "ट्रायल समाप्त होने के बाद कटने वाले सब्सक्रिप्शन रद्द करें और अपने नए लैपटॉप या फोन के लिए बचत करें।",
-      eduHeading: "वित्तीय ज्ञान और सुरक्षा समाचार",
-      eduSub: "RBI के महत्वपूर्ण दिशा-निर्देश, सुरक्षित निवेश और युवा पीढ़ी के लिए उपयोगी टिप्स।",
-      footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
-      readyHeading: "क्या आप अपने डिजिटल पैसे पर नियंत्रण पाने के लिए तैयार हैं?",
-      readySub: "हजारों युवा भारतीयों से जुड़ें जो बिना किसी चिंता के सुरक्षित UPI भुगतान करते हैं।"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   return (
     <div className="flex flex-col animate-fade-in text-left">
@@ -160,7 +132,7 @@ export default function LandingPage() {
             onClick={() => handleAction('/dashboard')}
             className="w-full sm:w-auto min-h-[52px] px-7 py-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-stone-900/15 cursor-pointer active:scale-[0.98]"
           >
-            <span>{user ? (lang === 'hi' ? 'डैशबोर्ड खोलें' : 'Open Dashboard') : text.ctaPrimary}</span>
+            <span>{user ? 'Open Dashboard' : text.ctaPrimary}</span>
             <ArrowRight className="w-4 h-4 text-amber-400" />
           </button>
 
@@ -170,7 +142,7 @@ export default function LandingPage() {
             className="w-full sm:w-auto min-h-[52px] px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-base border-2 border-stone-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer"
           >
             <Shield className="w-4 h-4 text-stone-700" />
-            <span>{user ? (lang === 'hi' ? 'स्कैम शील्ड खोलें' : 'Open Scam Shield') : (lang === 'hi' ? 'सुरक्षा शुरू करें' : 'Sign Up to Explore')}</span>
+            <span>{user ? 'Open Scam Shield' : 'Sign Up to Explore'}</span>
           </button>
         </div>
 
@@ -332,7 +304,7 @@ export default function LandingPage() {
             onClick={() => handleAction('/dashboard')}
             className="w-full sm:w-auto min-h-[50px] px-8 py-3 rounded-xl bg-white text-stone-900 hover:bg-stone-100 font-black text-base shadow-md cursor-pointer active:scale-[0.98]"
           >
-            {user ? (lang === 'hi' ? 'डैशबोर्ड खोलें' : 'Go to Dashboard') : text.ctaPrimary}
+            {user ? 'Go to Dashboard' : text.ctaPrimary}
           </button>
         </div>
       </section>

@@ -64,32 +64,9 @@ export default function DashboardPage() {
       trackGoal: "Manage Goals",
       dailyQuiz: "Daily Quiz"
     },
-    hi: {
-      welcome: user ? `वापसी पर स्वागत है, ${user.name.split(' ')[0]} 👋` : "कवच को-पायलट में आपका स्वागत है 👋",
-      subtitle: "यहाँ आपका लाइव डिजिटल खर्च, दैनिक बजट और बचत की ताज़ा स्थिति है।",
-      inflowCard: "कुल आय (Inflow)",
-      inflowSub: "स्टाइपेंड (RazorpayX)",
-      spentCard: "कुल खर्च (Spent)",
-      spentSub: "14 UPI पेमेंट्स",
-      savedCard: "कुल बचत (Saved)",
-      savedSub: "स्मार्ट बचत + गोल फंड",
-      safeBurnCard: "सुरक्षित दैनिक खर्च",
-      safeBurnSub: "साइकिल में 24 दिन शेष",
-      chartTitle: "साप्ताहिक खर्च विश्लेषण (Weekly Pulse)",
-      chartSub: "औसत खर्च: ₹487/दिन। गुरुवार को सर्वाधिक खर्च हुआ।",
-      breakdownTitle: "कैटेगरी अनुसार खर्च",
-      breakdownSub: "इस पेआउट साइकिल में आपके पैसे कहाँ गए।",
-      savingsVelocity: "बचत लक्ष्य की गति",
-      laptopGoal: "₹15,000 लैपटॉप फंड",
-      laptopGoalPace: "64% पूर्ण • 8 दिन आगे",
-      quickActions: "त्वरित विकल्प",
-      testShield: "स्कैम शील्ड जाँचें",
-      trackGoal: "लक्ष्य प्रबंधित करें",
-      dailyQuiz: "दैनिक क्विज़"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   return (
     <div className="w-full space-y-8 animate-fade-in text-left">

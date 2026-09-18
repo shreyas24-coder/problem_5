@@ -113,25 +113,9 @@ export default function QuizPage() {
       goToDashboard: "Go to Dashboard",
       trackGoals: "Apply Learnings to Goals"
     },
-    hi: {
-      badge: "दैनिक वित्तीय ज्ञान",
-      headline: "दैनिक बचत व सुरक्षा क्विज़",
-      subheadline: "90 सेकंड में डिजिटल भुगतान और बचत से जुड़े सवालों के जवाब दें और अपनी फाइनेंशियल समझ परखें।",
-      questionCounter: `प्रश्न ${currentIdx + 1} / ${total}`,
-      streakLabel: "3-दिन की स्ट्रीक 🔥",
-      nextBtn: currentIdx < total - 1 ? "अगला प्रश्न" : "परिणाम देखें",
-      retakeBtn: "पुनः क्विज़ दें",
-      scoreTitle: "क्विज़ समाप्त!",
-      scoreSub: `आपका स्कोर: ${total} में से ${score} (${percentage}%)`,
-      tierMaster: "🛡️ कवच ग्रैंडमास्टर (फाइनेंशियल IQ: 100%)",
-      tierSmart: "⚡ स्मार्ट सेवर (फाइनेंशियल IQ: 75%)",
-      tierRookie: "🌱 शुरुआती सेवर (सीखते रहें!)",
-      goToDashboard: "डैशबोर्ड पर जाएँ",
-      trackGoals: "लक्ष्य में पैसे जोड़ें"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   return (
     <div className="flex flex-col animate-fade-in text-left space-y-6 max-w-xl mx-auto">

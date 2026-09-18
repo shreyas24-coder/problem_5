@@ -44,27 +44,9 @@ export default function ShieldPage() {
       safeTitle: "No malicious collect request found",
       safeBody: "This message does not match known fraudulent UPI collect signatures. Always verify the recipient VPA before approving any payment."
     },
-    hi: {
-      badge: "प्री-ट्रांजैक्शन फ्रॉड डिफेंस",
-      headline: "पैसे कटने से पहले UPI सुरक्षित करें।",
-      subheadline: "पिन दर्ज करने से पहले फर्जी रिफंड लिंक, संदिग्ध QR कोड और कलेक्ट रिक्वेस्ट की जांच करें।",
-      dropPrompt: "भुगतान का कोई भी संदेश या लिंक यहाँ पेस्ट करें",
-      dropSubprompt: "पेमेंट लिंक, SMS मैसेज, UPI ID या स्क्रीनशॉट टेक्स्ट स्वीकार्य",
-      scanBtn: "फ्रॉड स्कैन करें",
-      scanningTitle: "भुगतान की जांच हो रही है...",
-      scanningDesc: "UPI कलेक्ट रिक्वेस्ट डेटाबेस से संदेश का मिलान किया जा रहा है...",
-      dangerTitle: "गंभीर वित्तीय खतरा पाया गया",
-      dangerBadge: "कलेक्ट रिक्वेस्ट ट्रैप",
-      dangerBody: "यह एक कलेक्ट रिक्वेस्ट है। इसे मंज़ूर करने पर आपके खाते से पैसे कटेंगे। रिफंड कभी भी कलेक्ट रिक्वेस्ट नहीं होते।",
-      dangerSubtext: "रिफंड के नाम पर आपके बैंक खाते से ₹4,999 निकालने का कपटपूर्ण प्रयास किया गया है।",
-      resetBtn: "रीसेट करें और नया संदेश जांचें",
-      demoPrompt: "डेमो फ्रॉड संदेश आज़माएं:",
-      safeTitle: "कोई संदिग्ध कलेक्ट रिक्वेस्ट नहीं मिली",
-      safeBody: "यह संदेश ज्ञात वित्तीय धोखाधड़ी से मेल नहीं खाता। फिर भी भुगतान करने से पहले प्राप्तकर्ता का नाम अवश्य जांचें।"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   const handleScan = (e) => {
     if (e) e.preventDefault();

@@ -16,7 +16,7 @@ import ChatWidget from './ChatWidget';
 
 export default function Layout({ user, onSignOut, onLogin }) {
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const navItems = [
     {
@@ -52,7 +52,8 @@ export default function Layout({ user, onSignOut, onLogin }) {
   ];
 
   const isAuthPage = location.pathname === '/auth';
-  const showSidebar = user && !isAuthPage;
+  const isLandingPage = location.pathname === '/';
+  const showSidebar = user && !isAuthPage && !isLandingPage;
 
   return (
     <div className="min-h-screen bg-[#fbfbf9] text-stone-900 font-sans flex flex-col selection:bg-amber-200">
@@ -68,16 +69,18 @@ export default function Layout({ user, onSignOut, onLogin }) {
       <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#fbfbf9]/95 border-b border-stone-200/90 shadow-xs">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
           
-          {/* Left Side: Mobile Menu Toggle or Brand Quick-Link */}
+          {/* Left Side: Slide-In / Slide-Out Navigation Button & Logo */}
           <div className="flex items-center gap-3 w-1/4">
             {showSidebar && (
               <button
                 type="button"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center cursor-pointer transition-colors"
+                onClick={() => setIsNavOpen(!isNavOpen)}
+                className="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-all shadow-sm cursor-pointer active:scale-95 border border-stone-800"
                 aria-label="Toggle Navigation Menu"
+                title={isNavOpen ? "Close Navigation" : "Open Navigation"}
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isNavOpen ? <X className="w-4 h-4 text-amber-400" /> : <Menu className="w-4 h-4 text-amber-400" />}
+                <span className="font-bold text-xs">{isNavOpen ? 'Close' : 'Menu'}</span>
               </button>
             )}
 
@@ -158,32 +161,58 @@ export default function Layout({ user, onSignOut, onLogin }) {
         </div>
       </header>
 
-      {/* BODY WORKSPACE: Vertical Sidebar on the Left + Centered Main Content Area */}
+      {/* BODY WORKSPACE: Slide-In Sidebar + Main Content Area with Blur on open */}
       <div className="flex-1 flex w-full relative">
         
-        {/* VERTICAL LEFT SIDEBAR (Desktop Fixed / Mobile Responsive Drawer) */}
+        {/* SLIDE-IN NAVIGATION SIDEBAR & BLURRED BACKDROP */}
         {showSidebar && (
           <>
-            {/* Mobile Backdrop */}
-            {isMobileMenuOpen && (
+            {/* Backdrop Blur Overlay: Blurs entire website behind the navigation drawer */}
+            {isNavOpen && (
               <div
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-xs lg:hidden"
+                onClick={() => setIsNavOpen(false)}
+                className="fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-md transition-all duration-300 animate-fade-in"
+                aria-hidden="true"
               />
             )}
 
             <aside
-              className={`fixed lg:sticky top-20 left-0 z-40 h-[calc(100vh-80px)] w-64 bg-white border-r border-stone-200/90 p-5 flex flex-col justify-between shrink-0 shadow-xs transition-transform duration-300 ${
-                isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+              className={`fixed top-0 left-0 z-50 h-full w-72 sm:w-80 bg-white border-r border-stone-200/90 p-6 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out ${
+                isNavOpen ? 'translate-x-0' : '-translate-x-full'
               }`}
             >
               <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-sm">
+                      <Shield className="w-4 h-4 stroke-[2.4]" />
+                    </div>
+                    <div>
+                      <span className="text-lg font-black tracking-tight text-stone-900 flex items-center gap-1 leading-tight">
+                        Kavach
+                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      </span>
+                      <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                        Navigation Menu
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsNavOpen(false)}
+                    className="w-8 h-8 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center cursor-pointer transition-colors"
+                    aria-label="Slide out navigation"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
                 <div>
                   <span className="text-[10px] font-black tracking-widest text-stone-400 uppercase block mb-3 pl-2">
-                    Navigation
+                    Menu Items
                   </span>
 
-                  <nav className="space-y-1.5" aria-label="Sidebar Navigation">
+                  <nav className="space-y-2" aria-label="Sidebar Navigation">
                     {navItems.map((item) => {
                       const Icon = item.icon;
                       const isActive = location.pathname === item.to;
@@ -192,7 +221,7 @@ export default function Layout({ user, onSignOut, onLogin }) {
                         <NavLink
                           key={item.to}
                           to={item.to}
-                          onClick={() => setIsMobileMenuOpen(false)}
+                          onClick={() => setIsNavOpen(false)}
                           className={`w-full p-3 rounded-2xl flex items-center gap-3 transition-all text-left group cursor-pointer ${
                             isActive
                               ? 'bg-stone-900 text-white shadow-md shadow-stone-900/10 font-bold'
@@ -222,25 +251,14 @@ export default function Layout({ user, onSignOut, onLogin }) {
                   </nav>
                 </div>
               </div>
-
-              {/* Sidebar Footer: Security & Protection Badge */}
-              <div className="pt-4 border-t border-stone-100">
-                <div className="p-3.5 bg-stone-50 border border-stone-200/80 rounded-2xl text-left space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-stone-800">
-                    <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>256-Bit Protection</span>
-                  </div>
-                  <p className="text-[11px] text-stone-500 leading-tight">
-                    Non-custodial • On-device PIN security • Zero tracking
-                  </p>
-                </div>
-              </div>
             </aside>
           </>
         )}
 
-        {/* MAIN LAPTOP CONTENT AREA: Centered and Spacious */}
-        <main className="flex-1 min-w-0 px-4 sm:px-8 lg:px-12 py-8 overflow-y-auto">
+        {/* MAIN LAPTOP CONTENT AREA: Centered, blurred when navigation tab is ON */}
+        <main className={`flex-1 min-w-0 px-4 sm:px-8 lg:px-12 py-8 overflow-y-auto transition-all duration-300 ${
+          isNavOpen ? 'filter blur-sm pointer-events-none select-none' : ''
+        }`}>
           <div className="w-full max-w-6xl mx-auto">
             <Outlet context={{ user, onLogin }} />
           </div>
@@ -248,8 +266,10 @@ export default function Layout({ user, onSignOut, onLogin }) {
 
       </div>
 
-      {/* GLOBAL FLOATING CHATBOT WIDGET: Accessible across every page */}
-      <ChatWidget user={user} />
+      {/* GLOBAL FLOATING CHATBOT WIDGET: Accessible ONLY inside authenticated app, NOT on landing page or auth */}
+      {user && !isLandingPage && !isAuthPage && (
+        <ChatWidget user={user} />
+      )}
 
     </div>
   );

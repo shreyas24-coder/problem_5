@@ -54,47 +54,18 @@ export default function SignUpModal({ isOpen, onClose, onComplete, lang = 'en' }
       exploreBtn: "Open Scam Shield",
       securityBadge: "Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN storage"
     },
-    hi: {
-      title: "कवच से जुड़ें",
-      subtitle: "60 सेकंड के भीतर अपना निःशुल्क UPI सुरक्षा को-पायलट शुरू करें।",
-      step1Title: "बुनियादी जानकारी",
-      step1Sub: "अपने प्राथमिक UPI से जुड़ा मोबाइल नंबर दर्ज करें।",
-      nameLabel: "आपका पूरा नाम",
-      namePlaceholder: "उदा. श्रेयस पटेल",
-      phoneLabel: "मोबाइल नंबर (UPI से जुड़ा हुआ)",
-      phonePlaceholder: "98765 43210",
-      sendOtpBtn: "4-अंकीय OTP भेजें",
-      step2Title: "नंबर सत्यापित करें",
-      step2Sub: `हमने +91 ${phone || '9876543210'} पर कोड भेजा है`,
-      otpHint: "डेमो OTP उपलब्ध है: 'Auto-Fill 2426' पर क्लिक करें",
-      autoFillBtn: "ऑटो-फिल 2426",
-      verifyBtn: "सत्यापित करें और आगे बढ़ें",
-      step3Title: "आपकी आय और खर्च का प्रकार",
-      step3Sub: "कवच आपके पेआउट साइकल्स को आपकी जीवनशैली के अनुसार अनुकूलित करता है।",
-      personaStudent: "कॉलेज छात्र / इंटर्न",
-      personaStudentDesc: "अनियमित स्टाइपेंड, पॉकेट मनी, कॉलेज प्रोजेक्ट्स",
-      personaFreelance: "फ्रीलांसर / कंटेंट क्रिएटर",
-      personaFreelanceDesc: "गिग पेमेंट्स, अनियमित इनवॉइस, विभिन्न क्लाइंट्स",
-      personaJunior: "नवागंतुक कर्मचारी (Early Career)",
-      personaJuniorDesc: "मासिक वेतन, किराया विभाजन, सप्ताहांत के खर्च",
-      completeBtn: "सुरक्षा सक्रिय करें",
-      step4Title: "आप पूरी तरह सुरक्षित हैं!",
-      step4Sub: "कवच सुरक्षा अब सक्रिय है। आपके सभी UPI भुगतान पिन डालने से पहले जाँचे जाएंगे।",
-      exploreBtn: "स्कैम शील्ड खोलें",
-      securityBadge: "बैंक-ग्रेड 256-बिट एन्क्रिप्शन • कोई UPI पिन नहीं पूछा जाता"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   const handleStep1Submit = (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      setErrorMsg(lang === 'en' ? 'Please enter your name' : 'कृपया अपना नाम दर्ज करें');
+      setErrorMsg('Please enter your name');
       return;
     }
     if (phone.replace(/\D/g, '').length < 10) {
-      setErrorMsg(lang === 'en' ? 'Please enter a valid 10-digit number' : 'कृपया वैध 10-अंकीय मोबाइल नंबर दर्ज करें');
+      setErrorMsg('Please enter a valid 10-digit number');
       return;
     }
     setErrorMsg('');
@@ -110,7 +81,7 @@ export default function SignUpModal({ isOpen, onClose, onComplete, lang = 'en' }
     e.preventDefault();
     const fullOtp = otp.join('');
     if (fullOtp.length < 4) {
-      setErrorMsg(lang === 'en' ? 'Please enter 4 digits' : 'कृपया 4 अंक दर्ज करें');
+      setErrorMsg('Please enter 4 digits');
       return;
     }
     setErrorMsg('');

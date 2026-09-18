@@ -54,47 +54,19 @@ export default function AuthPage() {
       completeBtn: "Activate Protection & Enter App",
       securityNote: "Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN access"
     },
-    hi: {
-      backHome: "होम पेज पर वापस जाएँ",
-      title: "कवच साइन अप (Sign Up)",
-      sub: "स्कैम शील्ड, स्टाइपेंड बजटिंग और गोल्स अनलॉक करने के लिए खाता बनाएँ।",
-      step1Title: "1. बुनियादी जानकारी",
-      step1Sub: "अपना पूरा नाम और प्राथमिक UPI मोबाइल नंबर दर्ज करें।",
-      nameLabel: "पूरा नाम",
-      namePlaceholder: "उदा. श्रेयस पटेल",
-      phoneLabel: "मोबाइल नंबर (UPI से जुड़ा)",
-      phonePlaceholder: "98765 43210",
-      sendOtpBtn: "4-अंकीय सत्यापन कोड भेजें",
-      demoQuickFill: "⚡ डेमो प्रोफाइल भरें (Shreyas • 9876543210)",
-      step2Title: "2. मोबाइल नंबर सत्यापित करें",
-      step2Sub: `कोड +91 ${phone || '9876543210'} पर भेजा गया`,
-      otpHint: "तुरंत सत्यापन के लिए नीचे क्लिक करें:",
-      autoFillOtpBtn: "ऑटो-फिल 2426",
-      verifyBtn: "सत्यापित करें और आगे बढ़ें",
-      step3Title: "3. अपनी जीवनशैली चुनें",
-      step3Sub: "कवच आपके पेआउट साइकल्स को आपकी जीवनशैली के अनुसार सेट करता है।",
-      personaStudent: "कॉलेज छात्र / इंटर्न",
-      personaStudentDesc: "स्टाइपेंड, पॉकेट मनी, कॉलेज प्रोजेक्ट्स",
-      personaFreelance: "फ्रीलांसर / कंटेंट क्रिएटर",
-      personaFreelanceDesc: "गिग पेमेंट्स, अनियमित इनवॉइस, विभिन्न क्लाइंट्स",
-      personaJunior: "नवागंतुक कर्मचारी (Early Career)",
-      personaJuniorDesc: "मासिक वेतन, किराया विभाजन, सप्ताहांत के खर्च",
-      completeBtn: "सुरक्षा सक्रिय करें और ऐप खोलें",
-      securityNote: "बैंक-ग्रेड 256-बिट एन्क्रिप्शन • कोई UPI पिन नहीं पूछा जाता"
-    }
   };
 
-  const text = t[lang] || t.en;
+  const text = t.en;
 
   // Step 1: Submit info
   const handleStep1 = (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      setErrorMsg(lang === 'en' ? 'Please enter your name' : 'कृपया अपना नाम दर्ज करें');
+      setErrorMsg('Please enter your name');
       return;
     }
     if (phone.replace(/\D/g, '').length < 10) {
-      setErrorMsg(lang === 'en' ? 'Please enter a valid 10-digit number' : 'कृपया वैध 10-अंकीय मोबाइल नंबर दर्ज करें');
+      setErrorMsg('Please enter a valid 10-digit number');
       return;
     }
     setErrorMsg('');
@@ -111,7 +83,7 @@ export default function AuthPage() {
   const handleStep2 = (e) => {
     e.preventDefault();
     if (otp.join('').length < 4) {
-      setErrorMsg(lang === 'en' ? 'Please enter 4 digits' : 'कृपया 4 अंक दर्ज करें');
+      setErrorMsg('Please enter 4 digits');
       return;
     }
     setErrorMsg('');
