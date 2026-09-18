@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import LandingPage from './pages/Landing';
+import DashboardPage from './pages/Dashboard';
 import ShieldPage from './pages/Shield';
 import SpendPage from './pages/Spend';
 import SavePage from './pages/Save';
+import GoalsPage from './pages/Goals';
+import QuizPage from './pages/Quiz';
 import SignUpModal from './components/SignUpModal';
 
 export default function App() {
@@ -12,14 +15,11 @@ export default function App() {
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Check saved user session
   useEffect(() => {
     try {
       const saved = localStorage.getItem('kavach_user');
       if (saved) setUser(JSON.parse(saved));
-    } catch (e) {
-      console.warn('Storage not available', e);
-    }
+    } catch (e) {}
   }, []);
 
   const handleSignUpComplete = (userData) => {
@@ -52,13 +52,15 @@ export default function App() {
           }
         >
           <Route index element={<LandingPage onOpenSignUp={() => setIsSignUpOpen(true)} />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="shield" element={<ShieldPage />} />
           <Route path="spend" element={<SpendPage />} />
           <Route path="save" element={<SavePage />} />
+          <Route path="goals" element={<GoalsPage />} />
+          <Route path="quiz" element={<QuizPage />} />
         </Route>
       </Routes>
 
-      {/* Global Interactive Sign Up Modal */}
       <SignUpModal
         isOpen={isSignUpOpen}
         onClose={() => setIsSignUpOpen(false)}

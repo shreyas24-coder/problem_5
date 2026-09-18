@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './src/components/Layout';
 import LandingPage from './src/pages/Landing';
+import DashboardPage from './src/pages/Dashboard';
 import ShieldPage from './src/pages/Shield';
 import SpendPage from './src/pages/Spend';
 import SavePage from './src/pages/Save';
+import GoalsPage from './src/pages/Goals';
+import QuizPage from './src/pages/Quiz';
 import SignUpModal from './src/components/SignUpModal';
 
 export default function App() {
@@ -49,9 +52,12 @@ export default function App() {
           }
         >
           <Route index element={<LandingPage onOpenSignUp={() => setIsSignUpOpen(true)} />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="shield" element={<ShieldPage />} />
           <Route path="spend" element={<SpendPage />} />
           <Route path="save" element={<SavePage />} />
+          <Route path="goals" element={<GoalsPage />} />
+          <Route path="quiz" element={<QuizPage />} />
         </Route>
       </Routes>
 
