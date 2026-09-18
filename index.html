@@ -62,6 +62,9 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -123,9 +126,25 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    // Supabase Client Initialization
+    const SUPABASE_URL = "https://vcidtjeohkvpmotfllin.supabase.co";
+    const SUPABASE_KEY = "sb_secret_xRflMZO_w5t7CQlbz4dAPw_orrsBZYW";
+    const supabase = (window.supabase && window.supabase.createClient)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+      : null;
+
     // ==========================================
     // STANDARDIZED SVG ICONS (Clean stroke, scalable)
     // ==========================================
+    const IconGoogle = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+        <path fill="#FBBC05" d="M5.28 14.27A7.18 7.18 0 0 1 4.9 12c0-.79.14-1.57.38-2.27V6.58H1.25A11.96 11.96 0 0 0 0 12c0 1.92.45 3.74 1.25 5.42l4.03-3.15Z"/>
+        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+      </svg>
+    );
+
     const IconShield = ({ className = "w-5 h-5" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -419,8 +438,30 @@
       const [phone, setPhone] = useState('');
       const [otp, setOtp] = useState(['', '', '', '']);
       const [errorMsg, setErrorMsg] = useState('');
+      const [googleLoading, setGoogleLoading] = useState(false);
 
       if (!isOpen) return null;
+
+      const handleGoogleSignIn = async () => {
+        if (!supabase) {
+          setErrorMsg('Supabase authentication is not configured.');
+          return;
+        }
+        setGoogleLoading(true);
+        setErrorMsg('');
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin
+            }
+          });
+          if (error) throw error;
+        } catch (err) {
+          setErrorMsg(err.message || 'Google sign-in failed. Please try again.');
+          setGoogleLoading(false);
+        }
+      };
 
       const handleStep1 = (e) => {
         e.preventDefault();
@@ -471,46 +512,70 @@
             </div>
 
             {step === 1 && (
-              <form onSubmit={handleStep1} className="space-y-4 text-left">
+              <div className="space-y-4 text-left">
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Join Kavach Free</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter details linked with your primary UPI number.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Get instant access via Google or your UPI mobile number.</p>
                 </div>
+
+                {/* Google OAuth Button */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Your Name</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="e.g. Shreyas Patel"
-                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                    required
-                  />
+                  <button
+                    type="button"
+                    onClick={handleGoogleSignIn}
+                    disabled={googleLoading}
+                    className="w-full min-h-[46px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-3 cursor-pointer shadow-xs transition-all active:scale-[0.99] disabled:opacity-60"
+                  >
+                    <IconGoogle className="w-5 h-5 flex-shrink-0" />
+                    <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Mobile Number (UPI)</label>
-                  <div className="flex items-center">
-                    <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center font-bold text-xs text-slate-600 dark:text-slate-400">+91</span>
+
+                {/* Divider */}
+                <div className="relative flex items-center justify-center my-2">
+                  <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+                  <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 absolute">
+                    or continue with mobile OTP
+                  </span>
+                </div>
+
+                <form onSubmit={handleStep1} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Your Name</label>
                     <input
-                      type="tel"
-                      maxLength={10}
-                      value={phone}
-                      onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
-                      placeholder="98765 43210"
-                      className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="e.g. Shreyas Patel"
+                      className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                       required
                     />
                   </div>
-                </div>
-                {errorMsg && <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>}
-                <button
-                  type="submit"
-                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
-                >
-                  <span>Send OTP</span>
-                  <IconArrowRight className="w-4 h-4" />
-                </button>
-              </form>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Mobile Number (UPI)</label>
+                    <div className="flex items-center">
+                      <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center font-bold text-xs text-slate-600 dark:text-slate-400">+91</span>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={phone}
+                        onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="98765 43210"
+                        className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  {errorMsg && <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>}
+                  <button
+                    type="submit"
+                    className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                  >
+                    <span>Send OTP</span>
+                    <IconArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              </div>
             )}
 
             {step === 2 && (
@@ -2120,6 +2185,28 @@
       const [selectedPersona, setSelectedPersona] = useState('student');
       const [errorMsg, setErrorMsg] = useState('');
       const [isVerifying, setIsVerifying] = useState(false);
+      const [googleLoading, setGoogleLoading] = useState(false);
+
+      const handleGoogleSignIn = async () => {
+        if (!supabase) {
+          setErrorMsg('Supabase authentication is not configured.');
+          return;
+        }
+        setGoogleLoading(true);
+        setErrorMsg('');
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin
+            }
+          });
+          if (error) throw error;
+        } catch (err) {
+          setErrorMsg(err.message || 'Google sign-in failed. Please try again.');
+          setGoogleLoading(false);
+        }
+      };
 
       const handleStep1 = (e) => {
         e.preventDefault();
@@ -2197,7 +2284,7 @@
 
             {/* STEP 1: Name & Phone */}
             {step === 1 && (
-              <form onSubmit={handleStep1} className="space-y-4">
+              <div className="space-y-4">
                 <div>
                   <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-200/60 dark:border-blue-900/60">
                     <IconShield className="w-5 h-5" />
@@ -2206,66 +2293,89 @@
                     Sign Up for Kavach
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Enter your details to unlock Scam Shield, Cashflow, and Goals.
+                    Sign in with Google or enter mobile number to unlock Scam Shield, Cashflow, and Goals.
                   </p>
                 </div>
 
+                {/* Google Sign-in Option */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Shreyas Patel"
-                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    UPI Mobile Number
-                  </label>
-                  <div className="flex items-center">
-                    <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center text-xs font-bold text-slate-600 dark:text-slate-400">
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      maxLength={10}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                      placeholder="98765 43210"
-                      className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-0.5">
                   <button
                     type="button"
-                    onClick={handleQuickDemoFill}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline cursor-pointer"
+                    onClick={handleGoogleSignIn}
+                    disabled={googleLoading}
+                    className="w-full min-h-[48px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-3 cursor-pointer shadow-xs transition-all active:scale-[0.99] disabled:opacity-60"
                   >
-                    ⚡ Auto-Fill Demo Profile (Shreyas • 9876543210)
+                    <IconGoogle className="w-5 h-5 flex-shrink-0" />
+                    <span>{googleLoading ? 'Redirecting to Google...' : 'Continue with Google'}</span>
                   </button>
                 </div>
 
-                {errorMsg && (
-                  <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>
-                )}
+                {/* Divider */}
+                <div className="relative flex items-center justify-center my-2">
+                  <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+                  <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 absolute">
+                    or continue with mobile OTP
+                  </span>
+                </div>
 
-                <button
-                  type="submit"
-                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all"
-                >
-                  <span>Send 4-Digit Verification Code</span>
-                  <IconArrowRight className="w-4 h-4 text-amber-300" />
-                </button>
-              </form>
+                <form onSubmit={handleStep1} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Shreyas Patel"
+                      className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                      UPI Mobile Number
+                    </label>
+                    <div className="flex items-center">
+                      <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center text-xs font-bold text-slate-600 dark:text-slate-400">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="98765 43210"
+                        className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-0.5">
+                    <button
+                      type="button"
+                      onClick={handleQuickDemoFill}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline cursor-pointer"
+                    >
+                      ⚡ Auto-Fill Demo Profile (Shreyas • 9876543210)
+                    </button>
+                  </div>
+
+                  {errorMsg && (
+                    <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all"
+                  >
+                    <span>Send 4-Digit Verification Code</span>
+                    <IconArrowRight className="w-4 h-4 text-amber-300" />
+                  </button>
+                </form>
+              </div>
             )}
 
             {/* STEP 2: OTP Verification */}
@@ -2648,6 +2758,76 @@
         }
       });
 
+      // Process and persist authenticated Supabase User
+      const processSupabaseUser = async (authUser) => {
+        if (!authUser) return;
+        const email = authUser.email || '';
+        const name = authUser.user_metadata?.full_name || authUser.user_metadata?.name || (email ? email.split('@')[0] : 'Kavach User');
+        const phone = authUser.phone || authUser.user_metadata?.phone || '9876543210';
+        const avatar = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null;
+
+        // Defensive Sync: Ensure row exists in public.users to prevent foreign key violations on transactions/goals
+        if (supabase) {
+          try {
+            await supabase.from('users').upsert({
+              id: authUser.id,
+              email: email,
+              name: name,
+              monthly_income: 45000.0,
+              monthly_budget_cap: 20000.0
+            }, { onConflict: 'id' });
+          } catch (err) {
+            console.warn('Defensive sync to public.users warning:', err);
+          }
+        }
+
+        const kavachUser = {
+          id: authUser.id,
+          name: name,
+          email: email,
+          phone: phone,
+          avatar: avatar,
+          persona: 'student',
+          provider: authUser.app_metadata?.provider || 'google'
+        };
+
+        setUser(kavachUser);
+        try {
+          localStorage.setItem('kavach_user', JSON.stringify(kavachUser));
+        } catch(e) {}
+
+        const currentRoute = getRoute();
+        if (currentRoute === '/' || currentRoute === '/auth') {
+          navigate('/dashboard');
+        }
+      };
+
+      // Listen for Supabase OAuth redirect & auth state changes
+      useEffect(() => {
+        if (!supabase) return;
+
+        // Check if there is an active session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user) {
+            processSupabaseUser(session.user);
+          }
+        });
+
+        // Listen for OAuth callbacks (SIGNED_IN) or SIGNED_OUT
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'SIGNED_IN' && session?.user) {
+            await processSupabaseUser(session.user);
+          } else if (event === 'SIGNED_OUT') {
+            setUser(null);
+            try { localStorage.removeItem('kavach_user'); } catch(e) {}
+          }
+        });
+
+        return () => {
+          subscription?.unsubscribe();
+        };
+      }, []);
+
       // Navigation drawer state & hover timeout
       const [isNavOpen, setIsNavOpen] = useState(false);
       const navTimeoutRef = useRef(null);
@@ -2726,7 +2906,12 @@
         navigate('/dashboard');
       };
 
-      const handleSignOut = () => {
+      const handleSignOut = async () => {
+        if (supabase) {
+          try {
+            await supabase.auth.signOut();
+          } catch(e) {}
+        }
         setUser(null);
         try {
           localStorage.removeItem('kavach_user');
