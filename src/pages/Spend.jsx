@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Wallet,
@@ -6,6 +6,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   TrendingDown,
+  TrendingUp,
   Sparkles,
   Coffee,
   ShoppingBag,
@@ -14,449 +15,584 @@ import {
   ChevronRight,
   Info,
   Plus,
-  PiggyBank,
+  Trash2,
   X,
   CreditCard,
-  Layers
+  Layers,
+  Clock,
+  AlertCircle,
+  PiggyBank
 } from 'lucide-react';
 
 export default function SpendPage() {
-  const { lang } = useOutletContext() || { lang: 'en' };
+  const { user } = useOutletContext() || { user: null };
 
-  // Transactions list state (allows adding new ones)
-  const [transactions, setTransactions] = useState([
+  const defaultTransactions = [
     {
       id: 1,
-      merchant: "Swiggy Food Delivery",
-      category: "Food & Dining",
-      date: "Sep 16, 2026",
-      amount: 249,
-      type: "expense",
-      tag: "UPI Auto-Split"
+      title: "UI Design Client Advance",
+      category: "Freelance Gig",
+      date: "2026-09-18",
+      dateLabel: "Today, 18 Sep",
+      amount: 6500,
+      type: "income",
+      mode: "UPI (Razorpay)"
     },
     {
       id: 2,
-      merchant: "Zepto Quick Commerce",
-      category: "Groceries",
-      date: "Sep 15, 2026",
-      amount: 185,
+      title: "Zepto Quick Delivery",
+      category: "Food & Dining",
+      date: "2026-09-18",
+      dateLabel: "Today, 18 Sep",
+      amount: 215,
       type: "expense",
-      tag: "10-Min Delivery"
+      mode: "UPI (PhonePe)"
     },
     {
       id: 3,
-      merchant: "Emergency Savings Pot",
-      category: "Savings",
-      date: "Sep 15, 2026",
-      amount: 500,
-      type: "saving",
-      tag: "Auto-Saved"
+      title: "Chai & Samosa Break",
+      category: "Food & Dining",
+      date: "2026-09-18",
+      dateLabel: "Today, 18 Sep",
+      amount: 45,
+      type: "expense",
+      mode: "UPI (GPay)"
     },
     {
       id: 4,
-      merchant: "Metro Transit Smart Card",
-      category: "Commute",
-      date: "Sep 14, 2026",
-      amount: 100,
-      type: "expense",
-      tag: "NCMC Recharge"
+      title: "Monthly College Stipend",
+      category: "Stipend",
+      date: "2026-09-17",
+      dateLabel: "Yesterday, 17 Sep",
+      amount: 12000,
+      type: "income",
+      mode: "Bank NEFT"
     },
     {
       id: 5,
-      merchant: "Chai Point UPI Tap",
-      category: "Snacks",
-      date: "Sep 13, 2026",
-      amount: 40,
+      title: "Swiggy Dinner with Roommates",
+      category: "Food & Dining",
+      date: "2026-09-17",
+      dateLabel: "Yesterday, 17 Sep",
+      amount: 380,
       type: "expense",
-      tag: "Quick Tap"
+      mode: "UPI Auto-Split"
+    },
+    {
+      id: 6,
+      title: "Metro Smart Card Top-up",
+      category: "Commute & Travel",
+      date: "2026-09-17",
+      dateLabel: "Yesterday, 17 Sep",
+      amount: 200,
+      type: "expense",
+      mode: "NCMC Card"
+    },
+    {
+      id: 7,
+      title: "Cashback Reward",
+      category: "Cashback & Refunds",
+      date: "2026-09-16",
+      dateLabel: "16 Sep 2026",
+      amount: 75,
+      type: "income",
+      mode: "UPI (Cred)"
+    },
+    {
+      id: 8,
+      title: "Amazon Coding Cable & USB-C",
+      category: "Shopping & Tech",
+      date: "2026-09-16",
+      dateLabel: "16 Sep 2026",
+      amount: 499,
+      type: "expense",
+      mode: "UPI (AmazonPay)"
     }
-  ]);
+  ];
 
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'expense' | 'saving'
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  
-  // New transaction form state
-  const [entryType, setEntryType] = useState('expense'); // 'expense' | 'saving'
-  const [merchant, setMerchant] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Food & Dining');
+  const [transactions, setTransactions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kavach_transactions');
+      return saved ? JSON.parse(saved) : defaultTransactions;
+    } catch (e) {
+      return defaultTransactions;
+    }
+  });
 
-  const handleAddEntry = (e) => {
+  useEffect(() => {
+    try {
+      localStorage.setItem('kavach_transactions', JSON.stringify(transactions));
+    } catch (e) {}
+  }, [transactions]);
+
+  const [filter, setFilter] = useState('all'); // 'all' | 'expense' | 'income'
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Add Transaction Form State
+  const [formType, setFormType] = useState('expense'); // 'expense' | 'income'
+  const [formTitle, setFormTitle] = useState('');
+  const [formAmount, setFormAmount] = useState('');
+  const [formCategory, setFormCategory] = useState('Food & Dining');
+  const [formDate, setFormDate] = useState('2026-09-18');
+  const [formMode, setFormMode] = useState('UPI');
+
+  const expenseCategories = [
+    "Food & Dining",
+    "Commute & Travel",
+    "Shopping & Tech",
+    "Bills & Utilities",
+    "Education",
+    "Social & Entertainment",
+    "Other"
+  ];
+
+  const incomeCategories = [
+    "Stipend",
+    "Freelance Gig",
+    "Salary",
+    "Pocket Money",
+    "Cashback & Refunds",
+    "Investment Return",
+    "Other Income"
+  ];
+
+  const handleAddTransaction = (e) => {
     e.preventDefault();
-    if (!merchant.trim() || !amount) return;
+    if (!formTitle.trim() || !formAmount || Number(formAmount) <= 0) return;
+
+    const todayStr = "2026-09-18";
+    let label = formDate;
+    if (formDate === todayStr) {
+      label = "Today, 18 Sep";
+    } else if (formDate === "2026-09-17") {
+      label = "Yesterday, 17 Sep";
+    } else {
+      label = new Date(formDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
 
     const newTx = {
       id: Date.now(),
-      merchant: merchant.trim(),
-      category: entryType === 'saving' ? 'Savings' : category,
-      date: 'Today, ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-      amount: Number(amount),
-      type: entryType,
-      tag: entryType === 'saving' ? 'Saved Pot' : 'Manual Log'
+      title: formTitle.trim(),
+      category: formCategory,
+      date: formDate,
+      dateLabel: label,
+      amount: Number(formAmount),
+      type: formType,
+      mode: formMode
     };
 
     setTransactions([newTx, ...transactions]);
-    setIsAddOpen(false);
-    setMerchant('');
-    setAmount('');
+    setIsModalOpen(false);
+    setFormTitle('');
+    setFormAmount('');
   };
 
-  const filteredTxs = transactions.filter((tx) => {
-    if (activeFilter === 'all') return true;
-    return tx.type === activeFilter;
+  const handleDelete = (id) => {
+    setTransactions(transactions.filter((t) => t.id !== id));
+  };
+
+  // Calculations
+  const totalIncome = transactions
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalExpense = transactions
+    .filter((t) => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const netBalance = totalIncome - totalExpense;
+
+  // Today's Expense
+  const todayExpense = transactions
+    .filter((t) => t.type === 'expense' && (t.date === '2026-09-18' || t.dateLabel?.startsWith('Today')))
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const dailyCap = 500;
+  const isOverDailyCap = todayExpense > dailyCap;
+
+  // Filtered List
+  const filteredList = transactions.filter((t) => {
+    if (filter === 'all') return true;
+    return t.type === filter;
   });
 
-  // Calculate totals
-  const totalExpenses = transactions
-    .filter((tx) => tx.type === 'expense')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const totalSaved = transactions
-    .filter((tx) => tx.type === 'saving')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const STIPEND_INFLOW = 12000;
-  const cycleBalance = STIPEND_INFLOW - totalExpenses;
-
-  const t = {
-    en: {
-      badge: "Irregular Income Copilot",
-      headline: "Track Your Cashflow & Savings",
-      subheadline: "Log transactions and save funds anchored to your stipend cycles rather than rigid calendar months.",
-      addBtn: "Log Payment / Saving",
-      cyclesTitle: "Payout Cycles",
-      cyclesSubtitle: "Smart grouping anchored to when your money actually arrives.",
-      currentCycleLabel: "ACTIVE CYCLE",
-      currentCycleName: "Design Internship Stipend",
-      currentCycleInflow: "₹12,000",
-      creditedOn: "Credited Sep 10 via RazorpayX",
-      cycleLeft: `₹${cycleBalance.toLocaleString()} remaining`,
-      safeSpend: "Safe Daily Burn: ₹475/day",
-      daysEstimated: "24 days until next payout",
-      recentHeading: "Transactions & Savings History",
-      filterAll: "All",
-      filterExpenses: "Expenses",
-      filterSavings: "Savings Deposits",
-      modalTitle: "Log a Payment or Saving",
-      modalSub: "Record where your money went or deposit to your savings pot.",
-      typeExpense: "💸 Expense (Spent)",
-      typeSaving: "💰 Saving (Set Aside)",
-      titleLabel: "Merchant / Destination",
-      titlePlaceholder: "e.g. Swiggy, Metro, Laptop Pot",
-      amountLabel: "Amount (₹)",
-      amountPlaceholder: "250",
-      categoryLabel: "Category",
-      submitBtn: "Save Entry"
-    },
-    hi: {
-      badge: "अनियमित आय ट्रैकर",
-      headline: "खर्च व बचत का सटीक हिसाब",
-      subheadline: "महीने की 1 तारीख के बजाय अपने स्टाइपेंड आने के दिन से खर्च और बचत को रिकॉर्ड करें।",
-      addBtn: "+ नया खर्च / बचत जोड़ें",
-      cyclesTitle: "पेआउट साइकल्स (Payout Cycles)",
-      cyclesSubtitle: "जब स्टाइपेंड आता है तब से वास्तविक बजट का हिसाब।",
-      currentCycleLabel: "सक्रिय चक्र",
-      currentCycleName: "इंटर्नशिप स्टाइपेंड साइकिल",
-      currentCycleInflow: "₹12,000",
-      creditedOn: "10 सितंबर को प्राप्त (RazorpayX)",
-      cycleLeft: `₹${cycleBalance.toLocaleString()} शेष`,
-      safeSpend: "सुरक्षित दैनिक खर्च: ₹475/दिन",
-      daysEstimated: "अगले स्टाइपेंड में 24 दिन शेष",
-      recentHeading: "लेनदेन और बचत का इतिहास",
-      filterAll: "सभी",
-      filterExpenses: "खर्च",
-      filterSavings: "बचत डिपॉजिट",
-      modalTitle: "खर्च या बचत जोड़ें",
-      modalSub: "अपने खर्च को रिकॉर्ड करें या बचत पॉट में पैसे जोड़ें।",
-      typeExpense: "💸 खर्च (Spent)",
-      typeSaving: "💰 बचत (Set Aside)",
-      titleLabel: "प्राप्तकर्ता / विवरण",
-      titlePlaceholder: "उदा. स्विगी, मेट्रो कार्ड, लैपटॉप पॉट",
-      amountLabel: "राशि (₹)",
-      amountPlaceholder: "250",
-      categoryLabel: "कैटेगरी",
-      submitBtn: "रिकॉर्ड सेव करें"
-    }
-  };
-
-  const text = t[lang] || t.en;
+  // Group by date
+  const groupedTransactions = filteredList.reduce((acc, curr) => {
+    const key = curr.dateLabel || curr.date;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(curr);
+    return acc;
+  }, {});
 
   return (
     <div className="flex flex-col animate-fade-in text-left space-y-6">
       
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-stone-200">
+      {/* 1. Header & Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 border border-blue-300 text-blue-900 text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-blue-700" />
-            <span>{text.badge}</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-2">
+            <Wallet className="w-3.5 h-3.5" />
+            <span>Income & Daily Expense Tracker</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
-            {text.headline}
+          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight leading-tight">
+            Daily Cashflow
           </h1>
-          <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-            {text.subheadline}
+          <p className="text-xs sm:text-sm text-stone-500 font-medium">
+            Log your irregular income, monitor daily chai & food expenses, and stay under daily caps.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => setIsAddOpen(true)}
-          className="min-h-[48px] px-5 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-[0.98] self-start sm:self-auto shrink-0"
+          onClick={() => {
+            setFormType('expense');
+            setFormCategory('Food & Dining');
+            setIsModalOpen(true);
+          }}
+          className="min-h-[46px] px-5 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4 text-amber-400" />
-          <span>{text.addBtn}</span>
+          <span>Add Income / Expense</span>
         </button>
       </div>
 
-      {/* Payout Cycles Card */}
-      <section>
-        <div className="mb-3">
-          <h2 className="text-xl font-extrabold text-stone-900">{text.cyclesTitle}</h2>
-          <p className="text-xs sm:text-sm text-stone-500 font-medium">{text.cyclesSubtitle}</p>
+      {/* 2. Top Metrics Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        
+        {/* Net Available Balance */}
+        <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
+          <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Net Balance</span>
+          <span className="text-xl sm:text-2xl font-black text-stone-900 block mt-1">
+            ₹{netBalance.toLocaleString()}
+          </span>
+          <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+            <TrendingUp className="w-3 h-3" /> Inflow - Outflow
+          </span>
         </div>
 
-        <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-stone-300 shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
-            <div>
-              <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black tracking-wider uppercase mb-1">
-                {text.currentCycleLabel}
-              </span>
-              <h3 className="text-xl font-bold text-stone-900">{text.currentCycleName}</h3>
-              <p className="text-xs text-stone-500 font-medium mt-0.5">{text.creditedOn}</p>
-            </div>
-            <div className="sm:text-right">
-              <span className="text-xs text-stone-400 font-bold uppercase tracking-wider block">Inflow</span>
-              <span className="text-2xl font-black text-emerald-700">+{text.currentCycleInflow}</span>
-            </div>
+        {/* Today's Spent */}
+        <div className={`p-4 bg-white rounded-3xl border-2 shadow-sm ${isOverDailyCap ? 'border-rose-300' : 'border-stone-200'}`}>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Today's Spend</span>
+            <span className={`w-2 h-2 rounded-full ${isOverDailyCap ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
           </div>
+          <span className={`text-xl sm:text-2xl font-black block mt-1 ${isOverDailyCap ? 'text-rose-700' : 'text-stone-900'}`}>
+            ₹{todayExpense.toLocaleString()}
+          </span>
+          <span className={`text-[10px] font-semibold mt-1 block ${isOverDailyCap ? 'text-rose-600' : 'text-stone-500'}`}>
+            {isOverDailyCap ? `Exceeded ₹${dailyCap} cap` : `₹${dailyCap - todayExpense} under daily cap`}
+          </span>
+        </div>
 
-          <div className="my-5 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-            <div className="bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
-              <span className="text-xs text-stone-500 font-medium block mb-0.5">Cycle Balance</span>
-              <span className="text-lg sm:text-xl font-black text-stone-900">{text.cycleLeft}</span>
-            </div>
-            <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200">
-              <span className="text-xs text-emerald-700 font-medium block mb-0.5">Total Saved Pot</span>
-              <span className="text-lg sm:text-xl font-black text-emerald-800">₹{totalSaved.toLocaleString()}</span>
-            </div>
-            <div className="col-span-2 sm:col-span-1 bg-amber-50 p-3.5 rounded-2xl border border-amber-200">
-              <span className="text-xs text-amber-800 font-medium block mb-0.5">{text.safeSpend}</span>
-              <span className="text-xs text-amber-700 font-bold block">{text.daysEstimated}</span>
-            </div>
+        {/* Total Income */}
+        <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
+          <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Total Inflow</span>
+          <span className="text-xl sm:text-2xl font-black text-emerald-700 block mt-1">
+            +₹{totalIncome.toLocaleString()}
+          </span>
+          <span className="text-[10px] text-stone-500 font-medium mt-1 block">Stipends, gigs & refunds</span>
+        </div>
+
+        {/* Total Expenses */}
+        <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
+          <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Total Spent</span>
+          <span className="text-xl sm:text-2xl font-black text-rose-700 block mt-1">
+            -₹{totalExpense.toLocaleString()}
+          </span>
+          <span className="text-[10px] text-stone-500 font-medium mt-1 block">Across all categories</span>
+        </div>
+
+      </div>
+
+      {/* 3. Daily Budget Alert Bar */}
+      <div className={`p-4 rounded-3xl border-2 flex items-center justify-between gap-3 ${
+        isOverDailyCap ? 'bg-rose-50 border-rose-200 text-rose-900' : 'bg-amber-50 border-amber-200 text-stone-900'
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+            isOverDailyCap ? 'bg-rose-200 text-rose-800' : 'bg-amber-200 text-amber-900'
+          }`}>
+            <Clock className="w-5 h-5" />
           </div>
-
           <div>
-            <div className="flex justify-between text-xs text-stone-600 font-semibold mb-1.5">
-              <span>Spent: ₹{totalExpenses.toLocaleString()} of ₹{STIPEND_INFLOW.toLocaleString()}</span>
-              <span className="text-emerald-700 font-bold">
-                {Math.round(((STIPEND_INFLOW - totalExpenses) / STIPEND_INFLOW) * 100)}% Available
-              </span>
-            </div>
-            <div className="w-full h-3 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (totalExpenses / STIPEND_INFLOW) * 100)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Transactions & Savings History */}
-      <section>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
-          <div>
-            <h2 className="text-lg font-bold text-stone-900">{text.recentHeading}</h2>
-            <span className="text-xs text-stone-500 font-medium">{filteredTxs.length} records in this cycle</span>
-          </div>
-
-          {/* Filter Pills */}
-          <div className="flex items-center bg-stone-100 p-1 rounded-full border border-stone-300 text-xs font-bold self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setActiveFilter('all')}
-              className={`px-3 py-1.5 rounded-full transition-all ${
-                activeFilter === 'all' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600'
-              }`}
-            >
-              {text.filterAll}
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('expense')}
-              className={`px-3 py-1.5 rounded-full transition-all ${
-                activeFilter === 'expense' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600'
-              }`}
-            >
-              {text.filterExpenses}
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('saving')}
-              className={`px-3 py-1.5 rounded-full transition-all ${
-                activeFilter === 'saving' ? 'bg-emerald-700 text-white shadow-sm' : 'text-stone-600'
-              }`}
-            >
-              {text.filterSavings}
-            </button>
+            <h3 className="text-xs sm:text-sm font-black">
+              {isOverDailyCap ? '⚠️ Today’s Expense Cap Exceeded!' : '🎯 Daily Expense Cap: ₹500/day'}
+            </h3>
+            <p className="text-[11px] text-stone-600 font-medium">
+              {isOverDailyCap
+                ? `You have spent ₹${todayExpense} today (₹${todayExpense - dailyCap} over target). Cool down on food & cab taps!`
+                : `You spent ₹${todayExpense} today. ₹${dailyCap - todayExpense} left before hitting your daily limit.`}
+            </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border-2 border-stone-200 shadow-sm overflow-hidden divide-y divide-stone-100">
-          {filteredTxs.map((tx) => {
-            const isSaving = tx.type === 'saving';
+        <button
+          type="button"
+          onClick={() => {
+            setFormType('income');
+            setFormCategory('Stipend');
+            setIsModalOpen(true);
+          }}
+          className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-white border border-stone-300 text-stone-900 text-xs font-bold hover:bg-stone-50 cursor-pointer shrink-0 shadow-sm"
+        >
+          + Add Income
+        </button>
+      </div>
+
+      {/* 4. Filter Switcher */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-2xl border border-stone-200">
+          <button
+            type="button"
+            onClick={() => setFilter('all')}
+            className={`min-h-[36px] px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+              filter === 'all' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            All Activity ({transactions.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter('expense')}
+            className={`min-h-[36px] px-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+              filter === 'expense' ? 'bg-white text-rose-700 shadow-sm' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            Expenses Only
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter('income')}
+            className={`min-h-[36px] px-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+              filter === 'income' ? 'bg-white text-emerald-700 shadow-sm' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            Incomes Only
+          </button>
+        </div>
+
+        <span className="text-xs text-stone-400 font-semibold hidden sm:inline-block">
+          Grouped by Day
+        </span>
+      </div>
+
+      {/* 5. Grouped Transactions by Day */}
+      <div className="space-y-6">
+        {Object.keys(groupedTransactions).length === 0 ? (
+          <div className="bg-white rounded-3xl p-8 border-2 border-stone-200 text-center text-stone-500">
+            <p className="text-sm font-bold text-stone-800 mb-1">No transactions found</p>
+            <p className="text-xs">Click "+ Add Income / Expense" above to record your cashflow.</p>
+          </div>
+        ) : (
+          Object.entries(groupedTransactions).map(([dateTitle, list]) => {
+            const dayExpense = list.filter((x) => x.type === 'expense').reduce((s, x) => s + x.amount, 0);
+            const dayIncome = list.filter((x) => x.type === 'income').reduce((s, x) => s + x.amount, 0);
+
             return (
-              <div
-                key={tx.id}
-                className="p-4 sm:p-4.5 flex items-center justify-between gap-3 hover:bg-stone-50/70 transition-colors"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div
-                    className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
-                      isSaving
-                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                        : 'bg-stone-100 text-stone-700 border-stone-200'
-                    }`}
-                  >
-                    {isSaving ? <PiggyBank className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
+              <div key={dateTitle} className="bg-white rounded-3xl border-2 border-stone-200 shadow-sm overflow-hidden">
+                {/* Date Header with Daily Subtotal Summary */}
+                <div className="px-5 py-3.5 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-stone-500" />
+                    <span className="text-xs font-black text-stone-900 uppercase tracking-wider">{dateTitle}</span>
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="text-base font-bold text-stone-900 truncate leading-snug">
-                      {tx.merchant}
-                    </h4>
-                    <div className="flex items-center gap-2 text-xs text-stone-500 mt-0.5">
-                      <span>{tx.date}</span>
-                      <span>•</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${
-                          isSaving
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-stone-100 text-stone-600'
-                        }`}
-                      >
-                        {tx.tag}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-3 text-xs font-bold">
+                    {dayExpense > 0 && (
+                      <span className="text-rose-700">Spent: ₹{dayExpense.toLocaleString()}</span>
+                    )}
+                    {dayIncome > 0 && (
+                      <span className="text-emerald-700">Inflow: +₹{dayIncome.toLocaleString()}</span>
+                    )}
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <span
-                    className={`text-base sm:text-lg font-black block ${
-                      isSaving ? 'text-emerald-700' : 'text-stone-900'
-                    }`}
-                  >
-                    {isSaving ? `+₹${tx.amount}` : `-₹${tx.amount}`}
-                  </span>
-                  <span className="text-[11px] text-stone-400 font-medium">
-                    {isSaving ? 'Set Aside' : 'UPI Debited'}
-                  </span>
+                {/* List of items on this day */}
+                <div className="divide-y divide-stone-100">
+                  {list.map((item) => {
+                    const isIncome = item.type === 'income';
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-4 sm:p-5 flex items-center justify-between hover:bg-stone-50/60 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                            isIncome ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                          }`}>
+                            {isIncome ? (
+                              <ArrowDownLeft className="w-5 h-5 stroke-[2.4]" />
+                            ) : (
+                              <ArrowUpRight className="w-5 h-5 stroke-[2.4]" />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-stone-900 leading-snug">{item.title}</h4>
+                            <div className="flex items-center gap-2 text-[11px] text-stone-500 font-medium mt-0.5">
+                              <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-700 font-semibold">{item.category}</span>
+                              <span>•</span>
+                              <span>{item.mode}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className={`text-base font-black tracking-tight ${
+                            isIncome ? 'text-emerald-700' : 'text-stone-900'
+                          }`}>
+                            {isIncome ? `+₹${item.amount.toLocaleString()}` : `-₹${item.amount.toLocaleString()}`}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item.id)}
+                            title="Delete transaction"
+                            className="w-8 h-8 rounded-lg text-stone-300 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
-          })}
-        </div>
-      </section>
+          })
+        )}
+      </div>
 
-      {/* Log Entry Modal */}
-      {isAddOpen && (
+      {/* 6. Add Income / Expense Modal */}
+      {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
           <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-stone-300 shadow-2xl p-6 sm:p-7 text-stone-900">
+            
             <button
               type="button"
-              onClick={() => setIsAddOpen(false)}
+              onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="mb-5 text-left">
-              <h2 className="text-xl font-black text-stone-900">{text.modalTitle}</h2>
-              <p className="text-xs text-stone-600 mt-1">{text.modalSub}</p>
+            <h3 className="text-xl font-black text-stone-900 mb-1">Add Cashflow Entry</h3>
+            <p className="text-xs text-stone-500 mb-5">Record new income or log a daily payment.</p>
+
+            {/* Type Toggle */}
+            <div className="grid grid-cols-2 gap-2 p-1 bg-stone-100 rounded-2xl mb-4 border border-stone-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormType('expense');
+                  setFormCategory('Food & Dining');
+                }}
+                className={`min-h-[42px] rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  formType === 'expense' ? 'bg-white text-rose-700 shadow-sm font-black' : 'text-stone-600'
+                }`}
+              >
+                💸 Expense (-)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormType('income');
+                  setFormCategory('Stipend');
+                }}
+                className={`min-h-[42px] rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  formType === 'income' ? 'bg-white text-emerald-700 shadow-sm font-black' : 'text-stone-600'
+                }`}
+              >
+                💰 Income (+)
+              </button>
             </div>
 
-            <form onSubmit={handleAddEntry} className="space-y-4 text-left">
-              {/* Type Switcher */}
-              <div className="grid grid-cols-2 gap-2 p-1 bg-stone-100 rounded-2xl border border-stone-200">
-                <button
-                  type="button"
-                  onClick={() => setEntryType('expense')}
-                  className={`min-h-[44px] rounded-xl text-xs font-bold transition-all ${
-                    entryType === 'expense'
-                      ? 'bg-white text-stone-900 shadow-sm'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  {text.typeExpense}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEntryType('saving')}
-                  className={`min-h-[44px] rounded-xl text-xs font-bold transition-all ${
-                    entryType === 'saving'
-                      ? 'bg-emerald-700 text-white shadow-sm'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  {text.typeSaving}
-                </button>
+            <form onSubmit={handleAddTransaction} className="space-y-4 text-left">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  Amount (₹)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-stone-500">₹</span>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={formAmount}
+                    onChange={(e) => setFormAmount(e.target.value)}
+                    placeholder="e.g. 350"
+                    className="w-full min-h-[48px] pl-8 pr-4 bg-stone-50 border border-stone-300 rounded-xl text-base font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
-                  {text.titleLabel}
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  {formType === 'income' ? 'Source / Description' : 'Merchant / Expense Description'}
                 </label>
                 <input
                   type="text"
-                  value={merchant}
-                  onChange={(e) => setMerchant(e.target.value)}
-                  placeholder={text.titlePlaceholder}
-                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm sm:text-base text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
                   required
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder={formType === 'income' ? 'e.g. Freelance project payment' : 'e.g. Zepto groceries or Chai tap'}
+                  className="w-full min-h-[48px] px-4 bg-stone-50 border border-stone-300 rounded-xl text-sm font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
-                  {text.amountLabel}
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  Category
                 </label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder={text.amountPlaceholder}
-                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm sm:text-base text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
-                  required
-                />
+                <select
+                  value={formCategory}
+                  onChange={(e) => setFormCategory(e.target.value)}
+                  className="w-full min-h-[48px] px-3 bg-stone-50 border border-stone-300 rounded-xl text-sm font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                >
+                  {(formType === 'income' ? incomeCategories : expenseCategories).map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
 
-              {entryType === 'expense' && (
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
-                    {text.categoryLabel}
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="w-full min-h-[48px] px-3 bg-stone-50 border border-stone-300 rounded-xl text-xs font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    Payment Mode
                   </label>
                   <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm sm:text-base text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                    value={formMode}
+                    onChange={(e) => setFormMode(e.target.value)}
+                    className="w-full min-h-[48px] px-3 bg-stone-50 border border-stone-300 rounded-xl text-xs font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
                   >
-                    <option value="Food & Dining">Food & Dining</option>
-                    <option value="Groceries">Groceries & Quick Commerce</option>
-                    <option value="Commute">Commute & Transit</option>
-                    <option value="Subscriptions">App Subscriptions</option>
-                    <option value="Shopping">Shopping & Tech</option>
+                    <option value="UPI">UPI (GPay/PhonePe)</option>
+                    <option value="Bank Transfer">Bank NEFT/IMPS</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Debit/Credit Card</option>
                   </select>
                 </div>
-              )}
+              </div>
 
               <button
                 type="submit"
-                className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md mt-4"
+                className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md mt-4 active:scale-98"
               >
-                <span>{text.submitBtn}</span>
+                <span>{formType === 'income' ? 'Record Income (+)' : 'Log Expense (-)'}</span>
+                <CheckCircle2 className="w-4 h-4 text-amber-400" />
               </button>
             </form>
+
           </div>
         </div>
       )}

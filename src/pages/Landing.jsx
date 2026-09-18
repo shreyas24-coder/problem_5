@@ -16,7 +16,8 @@ import {
   BookOpen,
   Newspaper,
   Lightbulb,
-  X
+  X,
+  Bot
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -92,9 +93,9 @@ export default function LandingPage() {
       spendTitle: "SPEND",
       spendSubtitle: "Tracks your irregular income and stipends",
       spendDesc: "Forget standard 30-day calendar salaries. Budget your money from the exact day your stipend or freelance gig lands.",
-      saveTitle: "SAVE",
-      saveSubtitle: "Finds forgotten ₹99 AutoPay mandates",
-      saveDesc: "Audit passive subscription leaks from expired trials and turn them into goals like your next laptop.",
+      saveTitle: "AI COPILOT",
+      saveSubtitle: "1-on-1 FinTech Money Assistant",
+      saveDesc: "Ask personalized questions on saving stipends, detecting UPI scams, and planning purchases with instant AI intelligence.",
       eduHeading: "Financial Smarts & Security News",
       eduSub: "Essential financial literacy, RBI payment alerts, and micro-investing rules curated for young earners.",
       footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
@@ -242,12 +243,12 @@ export default function LandingPage() {
 
           <button
             type="button"
-            onClick={() => handleAction('/save')}
+            onClick={() => handleAction('/chat')}
             className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Coins className="w-6 h-6 stroke-[2.2]" />
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Bot className="w-6 h-6 stroke-[2.2]" />
               </div>
               <span className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider mb-2">
                 {text.saveTitle}
@@ -256,7 +257,7 @@ export default function LandingPage() {
               <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.saveDesc}</p>
             </div>
             <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
-              <span>{user ? 'Audit AutoPay Mandates' : 'Sign Up to Audit Leaks'}</span>
+              <span>{user ? 'Open AI Copilot' : 'Sign Up for AI Copilot'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>

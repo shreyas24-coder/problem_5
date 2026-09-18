@@ -59,8 +59,9 @@ export default function GoalsPage() {
   const [newSaved, setNewSaved] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
   const [newEmoji, setNewEmoji] = useState('🎯');
+  const [customAmounts, setCustomAmounts] = useState({});
 
-  // Quick Deposit function
+  // Variable & Quick Deposit function
   const handleDeposit = (id, amount) => {
     setGoals((prev) =>
       prev.map((g) => {
@@ -283,35 +284,55 @@ export default function GoalsPage() {
                 </div>
               </div>
 
-              {/* Quick Contribution Buttons */}
-              <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs text-stone-500 font-medium">Quick Deposit:</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleDeposit(goal.id, 500)}
-                    disabled={isDone}
-                    className="min-h-[38px] px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-colors cursor-pointer disabled:opacity-40"
-                  >
-                    + ₹500
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeposit(goal.id, 1000)}
-                    disabled={isDone}
-                    className="min-h-[38px] px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-colors cursor-pointer disabled:opacity-40"
-                  >
-                    + ₹1,000
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeposit(goal.id, 2500)}
-                    disabled={isDone}
-                    className="min-h-[38px] px-3.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-40 shadow-sm"
-                  >
-                    + ₹2,500
-                  </button>
+              {/* Variable Custom Amount & Quick Contribution */}
+              <div className="mt-4 pt-3.5 border-t border-stone-100 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-stone-700">Quick Deposit:</span>
+                  <div className="flex items-center gap-1.5">
+                    {[250, 500, 1000].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => handleDeposit(goal.id, amt)}
+                        disabled={isDone}
+                        className="min-h-[34px] px-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-colors cursor-pointer disabled:opacity-40 active:scale-95"
+                      >
+                        +₹{amt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Variable / Any Money Custom Input */}
+                {!isDone && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-500">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Enter any variable amount..."
+                        value={customAmounts[goal.id] || ''}
+                        onChange={(e) => setCustomAmounts({ ...customAmounts, [goal.id]: e.target.value })}
+                        className="w-full min-h-[42px] pl-7 pr-3 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const val = Number(customAmounts[goal.id]);
+                        if (val && val > 0) {
+                          handleDeposit(goal.id, val);
+                          setCustomAmounts({ ...customAmounts, [goal.id]: '' });
+                        }
+                      }}
+                      disabled={!customAmounts[goal.id] || Number(customAmounts[goal.id]) <= 0}
+                      className="min-h-[42px] px-4 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none shadow-sm active:scale-95"
+                    >
+                      Deposit
+                    </button>
+                  </div>
+                )}
               </div>
 
             </div>

@@ -253,6 +253,53 @@
       </svg>
     );
 
+    const IconBot = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 8V4H8"/>
+        <rect width="16" height="12" x="4" y="8" rx="2"/>
+        <path d="M2 14h2"/>
+        <path d="M20 14h2"/>
+        <path d="M15 13v2"/>
+        <path d="M9 13v2"/>
+      </svg>
+    );
+
+    const IconLogOut = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    );
+
+    const IconSend = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    );
+
+    const IconArrowDownLeft = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="17" y1="7" x2="7" y2="17"/>
+        <polyline points="17 17 7 17 7 7"/>
+      </svg>
+    );
+
+    const IconArrowUpRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="7" y1="17" x2="17" y2="7"/>
+        <polyline points="7 7 17 7 17 17"/>
+      </svg>
+    );
+
+    const IconClock = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    );
+
     // ==========================================
     // 1. SIGN UP MODAL
     // ==========================================
@@ -483,12 +530,13 @@
     // ==========================================
     // 3. GOALS PAGE
     // ==========================================
-    function GoalsPage({ lang }) {
+    function GoalsPage() {
       const [goals, setGoals] = useState([
         { id: 1, title: "M2 Coding Laptop", target: 65000, saved: 38400, deadline: "15 Dec 2026", days: 88, icon: "💻" },
         { id: 2, title: "Goa College Roadtrip", target: 12000, saved: 8500, deadline: "10 Nov 2026", days: 53, icon: "🏖️" },
         { id: 3, title: "Sony WH-1000XM5 Headphones", target: 18000, saved: 6200, deadline: "28 Feb 2027", days: 163, icon: "🎧" }
       ]);
+      const [customAmounts, setCustomAmounts] = useState({});
       const [isModalOpen, setIsModalOpen] = useState(false);
       const [title, setTitle] = useState('');
       const [target, setTarget] = useState('');
@@ -497,6 +545,13 @@
 
       const handleDeposit = (id, amt) => {
         setGoals(goals.map(g => g.id === id ? { ...g, saved: Math.min(g.target, g.saved + amt) } : g));
+      };
+
+      const handleCustomDeposit = (id) => {
+        const amt = Number(customAmounts[id]);
+        if (!amt || amt <= 0) return;
+        handleDeposit(id, amt);
+        setCustomAmounts(prev => ({ ...prev, [id]: '' }));
       };
 
       const handleAdd = (e) => {
@@ -565,11 +620,34 @@
                     </div>
                   </div>
 
-                  <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between gap-2">
-                    <span className="text-xs text-stone-500 font-medium">Quick Deposit:</span>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => handleDeposit(g.id, 500)} disabled={isDone} className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-40">+ ₹500</button>
-                      <button onClick={() => handleDeposit(g.id, 1000)} disabled={isDone} className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-40">+ ₹1,000</button>
+                  <div className="mt-3 pt-2.5 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs text-stone-500 font-medium mr-1">Quick Add:</span>
+                      <button onClick={() => handleDeposit(g.id, 250)} disabled={isDone} className="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-40 transition-colors">+ ₹250</button>
+                      <button onClick={() => handleDeposit(g.id, 500)} disabled={isDone} className="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-40 transition-colors">+ ₹500</button>
+                      <button onClick={() => handleDeposit(g.id, 1000)} disabled={isDone} className="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-40 transition-colors">+ ₹1,000</button>
+                    </div>
+
+                    {/* Custom Variable Deposit */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                      <div className="relative flex-1 sm:w-32">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-stone-500 font-bold">₹</span>
+                        <input
+                          type="number"
+                          placeholder="Custom ₹"
+                          value={customAmounts[g.id] || ''}
+                          onChange={(e) => setCustomAmounts({ ...customAmounts, [g.id]: e.target.value })}
+                          disabled={isDone}
+                          className="w-full pl-6 pr-2 py-1.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold outline-none focus:bg-white focus:border-stone-900 disabled:opacity-40"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleCustomDeposit(g.id)}
+                        disabled={isDone || !customAmounts[g.id]}
+                        className="px-3 py-1.5 bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-40 rounded-xl text-xs font-bold cursor-pointer transition-all shadow-sm shrink-0"
+                      >
+                        Deposit
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -758,116 +836,553 @@
     }
 
     // ==========================================
-    // 5. SPEND / TRANSACTIONS PAGE (With Logger)
+    // 5. SPEND / CASHFLOW & DAILY TRACKER PAGE
     // ==========================================
-    function SpendPage({ lang }) {
-      const [transactions, setTransactions] = useState([
-        { id: 1, merchant: "Swiggy Food Delivery", date: "Sep 16, 2026", amount: 249, type: 'expense', tag: "UPI Split" },
-        { id: 2, merchant: "Zepto Quick Commerce", date: "Sep 15, 2026", amount: 185, type: 'expense', tag: "10-Min Delivery" },
-        { id: 3, merchant: "Emergency Savings Pot", date: "Sep 15, 2026", amount: 500, type: 'saving', tag: "Auto-Saved" },
-        { id: 4, merchant: "Metro Transit Card", date: "Sep 14, 2026", amount: 100, type: 'expense', tag: "NCMC Recharge" },
-        { id: 5, merchant: "Chai Point UPI Tap", date: "Sep 13, 2026", amount: 40, type: 'expense', tag: "Quick Tap" }
-      ]);
-      const [filter, setFilter] = useState('all');
-      const [isOpen, setIsOpen] = useState(false);
-      const [type, setType] = useState('expense');
-      const [merchant, setMerchant] = useState('');
-      const [amount, setAmount] = useState('');
+    function SpendPage() {
+      const defaultTransactions = [
+        {
+          id: 1,
+          title: "UI Design Client Advance",
+          category: "Freelance Gig",
+          date: "2026-09-18",
+          dateLabel: "Today, 18 Sep",
+          amount: 6500,
+          type: "income",
+          mode: "UPI (Razorpay)"
+        },
+        {
+          id: 2,
+          title: "Zepto Quick Delivery",
+          category: "Food & Dining",
+          date: "2026-09-18",
+          dateLabel: "Today, 18 Sep",
+          amount: 215,
+          type: "expense",
+          mode: "UPI (PhonePe)"
+        },
+        {
+          id: 3,
+          title: "Chai & Samosa Break",
+          category: "Food & Dining",
+          date: "2026-09-18",
+          dateLabel: "Today, 18 Sep",
+          amount: 45,
+          type: "expense",
+          mode: "UPI (GPay)"
+        },
+        {
+          id: 4,
+          title: "Monthly College Stipend",
+          category: "Stipend",
+          date: "2026-09-17",
+          dateLabel: "Yesterday, 17 Sep",
+          amount: 12000,
+          type: "income",
+          mode: "Bank NEFT"
+        },
+        {
+          id: 5,
+          title: "Swiggy Dinner with Roommates",
+          category: "Food & Dining",
+          date: "2026-09-17",
+          dateLabel: "Yesterday, 17 Sep",
+          amount: 380,
+          type: "expense",
+          mode: "UPI Auto-Split"
+        },
+        {
+          id: 6,
+          title: "Metro Smart Card Top-up",
+          category: "Commute & Travel",
+          date: "2026-09-17",
+          dateLabel: "Yesterday, 17 Sep",
+          amount: 200,
+          type: "expense",
+          mode: "NCMC Card"
+        },
+        {
+          id: 7,
+          title: "Cashback Reward",
+          category: "Cashback & Refunds",
+          date: "2026-09-16",
+          dateLabel: "16 Sep 2026",
+          amount: 75,
+          type: "income",
+          mode: "UPI (Cred)"
+        },
+        {
+          id: 8,
+          title: "Amazon Coding Cable & USB-C",
+          category: "Shopping & Tech",
+          date: "2026-09-16",
+          dateLabel: "16 Sep 2026",
+          amount: 499,
+          type: "expense",
+          mode: "UPI (AmazonPay)"
+        }
+      ];
 
-      const handleAdd = (e) => {
+      const [transactions, setTransactions] = useState(() => {
+        try {
+          const saved = localStorage.getItem('kavach_transactions');
+          return saved ? JSON.parse(saved) : defaultTransactions;
+        } catch (e) {
+          return defaultTransactions;
+        }
+      });
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('kavach_transactions', JSON.stringify(transactions));
+        } catch (e) {}
+      }, [transactions]);
+
+      const [filter, setFilter] = useState('all');
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [formType, setFormType] = useState('expense');
+      const [formTitle, setFormTitle] = useState('');
+      const [formAmount, setFormAmount] = useState('');
+      const [formCategory, setFormCategory] = useState('Food & Dining');
+      const [formDate, setFormDate] = useState('2026-09-18');
+      const [formMode, setFormMode] = useState('UPI');
+
+      const expenseCategories = [
+        "Food & Dining",
+        "Commute & Travel",
+        "Shopping & Tech",
+        "Bills & Utilities",
+        "Education",
+        "Social & Entertainment",
+        "Other"
+      ];
+
+      const incomeCategories = [
+        "Stipend",
+        "Freelance Gig",
+        "Salary",
+        "Pocket Money",
+        "Cashback & Refunds",
+        "Investment Return",
+        "Other Income"
+      ];
+
+      const handleAddTransaction = (e) => {
         e.preventDefault();
-        if (!merchant.trim() || !amount) return;
-        setTransactions([{
+        if (!formTitle.trim() || !formAmount || Number(formAmount) <= 0) return;
+
+        const todayStr = "2026-09-18";
+        let label = formDate;
+        if (formDate === todayStr) {
+          label = "Today, 18 Sep";
+        } else if (formDate === "2026-09-17") {
+          label = "Yesterday, 17 Sep";
+        } else {
+          label = new Date(formDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        const newTx = {
           id: Date.now(),
-          merchant,
-          amount: Number(amount),
-          type,
-          date: "Today",
-          tag: type === 'saving' ? 'Saved Pot' : 'Manual Log'
-        }, ...transactions]);
-        setIsOpen(false);
-        setMerchant(''); setAmount('');
+          title: formTitle.trim(),
+          category: formCategory,
+          date: formDate,
+          dateLabel: label,
+          amount: Number(formAmount),
+          type: formType,
+          mode: formMode
+        };
+
+        setTransactions([newTx, ...transactions]);
+        setIsModalOpen(false);
+        setFormTitle('');
+        setFormAmount('');
       };
 
-      const filtered = transactions.filter(t => filter === 'all' ? true : t.type === filter);
-      const totalExp = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-      const totalSav = transactions.filter(t => t.type === 'saving').reduce((s, t) => s + t.amount, 0);
+      const handleDelete = (id) => {
+        setTransactions(transactions.filter((t) => t.id !== id));
+      };
+
+      const totalIncome = transactions
+        .filter((t) => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const totalExpense = transactions
+        .filter((t) => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const netBalance = totalIncome - totalExpense;
+
+      const todayExpense = transactions
+        .filter((t) => t.type === 'expense' && (t.date === '2026-09-18' || t.dateLabel?.startsWith('Today')))
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const dailyCap = 500;
+      const isOverDailyCap = todayExpense > dailyCap;
+
+      const filteredList = transactions.filter((t) => {
+        if (filter === 'all') return true;
+        return t.type === filter;
+      });
+
+      const groupedTransactions = filteredList.reduce((acc, curr) => {
+        const key = curr.dateLabel || curr.date;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(curr);
+        return acc;
+      }, {});
 
       return (
         <div className="flex flex-col animate-fade-in text-left space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-stone-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-900 text-xs font-bold block mb-1">Stipend & Cashflow</span>
-              <h1 className="text-2xl sm:text-3xl font-black text-stone-900">Transaction & Savings Log</h1>
-              <p className="text-xs sm:text-sm text-stone-500">Record spends and set aside savings anchored to your payout cycle.</p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-2">
+                <IconWallet className="w-3.5 h-3.5" />
+                <span>Income & Daily Expense Tracker</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight leading-tight">
+                Daily Cashflow
+              </h1>
+              <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                Log your irregular income, monitor daily chai & food expenses, and stay under daily caps.
+              </p>
             </div>
-            <button onClick={() => setIsOpen(true)} className="min-h-[48px] px-5 rounded-2xl bg-stone-900 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-md self-start sm:self-auto">
-              <IconPlus className="w-4 h-4 text-amber-400" /> Log Payment / Saving
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormType('expense');
+                setFormCategory('Food & Dining');
+                setIsModalOpen(true);
+              }}
+              className="min-h-[46px] px-5 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
+            >
+              <IconPlus className="w-4 h-4 text-amber-400" />
+              <span>Add Income / Expense</span>
             </button>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border-2 border-stone-300 shadow-sm grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div>
-              <span className="text-[11px] font-bold text-stone-400 uppercase block">Stipend Inflow</span>
-              <span className="text-xl font-black text-emerald-700">₹12,000</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
+              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Net Balance</span>
+              <span className="text-xl sm:text-2xl font-black text-stone-900 block mt-1">
+                ₹{netBalance.toLocaleString()}
+              </span>
+              <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+                <IconTrendingUp className="w-3 h-3" /> Inflow - Outflow
+              </span>
             </div>
-            <div>
-              <span className="text-[11px] font-bold text-stone-400 uppercase block">Total Expenses</span>
-              <span className="text-xl font-black text-stone-900">₹{totalExp.toLocaleString()}</span>
-            </div>
-            <div className="col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-stone-100 pt-2 sm:pt-0 sm:pl-3">
-              <span className="text-[11px] font-bold text-stone-400 uppercase block">Total Saved Pot</span>
-              <span className="text-xl font-black text-emerald-800">₹{totalSav.toLocaleString()}</span>
-            </div>
-          </div>
 
-          <div className="flex justify-between items-center">
-            <h3 className="text-base font-bold text-stone-900">Payment Records</h3>
-            <div className="flex bg-stone-100 p-1 rounded-full border border-stone-300 text-xs font-bold">
-              <button onClick={() => setFilter('all')} className={`px-3 py-1 rounded-full ${filter === 'all' ? 'bg-stone-900 text-white' : 'text-stone-600'}`}>All</button>
-              <button onClick={() => setFilter('expense')} className={`px-3 py-1 rounded-full ${filter === 'expense' ? 'bg-stone-900 text-white' : 'text-stone-600'}`}>Spends</button>
-              <button onClick={() => setFilter('saving')} className={`px-3 py-1 rounded-full ${filter === 'saving' ? 'bg-emerald-700 text-white' : 'text-stone-600'}`}>Saved</button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border-2 border-stone-200 shadow-sm divide-y divide-stone-100 overflow-hidden">
-            {filtered.map(t => (
-              <div key={t.id} className="p-4 flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-bold text-stone-900">{t.merchant}</h4>
-                  <span className="text-xs text-stone-400">{t.date} • {t.tag}</span>
-                </div>
-                <span className={`text-base font-black ${t.type === 'saving' ? 'text-emerald-700' : 'text-stone-900'}`}>
-                  {t.type === 'saving' ? `+₹${t.amount}` : `-₹${t.amount}`}
-                </span>
+            <div className={`p-4 bg-white rounded-3xl border-2 shadow-sm ${isOverDailyCap ? 'border-rose-300' : 'border-stone-200'}`}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Today's Spend</span>
+                <span className={`w-2 h-2 rounded-full ${isOverDailyCap ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
               </div>
-            ))}
+              <span className={`text-xl sm:text-2xl font-black block mt-1 ${isOverDailyCap ? 'text-rose-700' : 'text-stone-900'}`}>
+                ₹{todayExpense.toLocaleString()}
+              </span>
+              <span className={`text-[10px] font-semibold mt-1 block ${isOverDailyCap ? 'text-rose-600' : 'text-stone-500'}`}>
+                {isOverDailyCap ? `Exceeded ₹${dailyCap} cap` : `₹${dailyCap - todayExpense} under daily cap`}
+              </span>
+            </div>
+
+            <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
+              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Total Inflow</span>
+              <span className="text-xl sm:text-2xl font-black text-emerald-700 block mt-1">
+                +₹{totalIncome.toLocaleString()}
+              </span>
+              <span className="text-[10px] text-stone-500 font-medium mt-1 block">Stipends, gigs & refunds</span>
+            </div>
+
+            <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
+              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Total Spent</span>
+              <span className="text-xl sm:text-2xl font-black text-rose-700 block mt-1">
+                -₹{totalExpense.toLocaleString()}
+              </span>
+              <span className="text-[10px] text-stone-500 font-medium mt-1 block">Across all categories</span>
+            </div>
           </div>
 
-          {isOpen && (
+          <div className={`p-4 rounded-3xl border-2 flex items-center justify-between gap-3 ${
+            isOverDailyCap ? 'bg-rose-50 border-rose-200 text-rose-900' : 'bg-amber-50 border-amber-200 text-stone-900'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                isOverDailyCap ? 'bg-rose-200 text-rose-800' : 'bg-amber-200 text-amber-900'
+              }`}>
+                <IconClock className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-black">
+                  {isOverDailyCap ? '⚠️ Today’s Expense Cap Exceeded!' : '🎯 Daily Expense Cap: ₹500/day'}
+                </h3>
+                <p className="text-[11px] text-stone-600 font-medium">
+                  {isOverDailyCap
+                    ? `You have spent ₹${todayExpense} today (₹${todayExpense - dailyCap} over target). Cool down on food & cab taps!`
+                    : `You spent ₹${todayExpense} today. ₹${dailyCap - todayExpense} left before hitting your daily limit.`}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormType('income');
+                setFormCategory('Stipend');
+                setIsModalOpen(true);
+              }}
+              className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-white border border-stone-300 text-stone-900 text-xs font-bold hover:bg-stone-50 cursor-pointer shrink-0 shadow-sm"
+            >
+              + Add Income
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-2xl border border-stone-200">
+              <button
+                type="button"
+                onClick={() => setFilter('all')}
+                className={`min-h-[36px] px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  filter === 'all' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-800'
+                }`}
+              >
+                All Activity ({transactions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('expense')}
+                className={`min-h-[36px] px-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  filter === 'expense' ? 'bg-white text-rose-700 shadow-sm' : 'text-stone-500 hover:text-stone-800'
+                }`}
+              >
+                Expenses Only
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('income')}
+                className={`min-h-[36px] px-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  filter === 'income' ? 'bg-white text-emerald-700 shadow-sm' : 'text-stone-500 hover:text-stone-800'
+                }`}
+              >
+                Incomes Only
+              </button>
+            </div>
+
+            <span className="text-xs text-stone-400 font-semibold hidden sm:inline-block">
+              Grouped by Day
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            {Object.keys(groupedTransactions).length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 border-2 border-stone-200 text-center text-stone-500">
+                <p className="text-sm font-bold text-stone-800 mb-1">No transactions found</p>
+                <p className="text-xs">Click "+ Add Income / Expense" above to record your cashflow.</p>
+              </div>
+            ) : (
+              Object.entries(groupedTransactions).map(([dateTitle, list]) => {
+                const dayExpense = list.filter((x) => x.type === 'expense').reduce((s, x) => s + x.amount, 0);
+                const dayIncome = list.filter((x) => x.type === 'income').reduce((s, x) => s + x.amount, 0);
+
+                return (
+                  <div key={dateTitle} className="bg-white rounded-3xl border-2 border-stone-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-3.5 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <IconCalendar className="w-4 h-4 text-stone-500" />
+                        <span className="text-xs font-black text-stone-900 uppercase tracking-wider">{dateTitle}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs font-bold">
+                        {dayExpense > 0 && (
+                          <span className="text-rose-700">Spent: ₹{dayExpense.toLocaleString()}</span>
+                        )}
+                        {dayIncome > 0 && (
+                          <span className="text-emerald-700">Inflow: +₹{dayIncome.toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="divide-y divide-stone-100">
+                      {list.map((item) => {
+                        const isIncome = item.type === 'income';
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="p-4 sm:p-5 flex items-center justify-between hover:bg-stone-50/60 transition-colors group"
+                          >
+                            <div className="flex items-center gap-3.5">
+                              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                                isIncome ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                              }`}>
+                                {isIncome ? (
+                                  <IconArrowDownLeft className="w-5 h-5 stroke-[2.4]" />
+                                ) : (
+                                  <IconArrowUpRight className="w-5 h-5 stroke-[2.4]" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-bold text-stone-900 leading-snug">{item.title}</h4>
+                                <div className="flex items-center gap-2 text-[11px] text-stone-500 font-medium mt-0.5">
+                                  <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-700 font-semibold">{item.category}</span>
+                                  <span>•</span>
+                                  <span>{item.mode}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <span className={`text-base font-black tracking-tight ${
+                                isIncome ? 'text-emerald-700' : 'text-stone-900'
+                              }`}>
+                                {isIncome ? `+₹${item.amount.toLocaleString()}` : `-₹${item.amount.toLocaleString()}`}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(item.id)}
+                                title="Delete transaction"
+                                className="w-8 h-8 rounded-lg text-stone-300 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors cursor-pointer"
+                              >
+                                <IconTrash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-              <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-stone-300 shadow-2xl p-6 text-stone-900">
-                <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center">
+              <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-stone-300 shadow-2xl p-6 sm:p-7 text-stone-900">
+                
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                >
                   <IconX className="w-5 h-5" />
                 </button>
-                <h3 className="text-xl font-black mb-3">Log Expense or Saving</h3>
-                <form onSubmit={handleAdd} className="space-y-3 text-left">
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-stone-100 rounded-xl">
-                    <button type="button" onClick={() => setType('expense')} className={`py-2 rounded-lg text-xs font-bold ${type === 'expense' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600'}`}>💸 Expense</button>
-                    <button type="button" onClick={() => setType('saving')} className={`py-2 rounded-lg text-xs font-bold ${type === 'saving' ? 'bg-emerald-700 text-white shadow-sm' : 'text-stone-600'}`}>💰 Saving Pot</button>
-                  </div>
+
+                <h3 className="text-xl font-black text-stone-900 mb-1">Add Cashflow Entry</h3>
+                <p className="text-xs text-stone-500 mb-5">Record new income or log a daily payment.</p>
+
+                <div className="grid grid-cols-2 gap-2 p-1 bg-stone-100 rounded-2xl mb-4 border border-stone-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormType('expense');
+                      setFormCategory('Food & Dining');
+                    }}
+                    className={`min-h-[42px] rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      formType === 'expense' ? 'bg-white text-rose-700 shadow-sm font-black' : 'text-stone-600'
+                    }`}
+                  >
+                    💸 Expense (-)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormType('income');
+                      setFormCategory('Stipend');
+                    }}
+                    className={`min-h-[42px] rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      formType === 'income' ? 'bg-white text-emerald-700 shadow-sm font-black' : 'text-stone-600'
+                    }`}
+                  >
+                    💰 Income (+)
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddTransaction} className="space-y-4 text-left">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">Title / Destination</label>
-                    <input type="text" value={merchant} onChange={e => setMerchant(e.target.value)} placeholder="e.g. Swiggy, Metro, Laptop Fund" className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm outline-none" required />
+                    <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      Amount (₹)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-stone-500">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        value={formAmount}
+                        onChange={(e) => setFormAmount(e.target.value)}
+                        placeholder="e.g. 350"
+                        className="w-full min-h-[48px] pl-8 pr-4 bg-stone-50 border border-stone-300 rounded-xl text-base font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">Amount (₹)</label>
-                    <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="350" className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm outline-none" required />
+                    <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      {formType === 'income' ? 'Source / Description' : 'Merchant / Expense Description'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formTitle}
+                      onChange={(e) => setFormTitle(e.target.value)}
+                      placeholder={formType === 'income' ? 'e.g. Freelance project payment' : 'e.g. Zepto groceries or Chai tap'}
+                      className="w-full min-h-[48px] px-4 bg-stone-50 border border-stone-300 rounded-xl text-sm font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                    />
                   </div>
-                  <button type="submit" className="w-full min-h-[50px] bg-stone-900 text-white font-bold rounded-xl mt-3 cursor-pointer shadow-md">
-                    Save Record
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      Category
+                    </label>
+                    <select
+                      value={formCategory}
+                      onChange={(e) => setFormCategory(e.target.value)}
+                      className="w-full min-h-[48px] px-3 bg-stone-50 border border-stone-300 rounded-xl text-sm font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                    >
+                      {(formType === 'income' ? incomeCategories : expenseCategories).map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formDate}
+                        onChange={(e) => setFormDate(e.target.value)}
+                        className="w-full min-h-[48px] px-3 bg-stone-50 border border-stone-300 rounded-xl text-xs font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                        Payment Mode
+                      </label>
+                      <select
+                        value={formMode}
+                        onChange={(e) => setFormMode(e.target.value)}
+                        className="w-full min-h-[48px] px-3 bg-stone-50 border border-stone-300 rounded-xl text-xs font-medium text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                      >
+                        <option value="UPI">UPI (GPay/PhonePe)</option>
+                        <option value="Bank Transfer">Bank NEFT/IMPS</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Debit/Credit Card</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md mt-4 active:scale-98"
+                  >
+                    <span>{formType === 'income' ? 'Record Income (+)' : 'Log Expense (-)'}</span>
+                    <IconCheckCircle2 className="w-4 h-4 text-amber-400" />
                   </button>
                 </form>
+
               </div>
             </div>
           )}
@@ -876,49 +1391,261 @@
     }
 
     // ==========================================
-    // 6. SAVE & AUTOPAY PAGE
+    // 6. 1-ON-1 AI FINTECH CHATBOT PAGE (Kavach Copilot)
     // ==========================================
-    function SavePage({ lang }) {
-      const [mandates, setMandates] = useState([
-        { id: 1, name: "FitTrack Pro App", cost: 99, isCancelled: false, badge: "Unused Mandate" },
-        { id: 2, name: "StreamFlix Mobile Pass", cost: 199, isCancelled: false, badge: "AutoPay Active" },
-        { id: 3, name: "CloudVault Extra 100GB", cost: 89, isCancelled: false, badge: "Trial Ended" }
+    function ChatPage({ user, onNavigate }) {
+      const [inputMessage, setInputMessage] = useState('');
+      const [isTyping, setIsTyping] = useState(false);
+      const messagesEndRef = useRef(null);
+
+      const [messages, setMessages] = useState([
+        {
+          id: 1,
+          sender: 'bot',
+          time: 'Just now',
+          text: `Hello ${user ? user.name.split(' ')[0] : 'there'}! I am your Kavach AI Money Copilot. I can help you budget your irregular income, verify suspicious UPI collect requests, calculate savings velocity for your goals, or advise on daily spending caps. What can I help you with today?`,
+          suggestions: [
+            "How to save ₹5,000 on a student stipend?",
+            "Is this SMS a scam: 'Electricity unpaid, pay now'?",
+            "Liquid Mutual Funds vs 2.7% Savings Account",
+            "How do I set a daily expense budget?"
+          ]
+        }
       ]);
-      const toggle = (id) => setMandates(mandates.map(m => m.id === id ? { ...m, isCancelled: !m.isCancelled } : m));
-      const recovered = mandates.filter(m => m.isCancelled).reduce((s, m) => s + m.cost, 0);
+
+      const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      };
+
+      useEffect(() => {
+        scrollToBottom();
+      }, [messages, isTyping]);
+
+      const getBotResponse = (query) => {
+        const q = query.toLowerCase();
+
+        if (q.includes('scam') || q.includes('electricity') || q.includes('pin') || q.includes('refund') || q.includes('fake') || q.includes('qr')) {
+          return {
+            text: "🚨 UPI Safety Warning: Legitimate refunds or bill payments NEVER require entering your UPI PIN or scanning a QR code sent over WhatsApp/SMS! Fraudsters frequently impersonate power boards or customer care. If a screen asks for your UPI PIN, money is being DEBITED from your bank.",
+            action: { label: "Test in Scam Shield", path: "/shield" }
+          };
+        }
+
+        if (q.includes('stipend') || q.includes('save') || q.includes('5000') || q.includes('budget') || q.includes('salary')) {
+          return {
+            text: "💡 Smart Payout Strategy: When your stipend or gig money lands, immediately lock away 25-30% into your Savings Goals. Divide the remaining money by the days until your next payout to set a strict Daily Spend Cap (e.g. ₹250/day). Any unspent money rolls over to your weekend fun pot!",
+            action: { label: "Track in Cashflow", path: "/spend" }
+          };
+        }
+
+        if (q.includes('liquid') || q.includes('fund') || q.includes('interest') || q.includes('invest') || q.includes('sip')) {
+          return {
+            text: "📈 Micro-Investing Hack: Leaving stipend money in a regular bank account earns barely 2.5–3% p.a. Overnight and Liquid mutual funds invest in government-backed T-bills, earning ~6.8% with instant 1-day UPI withdrawal. It keeps your emergency cash beating inflation with zero stock market drama.",
+            action: { label: "Take Daily Quiz", path: "/quiz" }
+          };
+        }
+
+        if (q.includes('chai') || q.includes('expense') || q.includes('track') || q.includes('daily') || q.includes('food')) {
+          return {
+            text: "☕ Micro-Expense Leak: Small ₹30 chai taps and ₹150 food deliveries often add up to over ₹4,500 every month without you realizing it. Use our Tracker tab to log your daily expenses with one tap and see today's spent total instantly!",
+            action: { label: "Log Daily Expense", path: "/spend" }
+          };
+        }
+
+        if (q.includes('laptop') || q.includes('goal') || q.includes('buy') || q.includes('target')) {
+          return {
+            text: "🎯 Custom Goal Deposits: For any purchase like an M2 laptop or phone, break it down into flexible deposits. With Kavach, you can now deposit ANY variable amount (like ₹250, ₹640, or ₹2,000) whenever you get extra freelance or pocket money!",
+            action: { label: "Open Goals Planner", path: "/goals" }
+          };
+        }
+
+        return {
+          text: "That's a great question! Staying on top of your digital finances is all about pre-transaction awareness and smart daily tracking. You can log income & daily expenses in the Tracker, check suspicious payment requests in Shield, or set variable savings in Goals. Let me know what specific goal you are working towards!",
+          action: { label: "View Analytics Dashboard", path: "/dashboard" }
+        };
+      };
+
+      const handleSendMessage = (textToSend) => {
+        const text = textToSend || inputMessage;
+        if (!text.trim()) return;
+
+        const userMsg = {
+          id: Date.now(),
+          sender: 'user',
+          time: 'Just now',
+          text: text.trim()
+        };
+
+        setMessages((prev) => [...prev, userMsg]);
+        setInputMessage('');
+        setIsTyping(true);
+
+        setTimeout(() => {
+          const reply = getBotResponse(text);
+          const botMsg = {
+            id: Date.now() + 1,
+            sender: 'bot',
+            time: 'Just now',
+            text: reply.text,
+            action: reply.action
+          };
+          setMessages((prev) => [...prev, botMsg]);
+          setIsTyping(false);
+        }, 700);
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+        }
+      };
 
       return (
-        <div className="flex flex-col animate-fade-in text-left space-y-6">
-          <div className="pb-2 border-b border-stone-200">
-            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold block mb-1">Silent Leak Recovery</span>
-            <h1 className="text-2xl sm:text-3xl font-black text-stone-900">AutoPay Mandates & Leaks</h1>
-            <p className="text-xs sm:text-sm text-stone-500">Cancel forgotten ₹99 free trial mandates before they debit your stipend.</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-3xl border-2 border-stone-300 shadow-sm">
-            <h3 className="text-base font-black text-stone-900 mb-2">₹15,000 Laptop Fund Accelerator</h3>
-            <div className="w-full h-3 bg-stone-100 rounded-full overflow-hidden border border-stone-200 mb-2">
-              <div className="h-full bg-emerald-500" style={{ width: '64%' }} />
+        <div className="flex flex-col h-[calc(100vh-160px)] max-w-2xl mx-auto text-left animate-fade-in">
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-stone-200 shadow-sm flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shrink-0">
+                <IconBot className="w-6 h-6 stroke-[2.2]" />
+              </div>
+              <div>
+                <h1 className="text-lg font-black text-stone-900 tracking-tight flex items-center gap-1.5 leading-tight">
+                  Kavach AI Copilot
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </h1>
+                <p className="text-xs text-stone-500 font-medium">
+                  1-on-1 Digital Money Assistant • Always Active
+                </p>
+              </div>
             </div>
-            {recovered > 0 && (
-              <p className="text-xs text-emerald-800 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200 mt-2">
-                ⚡ Canceling {mandates.filter(m => m.isCancelled).length} mandate(s) frees ₹{recovered}/mo, reaching your laptop goal ~{Math.round((recovered * 3)/25)} days sooner!
-              </p>
-            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setMessages([
+                  {
+                    id: Date.now(),
+                    sender: 'bot',
+                    time: 'Just now',
+                    text: `Chat reset! How can I help you optimize your finances today, ${user ? user.name.split(' ')[0] : 'friend'}?`,
+                    suggestions: [
+                      "How to save ₹5,000 on a student stipend?",
+                      "Is this SMS a scam: 'Electricity unpaid, pay now'?",
+                      "Liquid Mutual Funds vs 2.7% Savings Account",
+                      "How do I set a daily expense budget?"
+                    ]
+                  }
+                ]);
+              }}
+              title="Reset conversation"
+              className="w-9 h-9 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <IconRotateCcw className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="space-y-3">
-            {mandates.map(m => (
-              <div key={m.id} className="p-4 bg-white rounded-3xl border-2 border-stone-200 flex items-center justify-between gap-3">
-                <div>
-                  <h4 className={`text-sm font-bold ${m.isCancelled ? 'line-through text-stone-400' : 'text-stone-900'}`}>{m.name}</h4>
-                  <span className="text-xs text-stone-400">₹{m.cost}/month • {m.badge}</span>
+          <div className="flex-1 overflow-y-auto pr-1 space-y-4 pb-4">
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
+              >
+                <div className="flex items-end gap-2 max-w-[88%] sm:max-w-[80%]">
+                  {m.sender === 'bot' && (
+                    <div className="w-8 h-8 rounded-xl bg-stone-900 text-amber-400 flex items-center justify-center text-xs shrink-0 shadow-sm mb-1">
+                      <IconBot className="w-4 h-4" />
+                    </div>
+                  )}
+
+                  <div
+                    className={`p-4 rounded-3xl text-sm leading-relaxed ${
+                      m.sender === 'user'
+                        ? 'bg-stone-900 text-white rounded-br-sm shadow-md font-medium'
+                        : 'bg-white text-stone-900 border-2 border-stone-200 rounded-bl-sm shadow-sm'
+                    }`}
+                  >
+                    <p className="whitespace-pre-line">{m.text}</p>
+
+                    {m.action && (
+                      <div className="mt-3 pt-2.5 border-t border-stone-100">
+                        <button
+                          type="button"
+                          onClick={() => onNavigate(m.action.path)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-stone-900 text-xs font-bold cursor-pointer transition-colors shadow-sm"
+                        >
+                          <span>{m.action.label}</span>
+                          <IconArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {m.sender === 'user' && (
+                    <div className="w-8 h-8 rounded-xl bg-amber-400 text-stone-900 font-bold text-xs flex items-center justify-center shrink-0 shadow-sm mb-1">
+                      {user && user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                 </div>
-                <button onClick={() => toggle(m.id)} className={`min-h-[44px] px-4 rounded-xl text-xs font-bold cursor-pointer ${m.isCancelled ? 'bg-stone-100 text-stone-700' : 'bg-rose-600 text-white'}`}>
-                  {m.isCancelled ? 'Restore' : 'Cancel Mandate'}
-                </button>
+
+                {m.suggestions && (
+                  <div className="flex flex-wrap gap-2 mt-3 ml-10 max-w-lg">
+                    {m.suggestions.map((s, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSendMessage(s)}
+                        className="text-xs bg-white hover:bg-stone-100 text-stone-700 font-medium px-3 py-1.5 rounded-xl border border-stone-300 shadow-sm transition-all cursor-pointer text-left active:scale-95"
+                      >
+                        ✨ {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
+
+            {isTyping && (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-stone-900 text-amber-400 flex items-center justify-center text-xs shrink-0 shadow-sm">
+                  <IconBot className="w-4 h-4" />
+                </div>
+                <div className="bg-white border-2 border-stone-200 rounded-2xl px-4 py-2.5 shadow-sm flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-stone-400 animate-bounce"></span>
+                  <span className="w-2 h-2 rounded-full bg-stone-400 animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-2 h-2 rounded-full bg-stone-400 animate-bounce [animation-delay:0.4s]"></span>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="pt-2">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="relative flex items-center bg-white border-2 border-stone-300 rounded-2xl p-1.5 shadow-md focus-within:border-stone-900 transition-colors"
+            >
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask anything about UPI safety, stipends, or savings..."
+                className="flex-1 min-h-[46px] px-3.5 bg-transparent text-sm text-stone-900 placeholder-stone-400 outline-none"
+              />
+
+              <button
+                type="submit"
+                disabled={!inputMessage.trim()}
+                className="min-h-[44px] px-4 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              >
+                <span>Send</span>
+                <IconSend className="w-3.5 h-3.5 text-amber-400" />
+              </button>
+            </form>
           </div>
         </div>
       );
@@ -1296,7 +2023,7 @@
     // ==========================================
     // 8. LANDING PAGE (Strictly Standalone)
     // ==========================================
-    function LandingPage({ lang, user, onNavigate }) {
+    function LandingPage({ user, onNavigate }) {
       const [modalArticle, setModalArticle] = useState(null);
 
       const handleAction = (destination) => {
@@ -1319,9 +2046,9 @@
           full: "Overnight & Liquid mutual funds invest in government-backed securities, offer near-zero volatility, and earn more than double regular savings bank interest."
         },
         {
-          id: 3, badge: "AutoPay Hack", title: "The 'Day 5 Rule' to Beat Free Trial Traps",
-          desc: "Stop unwanted ₹499 deductions before trial periods expire.",
-          full: "Cancel AutoPay mandates in your UPI app on Day 1 or Day 5. You keep trial access for the full 7 days, but prevent sudden surprise bank debits."
+          id: 3, badge: "Daily Caps", title: "Setting Daily Expense Limits to Protect Payouts",
+          desc: "Stop small ₹40 chai taps and delivery fees from draining your stipend.",
+          full: "Divide your monthly discretionary money by remaining days to set a strict daily cap. Check your Daily Tracker in Kavach before tapping UPI to keep your savings intact."
         },
         {
           id: 4, badge: "Compounding", title: "Why Starting a ₹500 SIP at 20 Beats ₹2,500 at 30",
@@ -1335,15 +2062,13 @@
           {/* Hero */}
           <section className="text-center max-w-3xl mx-auto pt-4">
             <span className="px-4 py-1.5 rounded-full bg-amber-100 text-stone-800 text-xs font-semibold inline-block mb-4">
-              ✨ {lang === 'en' ? "India's #1 Digital Money Copilot" : "भारत का पहला डिजिटल मनी को-पायलट"}
+              ✨ India's #1 Digital Money Copilot
             </span>
             <h1 className="text-4xl sm:text-6xl font-black text-stone-900 tracking-tight leading-tight mb-4">
-              {lang === 'en' ? 'Save. Spend. Stay safe.' : 'बचत। खर्च। पूर्ण सुरक्षा।'}
+              Save. Spend. Stay safe.
             </h1>
             <p className="text-base sm:text-lg text-stone-600 max-w-xl mx-auto mb-6">
-              {lang === 'en'
-                ? "A money copilot built for India's digital-payment generation. Pre-transaction fraud checks, stipend budgeting, and ₹99 leak detection."
-                : "भारत की पहली डिजिटल-पेमेंट पीढ़ी के लिए निर्मित। प्री-ट्रांजैक्शन फ्रॉड जांच, स्टाइपेंड बजटिंग और ₹99 लीक्स की रिकवरी।"}
+              A money copilot built for India's digital-payment generation. Pre-transaction fraud checks, irregular stipend cashflow tracking, and AI financial guidance.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto mb-8">
@@ -1351,14 +2076,14 @@
                 onClick={() => handleAction('/dashboard')}
                 className="min-h-[50px] px-6 bg-stone-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-[0.98]"
               >
-                <span>{user ? (lang === 'en' ? 'Open Dashboard' : 'डैशबोर्ड खोलें') : (lang === 'en' ? 'Sign Up for Free' : 'निःशुल्क साइन अप करें')}</span>
+                <span>{user ? 'Open Dashboard' : 'Sign Up for Free'}</span>
                 <IconArrowRight className="w-4 h-4 text-amber-400" />
               </button>
               <button
                 onClick={() => handleAction('/shield')}
                 className="min-h-[50px] px-6 bg-white border-2 border-stone-300 text-stone-900 font-bold rounded-2xl cursor-pointer hover:bg-stone-50"
               >
-                {user ? (lang === 'en' ? 'Open Scam Shield' : 'स्कैम शील्ड खोलें') : (lang === 'en' ? 'Sign Up to Explore' : 'सुरक्षा शुरू करें')}
+                {user ? 'Open Scam Shield' : 'Sign Up to Explore'}
               </button>
             </div>
 
@@ -1387,23 +2112,23 @@
               onClick={() => handleAction('/spend')}
               className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all text-left"
             >
-              <span className="text-xs font-mono font-bold bg-blue-100 text-blue-900 px-2 py-0.5 rounded">SPEND</span>
-              <h3 className="text-base font-black mt-2 mb-1">Irregular Stipend Cashflow</h3>
-              <p className="text-xs text-stone-500 mb-3">Tracks your irregular income and stipends, not just standard 30-day salaries.</p>
+              <span className="text-xs font-mono font-bold bg-blue-100 text-blue-900 px-2 py-0.5 rounded">CASHFLOW</span>
+              <h3 className="text-base font-black mt-2 mb-1">Income & Daily Expense Tracker</h3>
+              <p className="text-xs text-stone-500 mb-3">Track irregular stipends, daily food & chai taps, and daily spend caps.</p>
               <span className="text-xs font-bold underline text-stone-900">
                 {user ? 'Track Cashflow ➔' : 'Sign Up to Unlock ➔'}
               </span>
             </div>
 
             <div
-              onClick={() => handleAction('/save')}
+              onClick={() => handleAction('/chat')}
               className="p-5 bg-white rounded-3xl border-2 border-stone-200 hover:border-stone-900 cursor-pointer transition-all text-left"
             >
-              <span className="text-xs font-mono font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded">SAVE</span>
-              <h3 className="text-base font-black mt-2 mb-1">Audit ₹99 AutoPay Leaks</h3>
-              <p className="text-xs text-stone-500 mb-3">Finds forgotten ₹99 AutoPay mandates and turns them into savings goals.</p>
+              <span className="text-xs font-mono font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded">AI COPILOT</span>
+              <h3 className="text-base font-black mt-2 mb-1">1-on-1 AI FinTech Copilot</h3>
+              <p className="text-xs text-stone-500 mb-3">Instant answers for UPI collect requests, stipend budgeting, and daily spend limits.</p>
               <span className="text-xs font-bold underline text-stone-900">
-                {user ? 'Audit Leaks ➔' : 'Sign Up to Unlock ➔'}
+                {user ? 'Chat with Copilot ➔' : 'Sign Up to Unlock ➔'}
               </span>
             </div>
           </section>
@@ -1476,7 +2201,6 @@
     // MAIN ROOT APP (With Authenticated Route Guarding)
     // ==========================================
     function App() {
-      const [lang, setLang] = useState('en');
       const [user, setUser] = useState(() => {
         try {
           const saved = localStorage.getItem('kavach_user');
@@ -1543,10 +2267,11 @@
       };
 
       const navItems = [
-        { to: '/', label: 'Home', icon: IconHome },
         { to: '/dashboard', label: 'Dashboard', icon: IconDashboard },
         { to: '/shield', label: 'Shield', icon: IconShield },
+        { to: '/spend', label: 'Tracker', icon: IconWallet },
         { to: '/goals', label: 'Goals', icon: IconTarget },
+        { to: '/chat', label: 'Copilot', icon: IconBot },
         { to: '/quiz', label: 'Quiz', icon: IconHelpCircle }
       ];
 
@@ -1562,62 +2287,72 @@
           {/* Top Header */}
           <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#fbfbf9]/90 border-b border-stone-200/80">
             <div className="max-w-md md:max-w-4xl mx-auto px-4 h-18 py-3 flex items-center justify-between">
-              <button onClick={() => navigate(user ? '/dashboard' : '/')} className="flex items-center gap-2 cursor-pointer text-left">
-                <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md">
-                  <IconShield className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-2xl font-black text-stone-900 flex items-center gap-1.5">
-                    Kavach <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  </span>
-                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block -mt-1">Money Copilot</span>
-                </div>
-              </button>
+              
+              {/* Left Side: Brand Logo & Upgraded Profile Badge */}
+              <div className="flex items-center gap-3">
+                <button onClick={() => navigate(user ? '/dashboard' : '/')} className="flex items-center gap-2 cursor-pointer text-left">
+                  <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md">
+                    <IconShield className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-2xl font-black text-stone-900 flex items-center gap-1.5">
+                      Kavach <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </span>
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block -mt-1">Money Copilot</span>
+                  </div>
+                </button>
 
-              {/* Desktop quick links - ONLY when user is authenticated */}
-              {user && (
-                <div className="hidden md:flex items-center gap-4 text-xs font-bold text-stone-600">
-                  <button onClick={() => navigate('/dashboard')} className="hover:text-stone-900 cursor-pointer">Dashboard</button>
-                  <button onClick={() => navigate('/shield')} className="hover:text-stone-900 cursor-pointer">Shield</button>
-                  <button onClick={() => navigate('/spend')} className="hover:text-stone-900 cursor-pointer">Transactions</button>
-                  <button onClick={() => navigate('/save')} className="hover:text-stone-900 cursor-pointer">AutoPay Audit</button>
-                  <button onClick={() => navigate('/goals')} className="hover:text-stone-900 cursor-pointer">Goals</button>
-                  <button onClick={() => navigate('/quiz')} className="hover:text-stone-900 cursor-pointer">Daily Quiz</button>
-                </div>
-              )}
+                {/* Profile Badge shifted to left side with improved GUI */}
+                {user && (
+                  <div className="flex items-center gap-2 pl-3 border-l-2 border-stone-200">
+                    <div className="relative">
+                      <div className="w-9 h-9 rounded-xl bg-amber-400 text-stone-900 font-black text-sm flex items-center justify-center shadow-sm">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                    </div>
+                    <div className="hidden sm:flex flex-col text-left">
+                      <span className="text-xs font-black text-stone-900 leading-tight">
+                        {user.name || 'User'}
+                      </span>
+                      <span className="text-[10px] text-stone-500 font-semibold capitalize leading-none">
+                        {user.persona || 'Member'} • Protected
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
+              {/* Right Side: Logout Button (when user logged in) / Sign Up (when not logged in), NO language switcher, NO duplicate top navigation */}
               <div className="flex items-center gap-2">
                 {user ? (
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold text-emerald-950 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                    <span>{user.name.split(' ')[0]}</span>
-                    <button onClick={handleSignOut} className="text-[10px] underline ml-1 cursor-pointer font-semibold text-emerald-800">Exit</button>
-                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 text-stone-700 font-bold text-xs flex items-center gap-1.5 border border-stone-300 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <IconLogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
                 ) : (
                   <button onClick={() => navigate('/auth')} className="min-h-[44px] px-4 py-2 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm">
                     <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{lang === 'en' ? 'Sign Up' : 'साइन अप'}</span>
+                    <span>Sign Up</span>
                   </button>
                 )}
-
-                <div className="flex bg-stone-100 p-0.5 rounded-full border border-stone-300 text-xs font-bold">
-                  <button onClick={() => setLang('en')} className={`px-2.5 py-1 rounded-full ${lang === 'en' ? 'bg-stone-900 text-white' : 'text-stone-600'}`}>EN</button>
-                  <button onClick={() => setLang('hi')} className={`px-2.5 py-1 rounded-full ${lang === 'hi' ? 'bg-stone-900 text-white' : 'text-stone-600'}`}>हि</button>
-                </div>
               </div>
             </div>
           </header>
 
           {/* Main Body Container */}
           <main className={`flex-1 w-full max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 ${user && route !== '/auth' ? 'pb-28 sm:pb-32' : 'pb-12 sm:pb-16'}`}>
-            {route === '/' && <LandingPage lang={lang} user={user} onNavigate={navigate} />}
-            {route === '/auth' && <AuthPage lang={lang} onNavigate={navigate} onLogin={handleLogin} />}
-            {user && route === '/dashboard' && <DashboardPage lang={lang} onNavigate={navigate} />}
-            {user && route === '/shield' && <ShieldPage lang={lang} />}
-            {user && route === '/spend' && <SpendPage lang={lang} />}
-            {user && route === '/save' && <SavePage lang={lang} />}
-            {user && route === '/goals' && <GoalsPage lang={lang} />}
-            {user && route === '/quiz' && <QuizPage lang={lang} onNavigate={navigate} />}
+            {route === '/' && <LandingPage user={user} onNavigate={navigate} />}
+            {route === '/auth' && <AuthPage onNavigate={navigate} onLogin={handleLogin} />}
+            {user && route === '/dashboard' && <DashboardPage onNavigate={navigate} />}
+            {user && route === '/shield' && <ShieldPage />}
+            {user && route === '/spend' && <SpendPage />}
+            {user && (route === '/chat' || route === '/save') && <ChatPage user={user} onNavigate={navigate} />}
+            {user && route === '/goals' && <GoalsPage />}
+            {user && route === '/quiz' && <QuizPage onNavigate={navigate} />}
           </main>
 
           {/* Sticky Bottom Tab Bar - Rendered ONLY if user is authenticated and not on /auth */}

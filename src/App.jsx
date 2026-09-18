@@ -6,7 +6,7 @@ import AuthPage from './pages/Auth';
 import DashboardPage from './pages/Dashboard';
 import ShieldPage from './pages/Shield';
 import SpendPage from './pages/Spend';
-import SavePage from './pages/Save';
+import ChatPage from './pages/Chat';
 import GoalsPage from './pages/Goals';
 import QuizPage from './pages/Quiz';
 
@@ -18,7 +18,6 @@ function ProtectedRoute({ user, children }) {
 }
 
 export default function App() {
-  const [lang, setLang] = useState('en');
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -49,8 +48,6 @@ export default function App() {
           path="/"
           element={
             <Layout
-              lang={lang}
-              setLang={setLang}
               user={user}
               onSignOut={handleSignOut}
               onLogin={handleSignUpComplete}
@@ -84,12 +81,16 @@ export default function App() {
             }
           />
           <Route
-            path="save"
+            path="chat"
             element={
               <ProtectedRoute user={user}>
-                <SavePage />
+                <ChatPage />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="save"
+            element={<Navigate to="/chat" replace />}
           />
           <Route
             path="goals"

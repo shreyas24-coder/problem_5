@@ -1,34 +1,48 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Shield, Wallet, Coins, Home, LayoutDashboard, Target, HelpCircle, Sparkles } from 'lucide-react';
+import {
+  Shield,
+  Wallet,
+  LayoutDashboard,
+  Target,
+  HelpCircle,
+  Sparkles,
+  Bot,
+  LogOut
+} from 'lucide-react';
 
-export default function Layout({ lang, setLang, user, onSignOut, onLogin }) {
+export default function Layout({ user, onSignOut, onLogin }) {
   const location = useLocation();
 
   const navItems = [
     {
-      to: '/',
-      label: lang === 'en' ? 'Home' : 'होम',
-      icon: Home
-    },
-    {
       to: '/dashboard',
-      label: lang === 'en' ? 'Stats' : 'डैशबोर्ड',
+      label: 'Dashboard',
       icon: LayoutDashboard
     },
     {
       to: '/shield',
-      label: lang === 'en' ? 'Shield' : 'शील्ड',
+      label: 'Shield',
       icon: Shield
     },
     {
+      to: '/spend',
+      label: 'Tracker',
+      icon: Wallet
+    },
+    {
       to: '/goals',
-      label: lang === 'en' ? 'Goals' : 'लक्ष्य',
+      label: 'Goals',
       icon: Target
     },
     {
+      to: '/chat',
+      label: 'Copilot',
+      icon: Bot
+    },
+    {
       to: '/quiz',
-      label: lang === 'en' ? 'Quiz' : 'क्विज़',
+      label: 'Quiz',
       icon: HelpCircle
     }
   ];
@@ -47,90 +61,68 @@ export default function Layout({ lang, setLang, user, onSignOut, onLogin }) {
 
       {/* TOP HEADER */}
       <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#fbfbf9]/90 border-b border-stone-200/80 transition-colors">
-        <div className="max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 h-18 py-3 flex items-center justify-between">
+        <div className="max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 h-18 py-3 flex items-center justify-between">
           
-          {/* Logo */}
-          <NavLink to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shadow-stone-900/10 group-hover:scale-105 transition-transform">
-              <Shield className="w-5 h-5 stroke-[2.4]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-stone-900 flex items-center gap-1.5">
-                Kavach
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              </span>
-              <span className="text-[10px] font-bold text-stone-500 tracking-wider -mt-1 uppercase">
-                Money Copilot
-              </span>
-            </div>
-          </NavLink>
+          {/* Left Side: Brand Logo + Enhanced Profile GUI */}
+          <div className="flex items-center gap-3">
+            <NavLink to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shadow-stone-900/10 group-hover:scale-105 transition-transform shrink-0">
+                <Shield className="w-5 h-5 stroke-[2.4]" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-xl font-black tracking-tight text-stone-900 flex items-center gap-1.5 leading-tight">
+                  Kavach
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </span>
+                <span className="text-[10px] font-bold text-stone-500 tracking-wider -mt-0.5 uppercase">
+                  Money Copilot
+                </span>
+              </div>
+            </NavLink>
 
-          {/* Secondary Header Navigation for Desktop - Only for logged-in users */}
-          {user && (
-            <div className="hidden md:flex items-center gap-4 text-xs font-bold text-stone-600">
-              <NavLink to="/dashboard" className="hover:text-stone-900">Dashboard</NavLink>
-              <NavLink to="/shield" className="hover:text-stone-900">Shield</NavLink>
-              <NavLink to="/spend" className="hover:text-stone-900">Transactions</NavLink>
-              <NavLink to="/save" className="hover:text-stone-900">AutoPay Audit</NavLink>
-              <NavLink to="/goals" className="hover:text-stone-900">Goals</NavLink>
-              <NavLink to="/quiz" className="hover:text-stone-900">Daily Quiz</NavLink>
-            </div>
-          )}
+            {/* Shifted to Left: Upgraded Profile Card GUI */}
+            {user && (
+              <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l-2 border-stone-200/80">
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-xl bg-stone-900 text-amber-400 font-black text-xs flex items-center justify-center shadow-sm">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-xs font-black text-stone-900 leading-tight max-w-[90px] sm:max-w-[140px] truncate">
+                    {user.name}
+                  </span>
+                  <span className="text-[10px] font-semibold text-emerald-700 leading-tight flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    {user.persona === 'freelance' ? 'Creator' : user.persona === 'junior' ? 'Early Career' : 'Student'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
 
-          {/* Right: Sign Up / User + Language Switcher */}
+          {/* Right Side: Logout or Sign Up */}
           <div className="flex items-center gap-2">
             {user ? (
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-full shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                <span className="text-xs font-bold text-emerald-950 truncate max-w-[80px] sm:max-w-[120px]">
-                  {user.name.split(' ')[0]}
-                </span>
-                <button
-                  type="button"
-                  onClick={onSignOut}
-                  title="Sign Out"
-                  className="text-[10px] text-emerald-800 hover:text-emerald-950 font-semibold underline ml-1 cursor-pointer"
-                >
-                  Exit
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={onSignOut}
+                title="Logout from Kavach"
+                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-700 border border-stone-200 hover:border-rose-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Logout</span>
+              </button>
             ) : (
               <NavLink
                 to="/auth"
-                className="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                className="min-h-[42px] px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>{lang === 'en' ? 'Sign Up' : 'साइन अप'}</span>
+                <span>Sign Up</span>
               </NavLink>
             )}
-
-            {/* Language Switcher */}
-            <div 
-              className="flex items-center bg-stone-100 p-0.5 rounded-full border border-stone-300 shadow-inner"
-              role="group"
-              aria-label="Language switcher"
-            >
-              <button
-                type="button"
-                onClick={() => setLang('en')}
-                aria-pressed={lang === 'en'}
-                className={`min-h-[44px] px-2.5 sm:px-3 text-xs font-bold rounded-full transition-all cursor-pointer ${
-                  lang === 'en' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
-                }`}
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                onClick={() => setLang('hi')}
-                aria-pressed={lang === 'hi'}
-                className={`min-h-[44px] px-2.5 sm:px-3 text-xs font-bold rounded-full transition-all cursor-pointer ${
-                  lang === 'hi' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
-                }`}
-              >
-                हि
-              </button>
-            </div>
           </div>
 
         </div>
@@ -138,7 +130,7 @@ export default function Layout({ lang, setLang, user, onSignOut, onLogin }) {
 
       {/* PAGE CONTENT CONTAINER */}
       <main className={`flex-1 w-full max-w-md md:max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 ${showBottomNav ? 'pb-28 sm:pb-32' : 'pb-12 sm:pb-16'}`}>
-        <Outlet context={{ lang, user, onLogin }} />
+        <Outlet context={{ user, onLogin }} />
       </main>
 
       {/* STICKY BOTTOM TAB BAR (Rendered strictly for authenticated users) */}
