@@ -2796,10 +2796,12 @@
           localStorage.setItem('kavach_user', JSON.stringify(kavachUser));
         } catch(e) {}
 
-        const currentRoute = getRoute();
-        if (currentRoute === '/' || currentRoute === '/auth') {
-          navigate('/dashboard');
+        // Clean up OAuth hash or search tokens from address bar
+        if (window.location.hash.includes('access_token=') || window.location.search.includes('code=')) {
+          window.history.replaceState(null, '', window.location.pathname + '#/dashboard');
         }
+
+        navigate('/dashboard', kavachUser);
       };
 
       // Listen for Supabase OAuth redirect & auth state changes
@@ -2858,7 +2860,12 @@
 
       // Route management
       const getRoute = () => {
-        const h = window.location.hash.replace(/^#/, '') || '/';
+        const rawHash = window.location.hash || '';
+        // If this is an OAuth token or code callback, stay on or land on /dashboard
+        if (rawHash.includes('access_token=') || rawHash.includes('refresh_token=') || window.location.search.includes('code=')) {
+          return '/dashboard';
+        }
+        const h = rawHash.replace(/^#/, '') || '/';
         return h.startsWith('/') ? h : '/' + h;
       };
 
@@ -2866,6 +2873,10 @@
 
       useEffect(() => {
         const onHash = () => {
+          const rawHash = window.location.hash || '';
+          if (rawHash.includes('access_token=') || window.location.search.includes('code=')) {
+            return;
+          }
           const current = getRoute();
           if (!user && current !== '/' && current !== '/auth') {
             window.location.hash = '/auth';
@@ -2878,16 +2889,25 @@
         return () => window.removeEventListener('hashchange', onHash);
       }, [user]);
 
+      // Route guard effect
       useEffect(() => {
+        const rawHash = window.location.hash || '';
+        const rawSearch = window.location.search || '';
+        // Never wipe URL during active OAuth callback processing
+        if (rawHash.includes('access_token=') || rawSearch.includes('code=')) {
+          return;
+        }
+
         if (!user && route !== '/' && route !== '/auth') {
           window.location.hash = '/auth';
           setRoute('/auth');
         }
       }, [user, route]);
 
-      const navigate = (p) => {
+      const navigate = (p, currentUser = null) => {
         setIsNavOpen(false);
-        if (!user && p !== '/' && p !== '/auth') {
+        const activeUser = currentUser !== null ? currentUser : user;
+        if (!activeUser && p !== '/' && p !== '/auth') {
           window.location.hash = '/auth';
           setRoute('/auth');
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2903,7 +2923,7 @@
         try {
           localStorage.setItem('kavach_user', JSON.stringify(u));
         } catch(e) {}
-        navigate('/dashboard');
+        navigate('/dashboard', u);
       };
 
       const handleSignOut = async () => {
