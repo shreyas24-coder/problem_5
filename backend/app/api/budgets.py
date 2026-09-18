@@ -164,6 +164,59 @@ def get_current_alerts(
     return get_budget_alerts(db, current_user.id, m, y)
 
 
+@router.get("/{budget_id}", response_model=BudgetOut)
+def get_budget(
+    budget_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Retrieve a single budget boundary with its current consumption stats."""
+    b = (
+        db.query(BudgetBoundary)
+        .filter(BudgetBoundary.id == budget_id, BudgetBoundary.user_id == current_user.id)
+        .first()
+    )
+    if not b:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Budget boundary not found.")
+
+    query = db.query(func.coalesce(func.sum(Transaction.amount), 0.0)).filter(
+        Transaction.user_id == current_user.id,
+        Transaction.type == "EXPENSE",
+        extract("month", Transaction.date) == b.month,
+        extract("year", Transaction.date) == b.year,
+    )
+    if b.category:
+        query = query.filter(Transaction.category == b.category)
+    spent = float(query.scalar() or 0.0)
+    pct = (spent / b.limit_amount * 100.0) if b.limit_amount > 0 else 0.0
+    rem = float(b.limit_amount - spent)
+
+    if spent >= b.limit_amount:
+        status_val = BudgetStatusEnum.EXCEEDED
+        alert_msg = f"Budget exceeded by ₹{abs(rem):.2f}!"
+    elif pct >= 80.0:
+        status_val = BudgetStatusEnum.APPROACHING
+        alert_msg = f"Warning: {pct:.1f}% of budget consumed!"
+    else:
+        status_val = BudgetStatusEnum.NORMAL
+        alert_msg = f"Budget safe: {pct:.1f}% consumed."
+
+    return BudgetOut(
+        id=b.id,
+        user_id=b.user_id,
+        category=b.category,
+        limit_amount=b.limit_amount,
+        month=b.month,
+        year=b.year,
+        spent_amount=spent,
+        remaining_amount=rem,
+        percentage=round(pct, 1),
+        status=status_val,
+        alert_message=alert_msg,
+        created_at=b.created_at,
+    )
+
+
 @router.delete("/{budget_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_budget(
     budget_id: int,

@@ -39,10 +39,37 @@ def create_access_token(data: dict, expires_delta: Optional[datetime.timedelta] 
     return encoded_jwt
 
 
+class SupabaseUser:
+    """Wrapper around Supabase users table row that provides an interface identical to SQLAlchemy User."""
+    def __init__(self, data: dict):
+        self.id = str(data.get("id"))
+        self.name = data.get("name") or data.get("full_name") or "Alex Rivera"
+        self.full_name = self.name
+        self.email = data.get("email")
+        self.monthly_income = float(data.get("monthly_income") or 0.0)
+        self.monthly_budget_cap = float(data.get("monthly_budget_cap") or 0.0)
+        self.daily_expense_budget = self.monthly_budget_cap / 30.0 if self.monthly_budget_cap > 0 else 500.0
+        exp_sav = data.get("expected_monthly_savings")
+        if exp_sav is not None:
+            self.expected_monthly_savings = float(exp_sav)
+        elif self.monthly_income > self.monthly_budget_cap and self.monthly_budget_cap > 0:
+            self.expected_monthly_savings = float(self.monthly_income - self.monthly_budget_cap)
+        else:
+            self.expected_monthly_savings = 10000.0
+        ts = data.get("created_at")
+        if ts:
+            try:
+                self.created_at = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            except Exception:
+                self.created_at = datetime.datetime.now(datetime.timezone.utc)
+        else:
+            self.created_at = datetime.datetime.now(datetime.timezone.utc)
+
+
 def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
-) -> User:
+):
     """FastAPI dependency to extract and authenticate the current user via JWT."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -59,11 +86,25 @@ def get_current_user(
         user_id_str: str = payload.get("sub")
         if user_id_str is None:
             raise credentials_exception
-        user_id = int(user_id_str)
-    except (JWTError, ValueError):
+    except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-    return user
+    # 1. Look up in Supabase first
+    try:
+        from app.services.supabase_service import SupabaseService
+        supa_user = SupabaseService.get_user_by_id(user_id_str)
+        if supa_user:
+            return SupabaseUser(supa_user)
+    except Exception:
+        pass
+
+    # 2. Local fallback if int
+    try:
+        user_id_int = int(user_id_str)
+        user = db.query(User).filter(User.id == user_id_int).first()
+        if user:
+            return user
+    except Exception:
+        pass
+
+    raise credentials_exception

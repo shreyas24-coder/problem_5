@@ -59,11 +59,14 @@ def test_goal_wallet_transfer_mechanic(client, auth_headers):
     assert dep_data["new_goal_balance"] == 25000.0
     assert dep_data["general_available_savings"] == 15000.0
 
-    # Verify dashboard reflects the lockbox split
+    # Verify dashboard reflects the lockbox split.
+    # Under Model A accounting, net_balance is the TRUE liquid balance:
+    #   50,000 income - 10,000 expense - 25,000 goal deposit = 15,000
     dash_res2 = client.get("/api/dashboard/", headers=auth_headers)
-    assert dash_res2.json()["net_balance"] == 40000.0
-    assert dash_res2.json()["locked_goal_savings"] == 25000.0
-    assert dash_res2.json()["general_available_savings"] == 15000.0
+    assert dash_res2.json()["net_balance"] == 15000.0          # True liquid balance (goal deposit deducted)
+    assert dash_res2.json()["locked_goal_savings"] == 25000.0  # Funds locked in goal
+    assert dash_res2.json()["general_available_savings"] == 15000.0  # Equals net_balance in Model A
+
 
     # Verify a GOAL_TRANSFER transaction was recorded in transaction history
     txns_res = client.get("/api/transactions/?type=GOAL_TRANSFER", headers=auth_headers)

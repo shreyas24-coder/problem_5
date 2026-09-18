@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     
     # Database configuration (Supabase PostgreSQL supported or local SQLite fallback)
     DATABASE_URL: str = "sqlite:///./fintech.db"
+    SUPABASE_URL: str = "https://vcidtjeohkvpmotfllin.supabase.co"
+    SUPABASE_SERVICE_KEY: str = "sb_secret_xRflMZO_w5t7CQlbz4dAPw_orrsBZYW"
     
     # JWT Authentication
     SECRET_KEY: str = "fintech_super_secret_jwt_key_technofora_2026_change_in_production"

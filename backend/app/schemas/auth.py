@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
@@ -24,8 +24,8 @@ class UserUpdate(BaseModel):
 
 
 class UserOut(UserBase):
-    id: int
-    created_at: datetime.datetime
+    id: Union[int, str]
+    created_at: Optional[datetime.datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,4 +37,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: Optional[int] = None
+    user_id: Optional[Union[int, str]] = None

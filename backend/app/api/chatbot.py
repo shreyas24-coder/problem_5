@@ -33,6 +33,15 @@ async def chat_security_advisor(
         user_id=current_user.id,
     )
 
+    # Log into Supabase scam_logs table
+    try:
+        from app.services.supabase_service import SupabaseService
+        score_map = {"HIGH": 90, "MEDIUM": 60, "LOW": 15}
+        score = score_map.get(str(result["risk_level"]).upper(), 50)
+        SupabaseService.log_scam(raw_content=chat_in.message, risk_score=score, source_type="SMS")
+    except Exception:
+        pass
+
     return ChatResponse(
         reply=result["reply"],
         risk_level=result["risk_level"],

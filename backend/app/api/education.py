@@ -10,6 +10,7 @@ from app.models.education import DailyShort, Article, QuizQuestion, QuizSubmissi
 from app.schemas.education import (
     DailyShortOut,
     StreakCheckInResponse,
+    UserStreakOut,
     ArticleOut,
     QuizQuestionOut,
     QuizSubmissionRequest,
@@ -17,7 +18,7 @@ from app.schemas.education import (
     QuizQuestionResult,
 )
 from app.services.auth_service import get_current_user
-from app.services.streak_service import record_user_check_in
+from app.services.streak_service import record_user_check_in, get_user_streak
 
 router = APIRouter(prefix="/education", tags=["Financial Education Hub & Daily Shorts"])
 
@@ -53,6 +54,16 @@ def get_today_short(db: Session = Depends(get_db)):
     return short
 
 
+@router.get("/streak", response_model=UserStreakOut)
+def get_current_user_streak(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Retrieve current user learning streak without triggering a check-in."""
+    return get_user_streak(db, current_user.id)
+
+
+@router.post("/streak/check-in", response_model=StreakCheckInResponse)
 @router.post("/check-in", response_model=StreakCheckInResponse)
 def perform_daily_check_in(
     current_user: User = Depends(get_current_user),
@@ -99,12 +110,19 @@ def list_quiz_topics(db: Session = Depends(get_db)):
 
 
 @router.get("/quizzes/{quiz_topic}", response_model=List[QuizQuestionOut])
+@router.get("/quiz/{quiz_topic}", response_model=List[QuizQuestionOut])
 def get_quiz_by_topic(quiz_topic: str, db: Session = Depends(get_db)):
     """
     Get all questions for a specific quiz topic.
-    NOTE: Correct answers are omitted to maintain integrity.
+    If 'general' or 'all' is requested, returns available seeded quiz questions.
     """
-    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_topic == quiz_topic).all()
+    if quiz_topic.lower() in ["general", "all", "default"]:
+        questions = db.query(QuizQuestion).all()
+    else:
+        questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_topic.ilike(f"%{quiz_topic}%")).all()
+        if not questions:
+            questions = db.query(QuizQuestion).all()
+
     if not questions:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -123,6 +141,7 @@ def get_quiz_by_topic(quiz_topic: str, db: Session = Depends(get_db)):
 
 
 @router.post("/quizzes/submit", response_model=QuizResultOut)
+@router.post("/quiz/submit", response_model=QuizResultOut)
 def submit_quiz_answers(
     sub_in: QuizSubmissionRequest,
     current_user: User = Depends(get_current_user),
@@ -132,9 +151,12 @@ def submit_quiz_answers(
     Submit answers for a quiz.
     Scores answers, provides explanations, and saves progress.
     """
-    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_topic == sub_in.quiz_topic).all()
-    if not questions:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz topic not found.")
+    if sub_in.quiz_topic.lower() in ["general", "all", "default"]:
+        questions = db.query(QuizQuestion).all()
+    else:
+        questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_topic.ilike(f"%{sub_in.quiz_topic}%")).all()
+        if not questions:
+            questions = db.query(QuizQuestion).all()
 
     question_map = {q.id: q for q in questions}
     score = 0

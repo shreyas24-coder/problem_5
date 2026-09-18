@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from enum import Enum
 import datetime
 from pydantic import BaseModel, Field, ConfigDict
@@ -36,13 +36,13 @@ class BudgetAlertOut(BaseModel):
 
 
 class BudgetOut(BudgetBase):
-    id: int
-    user_id: int
+    id: Union[int, str]
+    user_id: Union[int, str]
     spent_amount: float = 0.0
     remaining_amount: float = 0.0
     percentage: float = 0.0
     status: BudgetStatusEnum = BudgetStatusEnum.NORMAL
     alert_message: str = ""
-    created_at: datetime.datetime
+    created_at: Optional[datetime.datetime] = None
 
     model_config = ConfigDict(from_attributes=True)

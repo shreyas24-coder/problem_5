@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from enum import Enum
 import datetime
 from pydantic import BaseModel, Field, ConfigDict
@@ -37,7 +37,7 @@ class GoalTransferRequest(BaseModel):
 
 class GoalTransferResponse(BaseModel):
     message: str
-    goal_id: int
+    goal_id: Union[int, str]
     transferred_amount: float
     new_goal_balance: float
     general_available_savings: float
@@ -45,13 +45,13 @@ class GoalTransferResponse(BaseModel):
 
 
 class GoalOut(GoalBase):
-    id: int
-    user_id: int
+    id: Union[int, str]
+    user_id: Union[int, str]
     current_amount: float
     status: GoalStatusEnum
     progress_percentage: float = 0.0
     remaining_amount: float = 0.0
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
 
     model_config = ConfigDict(from_attributes=True)

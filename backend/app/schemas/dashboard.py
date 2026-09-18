@@ -22,8 +22,9 @@ class MonthlyTrendPoint(BaseModel):
 class DashboardSummaryOut(BaseModel):
     total_income: float
     total_expenses: float
-    net_balance: float
-    general_available_savings: float
+    total_goal_deposits: float          # Total ever locked into goals (Model A accounting)
+    net_balance: float                  # True liquid available balance (income - expenses - goal deposits + withdrawals)
+    general_available_savings: float    # Equals net_balance in Model A
     locked_goal_savings: float
     expected_monthly_savings: float
     actual_current_month_savings: float
@@ -34,3 +35,4 @@ class DashboardSummaryOut(BaseModel):
     recent_transactions: List[TransactionOut]
     category_spending: List[CategorySpending]
     monthly_trend: List[MonthlyTrendPoint]
+

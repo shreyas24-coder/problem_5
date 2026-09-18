@@ -21,6 +21,12 @@ class StreakCheckInResponse(BaseModel):
     last_check_in: Optional[datetime.date] = None
 
 
+class UserStreakOut(BaseModel):
+    current_streak: int
+    longest_streak: int
+    last_check_in: Optional[datetime.date] = None
+
+
 class ArticleOut(BaseModel):
     id: int
     title: str

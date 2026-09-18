@@ -46,11 +46,38 @@ def create_goal(
     db: Session = Depends(get_db),
 ):
     """
-    Create a new Personal Financial Goal or Specific Purchase Lockbox.
-    Example: Saving ₹90,000 for a MacBook Air.
+    Create a new Personal Financial Goal in Supabase or local test DB.
     """
+    is_supabase_user = isinstance(current_user.id, str) and len(str(current_user.id)) > 15
+
+    if is_supabase_user:
+        from app.services.supabase_service import SupabaseService
+        supa_goal = SupabaseService.create_goal(
+            user_id=str(current_user.id),
+            title=goal_in.title,
+            target_amount=goal_in.target_amount,
+            goal_type=goal_in.category
+        )
+        return GoalOut(
+            id=str(supa_goal["id"]),
+            user_id=str(supa_goal["user_id"]),
+            title=supa_goal["title"],
+            description=goal_in.description or "",
+            category=goal_in.category or "Specific Purchase",
+            target_amount=float(supa_goal["target_amount"]),
+            current_amount=float(supa_goal.get("current_amount", 0.0)),
+            target_date=goal_in.target_date,
+            status=GoalStatusEnum.IN_PROGRESS,
+            progress_percentage=0.0,
+            remaining_amount=float(supa_goal["target_amount"]),
+            created_at=None,
+            updated_at=None,
+        )
+
+    # Local DB for non-Supabase test users
+    uid_int = int(current_user.id)
     goal = FinancialGoal(
-        user_id=current_user.id,
+        user_id=uid_int,
         title=goal_in.title,
         description=goal_in.description,
         category=goal_in.category or "Specific Purchase",
@@ -70,7 +97,37 @@ def list_goals(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all user goals with calculated progress and remaining amounts."""
+    """List all user goals from Supabase with calculated progress."""
+    is_supabase_user = isinstance(current_user.id, str) and len(str(current_user.id)) > 15
+
+    if is_supabase_user:
+        from app.services.supabase_service import SupabaseService
+        supa_goals = SupabaseService.get_goals(str(current_user.id))
+        out_list = []
+        for g in supa_goals:
+            cur = float(g.get("current_amount", 0.0))
+            tgt = float(g.get("target_amount", 1.0))
+            pct = (cur / tgt * 100.0) if tgt > 0 else 0.0
+            rem = max(0.0, tgt - cur)
+            out_list.append(
+                GoalOut(
+                    id=str(g["id"]),
+                    user_id=str(g["user_id"]),
+                    title=g["title"],
+                    description="",
+                    category="Specific Purchase",
+                    target_amount=tgt,
+                    current_amount=cur,
+                    target_date=None,
+                    status=GoalStatusEnum.COMPLETED if cur >= tgt else GoalStatusEnum.IN_PROGRESS,
+                    progress_percentage=round(min(100.0, pct), 1),
+                    remaining_amount=round(rem, 2),
+                    created_at=None,
+                    updated_at=None,
+                )
+            )
+        return out_list
+
     goals = (
         db.query(FinancialGoal)
         .filter(FinancialGoal.user_id == current_user.id)
@@ -82,11 +139,38 @@ def list_goals(
 
 @router.get("/{goal_id}", response_model=GoalOut)
 def get_goal(
-    goal_id: int,
+    goal_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get single goal details."""
+    """Get single goal details from Supabase or local DB."""
+    is_supabase_user = isinstance(current_user.id, str) and len(str(current_user.id)) > 15
+
+    if is_supabase_user:
+        from app.services.supabase_service import SupabaseService
+        supa_goals = SupabaseService.get_goals(str(current_user.id))
+        for g in supa_goals:
+            if str(g["id"]) == str(goal_id):
+                cur = float(g.get("current_amount", 0.0))
+                tgt = float(g.get("target_amount", 1.0))
+                pct = (cur / tgt * 100.0) if tgt > 0 else 0.0
+                return GoalOut(
+                    id=str(g["id"]),
+                    user_id=str(g["user_id"]),
+                    title=g["title"],
+                    description="",
+                    category="Specific Purchase",
+                    target_amount=tgt,
+                    current_amount=cur,
+                    target_date=None,
+                    status=GoalStatusEnum.COMPLETED if cur >= tgt else GoalStatusEnum.IN_PROGRESS,
+                    progress_percentage=round(min(100.0, pct), 1),
+                    remaining_amount=round(max(0.0, tgt - cur), 2),
+                    created_at=None,
+                    updated_at=None,
+                )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financial goal not found.")
+
     goal = (
         db.query(FinancialGoal)
         .filter(FinancialGoal.id == goal_id, FinancialGoal.user_id == current_user.id)
@@ -99,7 +183,7 @@ def get_goal(
 
 @router.put("/{goal_id}", response_model=GoalOut)
 def update_goal(
-    goal_id: int,
+    goal_id: str,
     updates: GoalUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -133,63 +217,120 @@ def update_goal(
 
 @router.delete("/{goal_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_goal(
-    goal_id: int,
+    goal_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Delete a goal. (Any locked amount is naturally unreserved back to general savings)."""
+    """Delete a goal from Supabase and local DB."""
+    is_supabase_user = isinstance(current_user.id, str) and len(str(current_user.id)) > 15
+
+    if is_supabase_user:
+        from app.services.supabase_service import SupabaseService
+        SupabaseService.delete_goal(str(current_user.id), str(goal_id))
+        return None
+
+    gid_int = int(goal_id)
     goal = (
         db.query(FinancialGoal)
-        .filter(FinancialGoal.id == goal_id, FinancialGoal.user_id == current_user.id)
+        .filter(FinancialGoal.id == gid_int, FinancialGoal.user_id == current_user.id)
         .first()
     )
-    if not goal:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financial goal not found.")
-
-    db.delete(goal)
-    db.commit()
+    if goal:
+        db.delete(goal)
+        db.commit()
     return None
 
 
 @router.post("/{goal_id}/deposit", response_model=GoalTransferResponse)
 def transfer_deposit(
-    goal_id: int,
+    goal_id: str,
     req: GoalTransferRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
     THE WALLET-TRANSFER MECHANIC:
-    Allocates funds from General Available Savings into this specific purchase lockbox.
-    Deducts from available unallocated savings and locks funds inside the goal.
+    Allocates funds from General Available Savings into this specific purchase lockbox in Supabase.
     """
-    goal, new_avail_savings = deposit_to_goal(db, current_user, goal_id, req.amount)
-    return GoalTransferResponse(
-        message=f"Successfully allocated ₹{req.amount:.2f} to '{goal.title}'.",
-        goal_id=goal.id,
-        transferred_amount=req.amount,
-        new_goal_balance=goal.current_amount,
-        general_available_savings=new_avail_savings,
-        goal_status=GoalStatusEnum(goal.status),
-    )
+    is_supabase_user = isinstance(current_user.id, str) and len(str(current_user.id)) > 15
+
+    if is_supabase_user:
+        try:
+            from app.services.supabase_service import SupabaseService
+            updated_goal = SupabaseService.deposit_to_goal(str(current_user.id), str(goal_id), req.amount)
+            summary = SupabaseService.get_dashboard_summary(str(current_user.id))
+            cur = float(updated_goal.get("current_amount", 0.0))
+            tgt = float(updated_goal.get("target_amount", 1.0))
+            st = GoalStatusEnum.COMPLETED if cur >= tgt else GoalStatusEnum.IN_PROGRESS
+            return GoalTransferResponse(
+                message=f"Successfully allocated ₹{req.amount:.2f} to '{updated_goal.get('title', 'Goal')}'.",
+                goal_id=str(goal_id),
+                transferred_amount=req.amount,
+                new_goal_balance=cur,
+                general_available_savings=summary["general_available_savings"],
+                goal_status=st,
+            )
+        except ValueError as ve:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+
+    # Local SQLite for test users
+    try:
+        gid_int = int(goal_id)
+        goal, new_avail_savings = deposit_to_goal(db, current_user, gid_int, req.amount)
+        return GoalTransferResponse(
+            message=f"Successfully allocated ₹{req.amount:.2f} to '{goal.title}'.",
+            goal_id=goal.id,
+            transferred_amount=req.amount,
+            new_goal_balance=goal.current_amount,
+            general_available_savings=new_avail_savings,
+            goal_status=GoalStatusEnum(goal.status),
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
 
 
 @router.post("/{goal_id}/withdraw", response_model=GoalTransferResponse)
 def transfer_withdraw(
-    goal_id: int,
+    goal_id: str,
     req: GoalTransferRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Unlocks funds from this purchase goal back into General Available Savings.
+    Unlocks funds from this purchase goal back into General Available Savings in Supabase.
     """
-    goal, new_avail_savings = withdraw_from_goal(db, current_user, goal_id, req.amount)
-    return GoalTransferResponse(
-        message=f"Successfully unlocked ₹{req.amount:.2f} from '{goal.title}' back to General Savings.",
-        goal_id=goal.id,
-        transferred_amount=req.amount,
-        new_goal_balance=goal.current_amount,
-        general_available_savings=new_avail_savings,
-        goal_status=GoalStatusEnum(goal.status),
-    )
+    is_supabase_user = isinstance(current_user.id, str) and len(str(current_user.id)) > 15
+
+    if is_supabase_user:
+        try:
+            from app.services.supabase_service import SupabaseService
+            updated_goal = SupabaseService.withdraw_from_goal(str(current_user.id), str(goal_id), req.amount)
+            summary = SupabaseService.get_dashboard_summary(str(current_user.id))
+            cur = float(updated_goal.get("current_amount", 0.0))
+            tgt = float(updated_goal.get("target_amount", 1.0))
+            st = GoalStatusEnum.COMPLETED if cur >= tgt else GoalStatusEnum.IN_PROGRESS
+            return GoalTransferResponse(
+                message=f"Successfully unlocked ₹{req.amount:.2f} from '{updated_goal.get('title', 'Goal')}' back to General Savings.",
+                goal_id=str(goal_id),
+                transferred_amount=req.amount,
+                new_goal_balance=cur,
+                general_available_savings=summary["general_available_savings"],
+                goal_status=st,
+            )
+        except ValueError as ve:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+
+    # Local SQLite for test users
+    try:
+        gid_int = int(goal_id)
+        goal, new_avail_savings = withdraw_from_goal(db, current_user, gid_int, req.amount)
+        return GoalTransferResponse(
+            message=f"Successfully unlocked ₹{req.amount:.2f} from '{goal.title}' back to General Savings.",
+            goal_id=goal.id,
+            transferred_amount=req.amount,
+            new_goal_balance=goal.current_amount,
+            general_available_savings=new_avail_savings,
+            goal_status=GoalStatusEnum(goal.status),
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
