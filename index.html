@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kavach — Multi-Page Money Copilot</title>
+  <title>Kavach — Money Copilot for Digital India</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,7 +35,7 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Lightweight Icons
+    // SVG Icons
     const IconShield = ({ className = "w-5 h-5" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -82,11 +82,29 @@
       </svg>
     );
 
-    const IconUploadCloud = ({ className = "w-4 h-4" }) => (
+    const IconHome = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    );
+
+    const IconSparkles = ({ className = "w-4 h-4" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
-        <path d="M12 12v9"/>
-        <path d="m16 16-4-4-4 4"/>
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+      </svg>
+    );
+
+    const IconArrowRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    );
+
+    const IconChevronRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6"/>
       </svg>
     );
 
@@ -104,6 +122,21 @@
       </svg>
     );
 
+    const IconX = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    );
+
+    const IconXCircle = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="m15 9-6 6"/>
+        <path d="m9 9 6 6"/>
+      </svg>
+    );
+
     const IconLaptop = ({ className = "w-6 h-6" }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>
@@ -116,27 +149,6 @@
         <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
         <path d="m7 22-4-4 4-4"/>
         <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
-      </svg>
-    );
-
-    const IconSparkles = ({ className = "w-3.5 h-3.5" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-      </svg>
-    );
-
-    const IconXCircle = ({ className = "w-4 h-4" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="m15 9-6 6"/>
-        <path d="m9 9 6 6"/>
-      </svg>
-    );
-
-    const IconTrendingUp = ({ className = "w-4 h-4" }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-        <polyline points="16 7 22 7 22 13"/>
       </svg>
     );
 
@@ -170,12 +182,604 @@
       </svg>
     );
 
-    // ==========================================
-    // PAGE 1: SHIELD (Hero Scam Checker)
-    // ==========================================
+    const IconUploadCloud = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+        <path d="M12 12v9"/>
+        <path d="m16 16-4-4-4 4"/>
+      </svg>
+    );
+
+    const IconSmartphone = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+        <path d="M12 18h.01"/>
+      </svg>
+    );
+
+    const IconGraduationCap = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
+        <path d="M22 10v6"/>
+        <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+      </svg>
+    );
+
+    const IconTrendingUp = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+        <polyline points="16 7 22 7 22 13"/>
+      </svg>
+    );
+
+    // ====================================================
+    // SIGN UP MODAL COMPONENT (4-Step Onboarding Process)
+    // ====================================================
+    function SignUpModal({ isOpen, onClose, onComplete, lang }) {
+      const [step, setStep] = useState(1);
+      const [name, setName] = useState('');
+      const [phone, setPhone] = useState('');
+      const [otp, setOtp] = useState(['', '', '', '']);
+      const [selectedPersona, setSelectedPersona] = useState('student');
+      const [errorMsg, setErrorMsg] = useState('');
+      const [isVerifying, setIsVerifying] = useState(false);
+
+      if (!isOpen) return null;
+
+      const t = {
+        en: {
+          title: "Join Kavach",
+          subtitle: "Set up your free UPI protection copilot in under 60 seconds.",
+          step1Sub: "Enter your name & primary UPI mobile number.",
+          nameLabel: "Your Full Name",
+          namePlaceholder: "e.g. Shreyas Patel",
+          phoneLabel: "Mobile Number (Linked with UPI)",
+          phonePlaceholder: "98765 43210",
+          sendOtpBtn: "Send 4-Digit OTP",
+          step2Title: "Verify Your Number",
+          step2Sub: `Code sent to +91 ${phone || '9876543210'}`,
+          autoFillBtn: "Auto-Fill 2426",
+          verifyBtn: "Verify & Continue",
+          step3Title: "How do you earn & spend?",
+          step3Sub: "Kavach personalizes your payout cycles based on your lifestyle.",
+          personaStudent: "College Student / Intern",
+          personaStudentDesc: "Stipends, monthly allowances, college projects",
+          personaFreelance: "Freelancer / Creator",
+          personaFreelanceDesc: "Gig payouts, client invoices, Razorpay payouts",
+          personaJunior: "Early Career Professional",
+          personaJuniorDesc: "First salary, rent splits, weekend social spends",
+          completeBtn: "Activate Protection",
+          step4Title: "Protection Activated!",
+          step4Sub: "Kavach Copilot is now active. Your UPI intents are safeguarded before PIN entry.",
+          exploreBtn: "Go to Scam Shield"
+        },
+        hi: {
+          title: "कवच से जुड़ें",
+          subtitle: "60 सेकंड के भीतर अपना निःशुल्क UPI सुरक्षा साथी शुरू करें।",
+          step1Sub: "अपना नाम और प्राथमिक UPI मोबाइल नंबर दर्ज करें।",
+          nameLabel: "आपका पूरा नाम",
+          namePlaceholder: "उदा. श्रेयस पटेल",
+          phoneLabel: "मोबाइल नंबर (UPI से जुड़ा)",
+          phonePlaceholder: "98765 43210",
+          sendOtpBtn: "4-अंकीय OTP भेजें",
+          step2Title: "नंबर सत्यापित करें",
+          step2Sub: `कोड +91 ${phone || '9876543210'} पर भेजा गया`,
+          autoFillBtn: "ऑटो-फिल 2426",
+          verifyBtn: "सत्यापित करें और आगे बढ़ें",
+          step3Title: "आपकी आय और खर्च का प्रकार",
+          step3Sub: "कवच आपके पेआउट साइकल्स को आपकी जीवनशैली के अनुसार अनुकूलित करता है।",
+          personaStudent: "कॉलेज छात्र / इंटर्न",
+          personaStudentDesc: "स्टाइपेंड, पॉकेट मनी, कॉलेज प्रोजेक्ट्स",
+          personaFreelance: "फ्रीलांसर / कंटेंट क्रिएटर",
+          personaFreelanceDesc: "गिग पेमेंट्स, अनियमित इनवॉइस, विभिन्न क्लाइंट्स",
+          personaJunior: "नवागंतुक कर्मचारी (Early Career)",
+          personaJuniorDesc: "मासिक वेतन, किराया विभाजन, सप्ताहांत के खर्च",
+          completeBtn: "सुरक्षा सक्रिय करें",
+          step4Title: "सुरक्षा सक्रिय हो चुकी है!",
+          step4Sub: "कवच सुरक्षा अब सक्रिय है। आपके सभी UPI भुगतान पिन डालने से पहले जाँचे जाएंगे।",
+          exploreBtn: "स्कैम शील्ड खोलें"
+        }
+      };
+
+      const text = t[lang] || t.en;
+
+      const handleStep1Submit = (e) => {
+        e.preventDefault();
+        if (!name.trim()) {
+          setErrorMsg(lang === 'en' ? 'Please enter your name' : 'कृपया अपना नाम दर्ज करें');
+          return;
+        }
+        if (phone.replace(/\D/g, '').length < 10) {
+          setErrorMsg(lang === 'en' ? 'Enter a valid 10-digit number' : 'वैध 10-अंकीय नंबर दर्ज करें');
+          return;
+        }
+        setErrorMsg('');
+        setStep(2);
+      };
+
+      const handleAutoFillOtp = () => {
+        setOtp(['2', '4', '2', '6']);
+        setErrorMsg('');
+      };
+
+      const handleStep2Submit = (e) => {
+        e.preventDefault();
+        if (otp.join('').length < 4) {
+          setErrorMsg(lang === 'en' ? 'Please enter 4 digits' : 'कृपया 4 अंक दर्ज करें');
+          return;
+        }
+        setErrorMsg('');
+        setIsVerifying(true);
+        setTimeout(() => {
+          setIsVerifying(false);
+          setStep(3);
+        }, 700);
+      };
+
+      const handleStep3Submit = () => {
+        setStep(4);
+        if (onComplete) {
+          onComplete({
+            name: name || 'Shreyas Patel',
+            phone: phone || '9876543210',
+            persona: selectedPersona
+          });
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-stone-300 shadow-2xl overflow-hidden p-6 sm:p-7 text-stone-900">
+            
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+            >
+              <IconX className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-1.5 mb-5">
+              {[1, 2, 3, 4].map((s) => (
+                <div
+                  key={s}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    s === step
+                      ? 'w-8 bg-stone-900'
+                      : s < step
+                      ? 'w-4 bg-emerald-500'
+                      : 'w-4 bg-stone-200'
+                  }`}
+                />
+              ))}
+              <span className="text-[11px] font-bold text-stone-400 ml-auto uppercase tracking-wider">
+                Step {step} of 4
+              </span>
+            </div>
+
+            {step === 1 && (
+              <form onSubmit={handleStep1Submit} className="space-y-4 text-left">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-3">
+                    <IconSmartphone className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-2xl font-black text-stone-900">{text.title}</h2>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1">{text.step1Sub}</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">{text.nameLabel}</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={text.namePlaceholder}
+                    className="w-full min-h-[50px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-base text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">{text.phoneLabel}</label>
+                  <div className="flex items-center">
+                    <span className="min-h-[50px] px-3.5 bg-stone-100 border border-r-0 border-stone-300 rounded-l-xl flex items-center text-sm font-bold text-stone-600">+91</span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder={text.phonePlaceholder}
+                      className="flex-1 min-h-[50px] bg-stone-50 border border-stone-300 rounded-r-xl px-4 text-base text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {errorMsg && <p className="text-rose-600 text-xs font-bold">{errorMsg}</p>}
+
+                <button
+                  type="submit"
+                  className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <span>{text.sendOtpBtn}</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {step === 2 && (
+              <form onSubmit={handleStep2Submit} className="space-y-5 text-left">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3">
+                    <IconCheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-2xl font-black text-stone-900">{text.step2Title}</h2>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1">{text.step2Sub}</p>
+                </div>
+
+                <div className="flex justify-between gap-2.5 max-w-[260px] mx-auto">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`otp-${idx}`}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const newOtp = [...otp];
+                        newOtp[idx] = val;
+                        setOtp(newOtp);
+                        if (val && idx < 3) document.getElementById(`otp-${idx + 1}`)?.focus();
+                      }}
+                      className="w-14 h-14 text-center text-2xl font-black bg-stone-50 border-2 border-stone-300 rounded-2xl focus:bg-white focus:border-stone-900 outline-none"
+                    />
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleAutoFillOtp}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-xs font-bold text-stone-800 border border-stone-300 cursor-pointer"
+                  >
+                    <span>⚡ {text.autoFillBtn}</span>
+                  </button>
+                </div>
+
+                {errorMsg && <p className="text-rose-600 text-xs font-bold text-center">{errorMsg}</p>}
+
+                <button
+                  type="submit"
+                  disabled={isVerifying}
+                  className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <span>{isVerifying ? "Verifying..." : text.verifyBtn}</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-4 text-left">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3">
+                    <IconSparkles className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-2xl font-black text-stone-900">{text.step3Title}</h2>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1">{text.step3Sub}</p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { id: 'student', title: text.personaStudent, desc: text.personaStudentDesc, icon: IconGraduationCap },
+                    { id: 'freelance', title: text.personaFreelance, desc: text.personaFreelanceDesc, icon: IconLaptop },
+                    { id: 'junior', title: text.personaJunior, desc: text.personaJuniorDesc, icon: IconWallet }
+                  ].map((p) => {
+                    const Icon = p.icon;
+                    const isSelected = selectedPersona === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPersona(p.id)}
+                        className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3.5 cursor-pointer ${
+                          isSelected ? 'border-stone-900 bg-amber-50/50 ring-2 ring-stone-900/10' : 'border-stone-200 bg-stone-50'
+                        }`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          isSelected ? 'bg-stone-900 text-amber-400' : 'bg-stone-200 text-stone-600'
+                        }`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-stone-900">{p.title}</h4>
+                          <p className="text-xs text-stone-500 leading-snug">{p.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleStep3Submit}
+                  className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md mt-2"
+                >
+                  <span>{text.completeBtn}</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-5 text-center py-2 animate-fade-in">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-md">
+                  <IconShield className="w-8 h-8" />
+                </div>
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase mb-2">Active Protection</span>
+                  <h2 className="text-2xl sm:text-3xl font-black text-stone-900">{text.step4Title}</h2>
+                  <p className="text-xs sm:text-sm text-stone-600 max-w-xs mx-auto mt-2 leading-relaxed">{text.step4Sub}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-left text-xs text-stone-700 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-stone-500">Registered Name:</span>
+                    <span className="font-bold text-stone-900">{name || 'Shreyas Patel'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-stone-500">UPI Number:</span>
+                    <span className="font-bold text-stone-900">+91 {phone || '9876543210'}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <span>{text.exploreBtn}</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    // ====================================================
+    // LANDING PAGE (Home / Value Proposition)
+    // ====================================================
+    function LandingPage({ lang, onNavigate, onOpenSignUp }) {
+      const t = {
+        en: {
+          badge: "India's #1 Digital Money Copilot",
+          heroHeading: "Save. Spend. Stay safe.",
+          heroSubheading: "A money copilot built for India’s first digital-payment generation. Pre-transaction fraud checks, irregular stipend budgeting, and ₹99 leak detection.",
+          ctaPrimary: "Sign Up for Free",
+          ctaSecondary: "Try Scam Shield Live",
+          statUsers: "48,000+",
+          statUsersLabel: "Digital Indians Protected",
+          statChecked: "₹18.4 Cr",
+          statCheckedLabel: "Transactions Scanned",
+          statLeaks: "3.2x",
+          statLeaksLabel: "Faster Savings Goals",
+          pillarsHeading: "Everything you need to master your digital money",
+          shieldTitle: "SHIELD",
+          shieldSubtitle: "Pre-transaction scam checks in under 3 seconds",
+          shieldDesc: "Heuristic engine catches deceptive UPI collect requests, fake cashback QR codes, and phishing links before PIN entry.",
+          spendTitle: "SPEND",
+          spendSubtitle: "Tracks your irregular income and stipends",
+          spendDesc: "Forget standard 30-day calendar salaries. Budget your money from the exact day your stipend or freelance gig lands.",
+          saveTitle: "SAVE",
+          saveSubtitle: "Finds forgotten ₹99 AutoPay mandates",
+          saveDesc: "Audit passive subscription leaks from expired trials and turn them into goals like your next laptop.",
+          footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
+          readyHeading: "Ready to take control of your digital money?",
+          readySub: "Join thousands of students and young professionals who never worry before tapping UPI."
+        },
+        hi: {
+          badge: "भारत का पहला डिजिटल मनी को-पायलट",
+          heroHeading: "बचत। खर्च। पूर्ण सुरक्षा।",
+          heroSubheading: "भारत की पहली डिजिटल-पेमेंट पीढ़ी के लिए विशेष रूप से निर्मित। लेन-देन से पहले फ्रॉड जांच, अनियमित स्टाइपेंड बजटिंग और ₹99 ऑटो-पे लीक्स की रिकवरी।",
+          ctaPrimary: "निःशुल्क साइन अप करें",
+          ctaSecondary: "स्कैम शील्ड डेमो देखें",
+          statUsers: "48,000+",
+          statUsersLabel: "सुरक्षित भारतीय युवा",
+          statChecked: "₹18.4 करोड़",
+          statCheckedLabel: "स्कैन किए गए भुगतान",
+          statLeaks: "3.2 गुना",
+          statLeaksLabel: "तेज़ बचत गति",
+          pillarsHeading: "आपके डिजिटल पैसे को सुरक्षित और संगठित रखने के तीन स्तंभ",
+          shieldTitle: "शील्ड (SHIELD)",
+          shieldSubtitle: "3 सेकंड के भीतर प्री-ट्रांजैक्शन स्कैम डिटेक्शन",
+          shieldDesc: "UPI पिन दर्ज करने से पहले फर्जी कलेक्ट रिक्वेस्ट और संदिग्ध QR कोड को तुरंत पहचान कर रोकता है।",
+          spendTitle: "स्पेंड (SPEND)",
+          spendSubtitle: "अनियमित आय और स्टाइपेंड का सटीक हिसाब",
+          spendDesc: "महीने की 1 तारीख के पारंपरिक नियम छोड़ें। जब स्टाइपेंड या फ्रीलांस पेमेंट आए, तब से खर्च प्लान करें।",
+          saveTitle: "सेव (SAVE)",
+          saveSubtitle: "भूले हुए ₹99 ऑटो-पे मैन्डेट्स की रिकवरी",
+          saveDesc: "ट्रायल समाप्त होने के बाद कटने वाले सब्सक्रिप्शन रद्द करें और अपने नए लैपटॉप या फोन के लिए बचत करें।",
+          footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
+          readyHeading: "क्या आप अपने डिजिटल पैसे पर नियंत्रण पाने के लिए तैयार हैं?",
+          readySub: "हजारों युवा भारतीयों से जुड़ें जो बिना किसी चिंता के सुरक्षित UPI भुगतान करते हैं।"
+        }
+      };
+
+      const text = t[lang] || t.en;
+
+      return (
+        <div className="flex flex-col animate-fade-in text-left">
+          
+          {/* Hero */}
+          <section className="text-center flex flex-col items-center max-w-3xl mx-auto pt-2 sm:pt-6 mb-16 sm:mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 border border-amber-300 text-stone-800 text-xs sm:text-sm font-semibold mb-6 shadow-sm">
+              <IconSparkles className="w-4 h-4 text-amber-600" />
+              <span>{text.badge}</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-6xl font-black text-stone-900 tracking-tight leading-[1.1] mb-5">
+              {text.heroHeading}
+            </h1>
+
+            <p className="text-base sm:text-xl text-stone-600 font-medium max-w-2xl mx-auto leading-relaxed mb-8">
+              {text.heroSubheading}
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-md mx-auto mb-10">
+              <button
+                type="button"
+                onClick={onOpenSignUp}
+                className="w-full sm:w-auto min-h-[52px] px-7 py-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-stone-900/15 cursor-pointer active:scale-[0.98]"
+              >
+                <span>{text.ctaPrimary}</span>
+                <IconArrowRight className="w-4 h-4 text-amber-400" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('/shield')}
+                className="w-full sm:w-auto min-h-[52px] px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-base border-2 border-stone-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <IconShield className="w-4 h-4 text-stone-700" />
+                <span>{text.ctaSecondary}</span>
+              </button>
+            </div>
+
+            <div className="w-full grid grid-cols-3 gap-2 sm:gap-4 p-4 rounded-3xl bg-white border-2 border-stone-200 shadow-sm text-center">
+              <div className="p-2">
+                <span className="text-xl sm:text-2xl font-black text-stone-900 block">{text.statUsers}</span>
+                <span className="text-[11px] sm:text-xs text-stone-500 font-medium">{text.statUsersLabel}</span>
+              </div>
+              <div className="p-2 border-x border-stone-200">
+                <span className="text-xl sm:text-2xl font-black text-emerald-700 block">{text.statChecked}</span>
+                <span className="text-[11px] sm:text-xs text-stone-500 font-medium">{text.statCheckedLabel}</span>
+              </div>
+              <div className="p-2">
+                <span className="text-xl sm:text-2xl font-black text-amber-700 block">{text.statLeaks}</span>
+                <span className="text-[11px] sm:text-xs text-stone-500 font-medium">{text.statLeaksLabel}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Pillars */}
+          <section className="mb-16">
+            <div className="text-center max-w-xl mx-auto mb-10">
+              <h2 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+                {text.pillarsHeading}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <button
+                type="button"
+                onClick={() => onNavigate('/shield')}
+                className="text-left group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer"
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <IconShield className="w-6 h-6" />
+                  </div>
+                  <span className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider mb-2">
+                    {text.shieldTitle}
+                  </span>
+                  <h3 className="text-lg font-bold text-stone-900 mb-1.5">{text.shieldSubtitle}</h3>
+                  <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.shieldDesc}</p>
+                </div>
+                <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
+                  <span>Try Scam Scanner</span>
+                  <IconChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('/spend')}
+                className="text-left group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer"
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <IconWallet className="w-6 h-6" />
+                  </div>
+                  <span className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider mb-2">
+                    {text.spendTitle}
+                  </span>
+                  <h3 className="text-lg font-bold text-stone-900 mb-1.5">{text.spendSubtitle}</h3>
+                  <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.spendDesc}</p>
+                </div>
+                <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
+                  <span>View Payout Cycles</span>
+                  <IconChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('/save')}
+                className="text-left group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer"
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <IconCoins className="w-6 h-6" />
+                  </div>
+                  <span className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider mb-2">
+                    {text.saveTitle}
+                  </span>
+                  <h3 className="text-lg font-bold text-stone-900 mb-1.5">{text.saveSubtitle}</h3>
+                  <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.saveDesc}</p>
+                </div>
+                <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
+                  <span>Audit AutoPay Mandates</span>
+                  <IconChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+            </div>
+          </section>
+
+          {/* Banner */}
+          <section className="bg-stone-900 text-white rounded-3xl p-7 sm:p-9 text-center mb-12 shadow-xl">
+            <div className="max-w-md mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-stone-900 flex items-center justify-center mx-auto mb-4">
+                <IconSparkles className="w-6 h-6" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-black mb-2">{text.readyHeading}</h3>
+              <p className="text-stone-300 text-xs sm:text-sm font-medium mb-6">{text.readySub}</p>
+              <button
+                type="button"
+                onClick={onOpenSignUp}
+                className="w-full sm:w-auto min-h-[50px] px-8 py-3 rounded-xl bg-white text-stone-900 hover:bg-stone-100 font-black text-base shadow-md cursor-pointer"
+              >
+                {text.ctaPrimary}
+              </button>
+            </div>
+          </section>
+
+          {/* Footer Impact */}
+          <footer className="w-full bg-[#121214] text-white rounded-3xl p-7 text-center border border-stone-800">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-800 text-red-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span className="w-2 h-2 rounded-full bg-red-500"></span>
+              Official UPI Security Notice
+            </div>
+            <p className="text-lg sm:text-xl font-black text-white leading-snug tracking-tight max-w-xl mx-auto mb-4">
+              &ldquo;{text.footerStatText}&rdquo;
+            </p>
+            <div className="text-xs text-stone-400 flex items-center justify-center gap-1.5">
+              <IconLock className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Non-custodial • 100% On-device privacy • Zero UPI PIN access</span>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // ====================================================
+    // SHIELD PAGE
+    // ====================================================
     function ShieldPage({ lang }) {
       const [inputText, setInputText] = useState('');
-      const [scanState, setScanState] = useState('idle'); // 'idle' | 'scanning' | 'danger' | 'safe'
+      const [scanState, setScanState] = useState('idle');
       const [inputError, setInputError] = useState(false);
       const [isDragOver, setIsDragOver] = useState(false);
 
@@ -196,9 +800,7 @@
           dangerBody: "This is a collect request. Approving it takes money from you. Refunds are never collect requests.",
           dangerSubtext: "Someone initiated a request to withdraw ₹4,999 from your bank account under the guise of an instant refund.",
           resetBtn: "Reset & Test Another",
-          demoPrompt: "Try sample fraud prompt:",
-          safeTitle: "No malicious collect request found",
-          safeBody: "This message does not match known fraudulent UPI collect signatures. Always verify the recipient VPA before approving any payment."
+          demoPrompt: "Try sample fraud prompt:"
         },
         hi: {
           badge: "प्री-ट्रांजैक्शन फ्रॉड डिफेंस",
@@ -214,9 +816,7 @@
           dangerBody: "यह एक कलेक्ट रिक्वेस्ट है। इसे मंज़ूर करने पर आपके खाते से पैसे कटेंगे। रिफंड कभी भी कलेक्ट रिक्वेस्ट नहीं होते।",
           dangerSubtext: "रिफंड के नाम पर आपके बैंक खाते से ₹4,999 निकालने का कपटपूर्ण प्रयास किया गया है।",
           resetBtn: "रीसेट करें और नया संदेश जांचें",
-          demoPrompt: "डेमो फ्रॉड संदेश आज़माएं:",
-          safeTitle: "कोई संदिग्ध कलेक्ट रिक्वेस्ट नहीं मिली",
-          safeBody: "यह संदेश ज्ञात वित्तीय धोखाधड़ी से मेल नहीं खाता। फिर भी भुगतान करने से पहले प्राप्तकर्ता का नाम अवश्य जांचें।"
+          demoPrompt: "डेमो फ्रॉड संदेश आज़माएं:"
         }
       };
 
@@ -231,7 +831,6 @@
         setInputError(false);
         setScanState('scanning');
 
-        // Exact 2-second loading animation
         setTimeout(() => {
           if (inputText.trim() === TARGET_SCAM) {
             setScanState('danger');
@@ -239,17 +838,6 @@
             setScanState('safe');
           }
         }, 2000);
-      };
-
-      const handleReset = () => {
-        setInputText('');
-        setScanState('idle');
-        setInputError(false);
-      };
-
-      const handleApplyDemoSample = () => {
-        setInputText(TARGET_SCAM);
-        setInputError(false);
       };
 
       return (
@@ -311,11 +899,7 @@
                     <div className="mt-2 flex items-center justify-between text-xs text-stone-600 px-1">
                       <span>{text.dropSubprompt}</span>
                       {inputText && (
-                        <button
-                          type="button"
-                          onClick={() => setInputText('')}
-                          className="text-stone-700 font-semibold hover:underline"
-                        >
+                        <button type="button" onClick={() => setInputText('')} className="text-stone-700 font-semibold hover:underline">
                           Clear
                         </button>
                       )}
@@ -341,9 +925,8 @@
                   <span className="text-stone-700 font-medium">{text.demoPrompt}</span>
                   <button
                     type="button"
-                    onClick={handleApplyDemoSample}
+                    onClick={() => { setInputText(TARGET_SCAM); setInputError(false); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-900 font-mono text-xs sm:text-sm font-semibold transition-colors cursor-pointer text-left shadow-sm"
-                    title="Click to auto-populate test scam"
                   >
                     <span>&quot;{TARGET_SCAM}&quot;</span>
                     <span className="text-emerald-700 font-sans font-bold">↵ Fill</span>
@@ -360,14 +943,8 @@
                     <IconShield className="w-7 h-7" />
                   </div>
                 </div>
-
-                <h3 className="text-xl sm:text-2xl font-bold text-stone-900 mb-2">
-                  {text.scanningTitle}
-                </h3>
-                <p className="text-stone-500 text-sm sm:text-base max-w-sm">
-                  {text.scanningDesc}
-                </p>
-
+                <h3 className="text-xl sm:text-2xl font-bold text-stone-900 mb-2">{text.scanningTitle}</h3>
+                <p className="text-stone-500 text-sm sm:text-base max-w-sm">{text.scanningDesc}</p>
                 <div className="w-48 h-1.5 bg-stone-100 rounded-full mt-6 overflow-hidden">
                   <div className="h-full bg-stone-900 animate-pulse" />
                 </div>
@@ -382,15 +959,12 @@
                       <IconAlertTriangle className="w-7 h-7" />
                     </div>
                     <div>
-                      <span className="inline-block px-2.5 py-0.5 rounded bg-black/30 text-white text-xs font-black tracking-wider uppercase mb-0.5">
+                      <span className="inline-block px-2.5 py-0.5 rounded bg-black/30 text-white text-xs font-black uppercase mb-0.5">
                         {text.dangerBadge}
                       </span>
-                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                        {text.dangerTitle}
-                      </h2>
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">{text.dangerTitle}</h2>
                     </div>
                   </div>
-
                   <span className="self-start sm:self-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
                     Confidence: 99.8%
                   </span>
@@ -400,9 +974,7 @@
                   <p className="text-lg sm:text-xl font-bold leading-snug text-white">
                     &ldquo;{text.dangerBody}&rdquo;
                   </p>
-                  <p className="text-sm text-red-100 mt-2 font-medium">
-                    {text.dangerSubtext}
-                  </p>
+                  <p className="text-sm text-red-100 mt-2 font-medium">{text.dangerSubtext}</p>
                 </div>
 
                 <div className="mb-6 px-3.5 py-2 rounded-xl bg-black/20 text-xs font-mono text-red-100 truncate">
@@ -417,7 +989,7 @@
 
                   <button
                     type="button"
-                    onClick={handleReset}
+                    onClick={() => { setInputText(''); setScanState('idle'); }}
                     className="min-h-[48px] px-6 py-3 rounded-2xl font-bold text-base bg-white text-red-700 hover:bg-stone-100 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <IconRotateCcw className="w-4 h-4" />
@@ -434,23 +1006,21 @@
                     <IconCheckCircle2 className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-stone-900">{text.safeTitle}</h3>
-                    <p className="text-stone-600 text-sm mt-1 leading-relaxed">{text.safeBody}</p>
+                    <h3 className="text-xl font-bold text-stone-900">No malicious collect request found</h3>
+                    <p className="text-stone-600 text-sm mt-1 leading-relaxed">
+                      This message does not match known fraudulent UPI collect signatures. Always verify the recipient VPA before approving any payment.
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-5 flex flex-col sm:flex-row gap-3 items-center justify-between pt-4 border-t border-stone-200">
-                  <p className="text-xs text-stone-500">
-                    Want to test the fraud scanner? Try: <button type="button" onClick={handleApplyDemoSample} className="text-stone-900 font-bold underline cursor-pointer">&quot;{TARGET_SCAM}&quot;</button>
-                  </p>
-
                   <button
                     type="button"
-                    onClick={handleReset}
+                    onClick={() => { setInputText(''); setScanState('idle'); }}
                     className="min-h-[48px] px-5 py-2.5 rounded-2xl font-semibold text-sm bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
                   >
                     <IconRotateCcw className="w-4 h-4" />
-                    <span>{text.resetBtn}</span>
+                    <span>Reset</span>
                   </button>
                 </div>
               </div>
@@ -460,139 +1030,59 @@
       );
     }
 
-    // ==========================================
-    // PAGE 2: SPEND (Payout Cycles & Cashflow)
-    // ==========================================
+    // ====================================================
+    // SPEND PAGE
+    // ====================================================
     function SpendPage({ lang }) {
       const transactions = [
-        {
-          id: 1,
-          merchant: "Swiggy Food Delivery",
-          category: "Food & Dining",
-          date: "Sep 16, 2026",
-          amount: "-₹249",
-          icon: IconShoppingBag,
-          tag: "UPI Auto-Split"
-        },
-        {
-          id: 2,
-          merchant: "Zepto Quick Commerce",
-          category: "Groceries",
-          date: "Sep 15, 2026",
-          amount: "-₹185",
-          icon: IconShoppingBag,
-          tag: "10-Min Delivery"
-        },
-        {
-          id: 3,
-          merchant: "Metro Transit Smart Card",
-          category: "Commute",
-          date: "Sep 14, 2026",
-          amount: "-₹100",
-          icon: IconTrain,
-          tag: "NCMC Recharge"
-        },
-        {
-          id: 4,
-          merchant: "Chai Point UPI Tap",
-          category: "Snacks",
-          date: "Sep 13, 2026",
-          amount: "-₹40",
-          icon: IconCoffee,
-          tag: "Quick Tap"
-        }
+        { id: 1, merchant: "Swiggy Food Delivery", date: "Sep 16, 2026", amount: "-₹249", icon: IconShoppingBag, tag: "UPI Auto-Split" },
+        { id: 2, merchant: "Zepto Quick Commerce", date: "Sep 15, 2026", amount: "-₹185", icon: IconShoppingBag, tag: "10-Min Delivery" },
+        { id: 3, merchant: "Metro Transit Smart Card", date: "Sep 14, 2026", amount: "-₹100", icon: IconTrain, tag: "NCMC Recharge" },
+        { id: 4, merchant: "Chai Point UPI Tap", date: "Sep 13, 2026", amount: "-₹40", icon: IconCoffee, tag: "Quick Tap" }
       ];
-
-      const t = {
-        en: {
-          badge: "Irregular Income Copilot",
-          headline: "Track Your Cashflow",
-          subheadline: "Built for stipends, creator gigs, and freelance payouts—not outdated 30-day calendar months.",
-          cyclesTitle: "Payout Cycles",
-          cyclesSubtitle: "Smart grouping anchored to when your money actually arrives.",
-          currentCycleLabel: "ACTIVE CYCLE",
-          currentCycleName: "Design Internship Stipend",
-          currentCycleInflow: "₹12,000",
-          creditedOn: "Credited Sep 10 via RazorpayX",
-          cycleLeft: "₹11,426 remaining",
-          safeSpend: "Safe Daily Burn: ₹475/day",
-          daysEstimated: "24 days until next expected payout",
-          recentHeading: "Recent Expenses in this Cycle"
-        },
-        hi: {
-          badge: "अनियमित आय ट्रैकर",
-          headline: "Track Your Cashflow",
-          subheadline: "स्टाइपेंड, फ्रीलांस प्रोजेक्ट्स और पॉकेट मनी के लिए विशेष रूप से निर्मित।",
-          cyclesTitle: "पेआउट साइकल्स (Payout Cycles)",
-          cyclesSubtitle: "महीने की 1 तारीख के बजाय आपके पैसे आने के दिन से खर्च का सटीक हिसाब।",
-          currentCycleLabel: "सक्रिय चक्र",
-          currentCycleName: "इंटर्नशिप स्टाइपेंड साइकिल",
-          currentCycleInflow: "₹12,000",
-          creditedOn: "10 सितंबर को प्राप्त (RazorpayX)",
-          cycleLeft: "₹11,426 शेष",
-          safeSpend: "सुरक्षित दैनिक खर्च: ₹475/दिन",
-          daysEstimated: "अगले स्टाइपेंड में 24 दिन शेष",
-          recentHeading: "इस साइकिल के ताज़ा खर्च"
-        }
-      };
-
-      const text = t[lang] || t.en;
 
       return (
         <div className="flex flex-col animate-fade-in text-left">
           <div className="text-center sm:text-left mb-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 border border-blue-300 text-blue-900 text-xs sm:text-sm font-semibold mb-3">
               <IconSparkles className="w-3.5 h-3.5 text-blue-700" />
-              <span>{text.badge}</span>
+              <span>Irregular Income Copilot</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight leading-tight">
-              {text.headline}
+              Track Your Cashflow
             </h1>
             <p className="text-stone-600 text-sm sm:text-base font-medium mt-1 leading-relaxed">
-              {text.subheadline}
+              Built for stipends, creator gigs, and freelance payouts—not outdated 30-day calendar months.
             </p>
           </div>
 
           <section className="mb-8">
             <div className="mb-3">
-              <h2 className="text-xl font-extrabold text-stone-900">
-                {text.cyclesTitle}
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-500 font-medium">
-                {text.cyclesSubtitle}
-              </p>
+              <h2 className="text-xl font-extrabold text-stone-900">Payout Cycles</h2>
+              <p className="text-xs sm:text-sm text-stone-500 font-medium">Smart grouping anchored to when your money actually arrives.</p>
             </div>
 
             <div className="bg-white rounded-3xl p-6 border-2 border-stone-300 shadow-md">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
                 <div>
-                  <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black tracking-wider uppercase mb-1">
-                    {text.currentCycleLabel}
-                  </span>
-                  <h3 className="text-xl font-bold text-stone-900">
-                    {text.currentCycleName}
-                  </h3>
-                  <p className="text-xs text-stone-500 font-medium mt-0.5">
-                    {text.creditedOn}
-                  </p>
+                  <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black tracking-wider uppercase mb-1">Active Cycle</span>
+                  <h3 className="text-xl font-bold text-stone-900">Design Internship Stipend</h3>
+                  <p className="text-xs text-stone-500 font-medium mt-0.5">Credited Sep 10 via RazorpayX</p>
                 </div>
-
                 <div className="sm:text-right">
                   <span className="text-xs text-stone-400 font-bold uppercase tracking-wider block">Inflow</span>
-                  <span className="text-2xl font-black text-emerald-700">
-                    +{text.currentCycleInflow}
-                  </span>
+                  <span className="text-2xl font-black text-emerald-700">+₹12,000</span>
                 </div>
               </div>
 
               <div className="my-5 grid grid-cols-2 gap-4">
                 <div className="bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
                   <span className="text-xs text-stone-500 font-medium block mb-0.5">Cycle Balance</span>
-                  <span className="text-lg sm:text-xl font-extrabold text-stone-900">{text.cycleLeft}</span>
+                  <span className="text-lg sm:text-xl font-extrabold text-stone-900">₹11,426 remaining</span>
                 </div>
                 <div className="bg-amber-50 p-3.5 rounded-2xl border border-amber-200">
-                  <span className="text-xs text-amber-800 font-medium block mb-0.5">{text.safeSpend}</span>
-                  <span className="text-xs text-amber-700 font-bold block">{text.daysEstimated}</span>
+                  <span className="text-xs text-amber-800 font-medium block mb-0.5">Safe Daily Burn: ₹475/day</span>
+                  <span className="text-xs text-amber-700 font-bold block">24 days until next payout</span>
                 </div>
               </div>
 
@@ -610,9 +1100,7 @@
 
           <section>
             <div className="flex items-center justify-between mb-3.5">
-              <h2 className="text-lg font-bold text-stone-900">
-                {text.recentHeading}
-              </h2>
+              <h2 className="text-lg font-bold text-stone-900">Recent Expenses in this Cycle</h2>
               <span className="text-xs font-semibold text-stone-500">4 Payments</span>
             </div>
 
@@ -620,32 +1108,22 @@
               {transactions.map((tx) => {
                 const Icon = tx.icon;
                 return (
-                  <div
-                    key={tx.id}
-                    className="p-4 flex items-center justify-between gap-3 hover:bg-stone-50/70 transition-colors"
-                  >
+                  <div key={tx.id} className="p-4 flex items-center justify-between gap-3 hover:bg-stone-50/70 transition-colors">
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className="w-11 h-11 rounded-2xl bg-stone-100 text-stone-700 border border-stone-200 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-base font-bold text-stone-900 truncate leading-snug">
-                          {tx.merchant}
-                        </h4>
+                        <h4 className="text-base font-bold text-stone-900 truncate">{tx.merchant}</h4>
                         <div className="flex items-center gap-2 text-xs text-stone-500 mt-0.5">
                           <span>{tx.date}</span>
                           <span>•</span>
-                          <span className="bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded text-[11px] font-medium">
-                            {tx.tag}
-                          </span>
+                          <span className="bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded text-[11px] font-medium">{tx.tag}</span>
                         </div>
                       </div>
                     </div>
-
                     <div className="text-right shrink-0">
-                      <span className="text-base sm:text-lg font-extrabold text-stone-900 block">
-                        {tx.amount}
-                      </span>
+                      <span className="text-base sm:text-lg font-extrabold text-stone-900 block">{tx.amount}</span>
                       <span className="text-[11px] text-stone-400 font-medium">UPI Debited</span>
                     </div>
                   </div>
@@ -657,105 +1135,40 @@
       );
     }
 
-    // ==========================================
-    // PAGE 3: SAVE (AutoPay Leaks & Goal)
-    // ==========================================
+    // ====================================================
+    // SAVE PAGE
+    // ====================================================
     function SavePage({ lang }) {
       const GOAL_TARGET = 15000;
       const INITIAL_SAVED = 9600;
 
       const [mandates, setMandates] = useState([
-        {
-          id: 1,
-          name: "FitTrack Pro App",
-          costPerMonth: 99,
-          approvedDate: "Jun 14, 2026",
-          isCancelled: false,
-          reason: "Inactive since 42 days",
-          badge: "Unused Mandate"
-        },
-        {
-          id: 2,
-          name: "StreamFlix Mobile Pass",
-          costPerMonth: 199,
-          approvedDate: "May 02, 2026",
-          isCancelled: false,
-          reason: "Duplicate video subscription",
-          badge: "AutoPay Active"
-        },
-        {
-          id: 3,
-          name: "CloudVault Extra 100GB",
-          costPerMonth: 89,
-          approvedDate: "Jul 21, 2026",
-          isCancelled: false,
-          reason: "Trial period ended",
-          badge: "AutoPay Active"
-        }
+        { id: 1, name: "FitTrack Pro App", costPerMonth: 99, approvedDate: "Jun 14, 2026", isCancelled: false, badge: "Unused Mandate" },
+        { id: 2, name: "StreamFlix Mobile Pass", costPerMonth: 199, approvedDate: "May 02, 2026", isCancelled: false, badge: "AutoPay Active" },
+        { id: 3, name: "CloudVault Extra 100GB", costPerMonth: 89, approvedDate: "Jul 21, 2026", isCancelled: false, badge: "AutoPay Active" }
       ]);
 
       const toggleMandate = (id) => {
-        setMandates((prev) =>
-          prev.map((m) => (m.id === id ? { ...m, isCancelled: !m.isCancelled } : m))
-        );
+        setMandates(prev => prev.map(m => m.id === id ? { ...m, isCancelled: !m.isCancelled } : m));
       };
 
-      const totalLeakingMonthly = mandates
-        .filter((m) => !m.isCancelled)
-        .reduce((sum, m) => sum + m.costPerMonth, 0);
-
-      const totalRecoveredMonthly = mandates
-        .filter((m) => m.isCancelled)
-        .reduce((sum, m) => sum + m.costPerMonth, 0);
-
-      const cancelledCount = mandates.filter((m) => m.isCancelled).length;
-      const daysAccelerated = Math.round((totalRecoveredMonthly * 3) / 25);
-      const currentSaved = INITIAL_SAVED + (totalRecoveredMonthly > 0 ? 300 : 0);
+      const totalRecovered = mandates.filter(m => m.isCancelled).reduce((sum, m) => sum + m.costPerMonth, 0);
+      const daysAccelerated = Math.round((totalRecovered * 3) / 25);
+      const currentSaved = INITIAL_SAVED + (totalRecovered > 0 ? 300 : 0);
       const progressPercent = Math.min(100, Math.round((currentSaved / GOAL_TARGET) * 100));
-
-      const t = {
-        en: {
-          badge: "Silent Leak Recovery",
-          headline: "Recover Your Leaks",
-          subheadline: "Stop hidden ₹99 AutoPay mandates before they drain your next paycheck.",
-          goalTitle: "Savings Goal",
-          goalName: "₹15,000 Laptop",
-          mandatesTitle: "Active AutoPay Mandates",
-          mandatesSub: "Click 'Cancel Mandate' to simulate stopping the leak & boosting your goal.",
-          acceleratorBanner: "Mandate Cancellation Impact",
-          acceleratorMsg: `Canceling ${cancelledCount} mandate(s) frees up ₹${totalRecoveredMonthly}/mo.`,
-          acceleratorDays: `You will reach your ₹15,000 Laptop goal ~${daysAccelerated} days sooner!`,
-          activeLeakWarning: `You are currently leaking ₹${totalLeakingMonthly}/mo across active mandates.`
-        },
-        hi: {
-          badge: "साइलेंट लीक रिकवरी",
-          headline: "Recover Your Leaks",
-          subheadline: "छिपे हुए ₹99 वाले ऑटो-पे मैन्डेट्स को रोकें और अपने बचत लक्ष्यों को गति दें।",
-          goalTitle: "बचत लक्ष्य (Savings Goal)",
-          goalName: "₹15,000 नया लैपटॉप फंड",
-          mandatesTitle: "सक्रिय ऑटो-पे मैन्डेट्स (AutoPay Mandates)",
-          mandatesSub: "अनचाहे सब्सक्रिप्शन रोकें और देखें कि आपका लैपटॉप लक्ष्य कितना जल्दी पूरा होगा।",
-          acceleratorBanner: "बचत गति प्रभाव",
-          acceleratorMsg: `${cancelledCount} सब्सक्रिप्शन रद्द करने से ₹${totalRecoveredMonthly}/माह की बचत होगी।`,
-          acceleratorDays: `आपका ₹15,000 लैपटॉप लक्ष्य ~${daysAccelerated} दिन पहले पूरा हो जाएगा!`,
-          activeLeakWarning: `वर्तमान में ₹${totalLeakingMonthly}/माह ऑटो-पे के रूप में कट रहे हैं।`
-        }
-      };
-
-      const text = t[lang] || t.en;
 
       return (
         <div className="flex flex-col animate-fade-in text-left">
           <div className="text-center sm:text-left mb-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-semibold mb-3">
               <IconSparkles className="w-3.5 h-3.5 text-emerald-700" />
-              <span>{text.badge}</span>
+              <span>Silent Leak Recovery</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight leading-tight">
-              {text.headline}
+              Recover Your Leaks
             </h1>
             <p className="text-stone-600 text-sm sm:text-base font-medium mt-1 leading-relaxed">
-              {text.subheadline}
+              Stop hidden ₹99 AutoPay mandates before they drain your next paycheck.
             </p>
           </div>
 
@@ -767,29 +1180,19 @@
                     <IconLaptop className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-stone-400 block">
-                      {text.goalTitle}
-                    </span>
-                    <h2 className="text-xl sm:text-2xl font-black text-stone-900">
-                      {text.goalName}
-                    </h2>
+                    <span className="text-xs font-black uppercase tracking-wider text-stone-400 block">Savings Goal</span>
+                    <h2 className="text-xl sm:text-2xl font-black text-stone-900">₹15,000 Laptop</h2>
                   </div>
                 </div>
-
                 <div className="text-right">
-                  <span className="text-lg sm:text-xl font-black text-emerald-700 block">
-                    ₹{currentSaved.toLocaleString()}
-                  </span>
+                  <span className="text-lg sm:text-xl font-black text-emerald-700 block">₹{currentSaved.toLocaleString()}</span>
                   <span className="text-xs text-stone-400 font-medium">of ₹{GOAL_TARGET.toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="mb-3">
                 <div className="w-full h-4 bg-stone-100 rounded-full overflow-hidden p-0.5 border border-stone-200">
-                  <div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  ></div>
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
                 </div>
               </div>
 
@@ -798,22 +1201,14 @@
                 <span>₹{(GOAL_TARGET - currentSaved).toLocaleString()} to go</span>
               </div>
 
-              {totalRecoveredMonthly > 0 ? (
+              {totalRecovered > 0 && (
                 <div className="mt-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 animate-fade-in">
                   <div className="flex items-center gap-2 font-black text-sm mb-0.5">
                     <IconTrendingUp className="w-4 h-4 text-emerald-700" />
-                    <span>{text.acceleratorBanner}</span>
+                    <span>Mandate Cancellation Impact</span>
                   </div>
-                  <p className="text-xs sm:text-sm font-semibold">
-                    {text.acceleratorMsg}
-                  </p>
-                  <p className="text-xs text-emerald-800 font-medium mt-1">
-                    ⚡ {text.acceleratorDays}
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium">
-                  {text.activeLeakWarning}
+                  <p className="text-xs sm:text-sm font-semibold">Canceling frees up ₹{totalRecovered}/mo.</p>
+                  <p className="text-xs text-emerald-800 font-medium mt-1">⚡ You will reach your ₹15,000 Laptop goal ~{daysAccelerated} days sooner!</p>
                 </div>
               )}
             </div>
@@ -821,85 +1216,40 @@
 
           <section>
             <div className="mb-3.5">
-              <h2 className="text-xl font-extrabold text-stone-900">
-                {text.mandatesTitle}
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-500 font-medium">
-                {text.mandatesSub}
-              </p>
+              <h2 className="text-xl font-extrabold text-stone-900">Active AutoPay Mandates</h2>
+              <p className="text-xs sm:text-sm text-stone-500 font-medium">Click 'Cancel Mandate' to simulate stopping the leak & boosting your goal.</p>
             </div>
 
             <div className="space-y-3">
-              {mandates.map((mandate) => (
-                <div
-                  key={mandate.id}
-                  className={`p-4 sm:p-5 rounded-3xl border-2 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm ${
-                    mandate.isCancelled
-                      ? 'bg-stone-100/70 border-stone-200 opacity-80'
-                      : 'bg-white border-stone-300 hover:border-stone-400'
-                  }`}
-                >
+              {mandates.map((m) => (
+                <div key={m.id} className={`p-4 sm:p-5 rounded-3xl border-2 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm ${
+                  m.isCancelled ? 'bg-stone-100/70 border-stone-200 opacity-80' : 'bg-white border-stone-300'
+                }`}>
                   <div className="flex items-start gap-3.5">
-                    <div
-                      className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
-                        mandate.isCancelled
-                          ? 'bg-stone-200 text-stone-400'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${m.isCancelled ? 'bg-stone-200 text-stone-400' : 'bg-amber-100 text-amber-800'}`}>
                       <IconRepeat className="w-5 h-5" />
                     </div>
-
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <h3
-                          className={`text-base font-bold ${
-                            mandate.isCancelled
-                              ? 'line-through text-stone-500'
-                              : 'text-stone-900'
-                          }`}
-                        >
-                          {mandate.name}
-                        </h3>
-                        {mandate.isCancelled ? (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
-                            Cancelled
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-800">
-                            {mandate.badge}
-                          </span>
-                        )}
+                        <h3 className={`text-base font-bold ${m.isCancelled ? 'line-through text-stone-500' : 'text-stone-900'}`}>{m.name}</h3>
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${m.isCancelled ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                          {m.isCancelled ? 'Cancelled' : m.badge}
+                        </span>
                       </div>
-
-                      <p className="text-xs text-stone-500 font-medium">
-                        {mandate.reason} • Approved: {mandate.approvedDate}
-                      </p>
+                      <p className="text-xs text-stone-500 font-medium">Approved: {m.approvedDate}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
-                    <div className="text-left sm:text-right">
-                      <span
-                        className={`text-base sm:text-lg font-black block ${
-                          mandate.isCancelled ? 'text-stone-400 line-through' : 'text-stone-900'
-                        }`}
-                      >
-                        ₹{mandate.costPerMonth}/mo
-                      </span>
-                      <span className="text-[11px] text-stone-400">Recurring UPI</span>
-                    </div>
-
+                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
+                    <span className={`text-base font-black ${m.isCancelled ? 'text-stone-400 line-through' : 'text-stone-900'}`}>₹{m.costPerMonth}/mo</span>
                     <button
                       type="button"
-                      onClick={() => toggleMandate(mandate.id)}
-                      className={`min-h-[48px] px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer ${
-                        mandate.isCancelled
-                          ? 'bg-stone-200 hover:bg-stone-300 text-stone-800'
-                          : 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm'
+                      onClick={() => toggleMandate(m.id)}
+                      className={`min-h-[48px] px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        m.isCancelled ? 'bg-stone-200 text-stone-800 hover:bg-stone-300' : 'bg-rose-600 text-white hover:bg-rose-700'
                       }`}
                     >
-                      {mandate.isCancelled ? (
+                      {m.isCancelled ? (
                         <>
                           <IconRotateCcw className="w-3.5 h-3.5" />
                           <span>Restore</span>
@@ -920,13 +1270,14 @@
       );
     }
 
-    // ==========================================
-    // APP ROUTER & SHARED LAYOUT
-    // ==========================================
+    // ====================================================
+    // MAIN APP COMPONENT
+    // ====================================================
     function App() {
       const [lang, setLang] = useState('en');
-      
-      // Listen to URL hash for routing (/#/, /#/spend, /#/save)
+      const [user, setUser] = useState(null);
+      const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+
       const getRouteFromHash = () => {
         const hash = window.location.hash.replace(/^#/, '') || '/';
         return hash.startsWith('/') ? hash : '/' + hash;
@@ -935,51 +1286,38 @@
       const [currentRoute, setCurrentRoute] = useState(getRouteFromHash());
 
       useEffect(() => {
-        const handleHashChange = () => {
-          setCurrentRoute(getRouteFromHash());
-        };
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
+        const handleHash = () => setCurrentRoute(getRouteFromHash());
+        window.addEventListener('hashchange', handleHash);
+        return () => window.removeEventListener('hashchange', handleHash);
       }, []);
 
       const navigate = (path) => {
         window.location.hash = path;
         setCurrentRoute(path);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       };
 
       const navItems = [
-        {
-          to: '/',
-          label: lang === 'en' ? 'Shield' : 'शील्ड',
-          icon: IconShield
-        },
-        {
-          to: '/spend',
-          label: lang === 'en' ? 'Spend' : 'स्पेंड',
-          icon: IconWallet
-        },
-        {
-          to: '/save',
-          label: lang === 'en' ? 'Save' : 'सेव',
-          icon: IconCoins
-        }
+        { to: '/', label: lang === 'en' ? 'Home' : 'होम', icon: IconHome },
+        { to: '/shield', label: lang === 'en' ? 'Shield' : 'शील्ड', icon: IconShield },
+        { to: '/spend', label: lang === 'en' ? 'Spend' : 'स्पेंड', icon: IconWallet },
+        { to: '/save', label: lang === 'en' ? 'Save' : 'सेव', icon: IconCoins }
       ];
 
       return (
         <div className="min-h-screen bg-[#fbfbf9] text-stone-900 font-sans flex flex-col justify-between selection:bg-amber-200">
           
-          {/* Ambient Background Glows */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[42rem] h-[22rem] bg-gradient-to-b from-amber-100/60 via-orange-50/40 to-transparent blur-3xl rounded-full" />
             <div className="absolute top-72 -left-20 w-80 h-80 bg-emerald-100/30 blur-3xl rounded-full" />
             <div className="absolute top-96 -right-20 w-80 h-80 bg-blue-100/30 blur-3xl rounded-full" />
           </div>
 
-          {/* TOP HEADER (Shared Layout) */}
+          {/* Top Header */}
           <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#fbfbf9]/90 border-b border-stone-200/80 transition-colors">
-            <div className="max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 h-18 py-3.5 flex items-center justify-between">
-              {/* Logo */}
-              <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left cursor-pointer">
+            <div className="max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 h-18 py-3 flex items-center justify-between">
+              
+              <button onClick={() => navigate('/')} className="flex items-center gap-2.5 text-left cursor-pointer">
                 <div className="w-10 h-10 rounded-2xl bg-stone-900 text-amber-400 flex items-center justify-center shadow-md shadow-stone-900/10">
                   <IconShield className="w-5 h-5" />
                 </div>
@@ -988,87 +1326,112 @@
                     Kavach
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   </span>
-                  <span className="text-[11px] font-bold text-stone-500 tracking-wider -mt-1 uppercase">
+                  <span className="text-[10px] font-bold text-stone-500 tracking-wider -mt-1 uppercase">
                     Money Copilot
                   </span>
                 </div>
               </button>
 
-              {/* Functional English / Hindi Toggle Switch */}
-              <div className="flex items-center">
-                <div className="flex items-center bg-stone-100 p-1 rounded-full border border-stone-300 shadow-inner">
+              <div className="flex items-center gap-2.5">
+                {user ? (
+                  <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-full shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                    <span className="text-xs font-bold text-emerald-950 truncate max-w-[90px] sm:max-w-[130px]">
+                      {user.name.split(' ')[0]}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setUser(null)}
+                      className="text-[10px] text-emerald-800 hover:text-emerald-950 font-semibold underline ml-1 cursor-pointer"
+                    >
+                      Exit
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsSignUpOpen(true)}
+                    className="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{lang === 'en' ? 'Sign Up' : 'साइन अप'}</span>
+                  </button>
+                )}
+
+                <div className="flex items-center bg-stone-100 p-0.5 rounded-full border border-stone-300 shadow-inner">
                   <button
                     type="button"
                     onClick={() => setLang('en')}
-                    className={`min-h-[48px] min-w-[72px] px-3.5 text-sm font-bold rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
-                      lang === 'en'
-                        ? 'bg-stone-900 text-white shadow-sm'
-                        : 'text-stone-600 hover:text-stone-900'
+                    className={`min-h-[44px] px-3 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                      lang === 'en' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
-                    English
+                    EN
                   </button>
                   <button
                     type="button"
                     onClick={() => setLang('hi')}
-                    className={`min-h-[48px] min-w-[72px] px-3.5 text-sm font-bold rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
-                      lang === 'hi'
-                        ? 'bg-stone-900 text-white shadow-sm'
-                        : 'text-stone-600 hover:text-stone-900'
+                    className={`min-h-[44px] px-3 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                      lang === 'hi' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
-                    हिन्दी
+                    हि
                   </button>
                 </div>
               </div>
+
             </div>
           </header>
 
-          {/* PAGE CONTENT CONTAINER */}
+          {/* Body Content */}
           <main className="flex-1 w-full max-w-md md:max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-28 sm:pb-32">
-            {currentRoute === '/' && <ShieldPage lang={lang} />}
+            {currentRoute === '/' && (
+              <LandingPage
+                lang={lang}
+                onNavigate={navigate}
+                onOpenSignUp={() => setIsSignUpOpen(true)}
+              />
+            )}
+            {currentRoute === '/shield' && <ShieldPage lang={lang} />}
             {currentRoute === '/spend' && <SpendPage lang={lang} />}
             {currentRoute === '/save' && <SavePage lang={lang} />}
           </main>
 
-          {/* BOTTOM NAVIGATION (Sticky Bottom Tab Bar) */}
-          <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-            <div className="max-w-md md:max-w-4xl mx-auto px-4 flex items-center justify-around h-20">
+          {/* Bottom Sticky Tab Bar */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-lg border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            <div className="max-w-md md:max-w-4xl mx-auto px-3 flex items-center justify-around h-20">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentRoute === item.to;
-
                 return (
                   <button
                     key={item.to}
                     type="button"
                     onClick={() => navigate(item.to)}
-                    className={`flex flex-col items-center justify-center flex-1 min-h-[48px] min-w-[48px] py-1.5 rounded-2xl transition-all duration-200 cursor-pointer ${
-                      isActive
-                        ? 'text-stone-950 font-extrabold'
-                        : 'text-stone-500 hover:text-stone-800 font-medium'
+                    className={`flex flex-col items-center justify-center flex-1 min-h-[48px] min-w-[48px] py-1 rounded-2xl transition-all cursor-pointer ${
+                      isActive ? 'text-stone-950 font-extrabold' : 'text-stone-500 hover:text-stone-800 font-medium'
                     }`}
                   >
-                    <div
-                      className={`w-11 h-9 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
-                        isActive
-                          ? 'bg-stone-900 text-amber-400 shadow-sm scale-105'
-                          : 'text-stone-500 hover:bg-stone-200/60'
-                      }`}
-                    >
+                    <div className={`w-10 h-8 rounded-xl flex items-center justify-center mb-0.5 transition-all ${
+                      isActive ? 'bg-stone-900 text-amber-400 shadow-sm scale-105' : 'text-stone-500 hover:bg-stone-200/60'
+                    }`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-xs tracking-tight">
-                      {item.label}
-                    </span>
-                    {isActive && (
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>
-                    )}
+                    <span className="text-[11px] tracking-tight font-bold">{item.label}</span>
+                    {isActive && <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-0.5"></span>}
                   </button>
                 );
               })}
             </div>
           </nav>
+
+          {/* Interactive Sign Up Modal */}
+          <SignUpModal
+            isOpen={isSignUpOpen}
+            onClose={() => setIsSignUpOpen(false)}
+            onComplete={(userData) => setUser(userData)}
+            lang={lang}
+          />
 
         </div>
       );

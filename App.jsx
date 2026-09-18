@@ -1,22 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './src/components/Layout';
+import LandingPage from './src/pages/Landing';
 import ShieldPage from './src/pages/Shield';
 import SpendPage from './src/pages/Spend';
 import SavePage from './src/pages/Save';
+import SignUpModal from './src/components/SignUpModal';
 
 export default function App() {
   const [lang, setLang] = useState('en');
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('kavach_user');
+      if (saved) setUser(JSON.parse(saved));
+    } catch (e) {}
+  }, []);
+
+  const handleSignUpComplete = (userData) => {
+    setUser(userData);
+    try {
+      localStorage.setItem('kavach_user', JSON.stringify(userData));
+    } catch (e) {}
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
+    try {
+      localStorage.removeItem('kavach_user');
+    } catch (e) {}
+  };
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout lang={lang} setLang={setLang} />}>
-          <Route index element={<ShieldPage />} />
+        <Route
+          path="/"
+          element={
+            <Layout
+              lang={lang}
+              setLang={setLang}
+              user={user}
+              onOpenSignUp={() => setIsSignUpOpen(true)}
+              onSignOut={handleSignOut}
+            />
+          }
+        >
+          <Route index element={<LandingPage onOpenSignUp={() => setIsSignUpOpen(true)} />} />
+          <Route path="shield" element={<ShieldPage />} />
           <Route path="spend" element={<SpendPage />} />
           <Route path="save" element={<SavePage />} />
         </Route>
       </Routes>
+
+      <SignUpModal
+        isOpen={isSignUpOpen}
+        onClose={() => setIsSignUpOpen(false)}
+        onComplete={handleSignUpComplete}
+        lang={lang}
+      />
     </BrowserRouter>
   );
 }
