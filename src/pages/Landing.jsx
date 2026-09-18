@@ -17,6 +17,7 @@ import {
   Newspaper,
   Lightbulb,
   X,
+  Target,
   Bot
 } from 'lucide-react';
 
@@ -243,21 +244,21 @@ export default function LandingPage() {
 
           <button
             type="button"
-            onClick={() => handleAction('/chat')}
+            onClick={() => handleAction('/goals')}
             className="group bg-white rounded-3xl p-6 border-2 border-stone-200 hover:border-stone-900 shadow-sm hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Bot className="w-6 h-6 stroke-[2.2]" />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Target className="w-6 h-6 stroke-[2.2]" />
               </div>
               <span className="inline-block px-2.5 py-0.5 rounded bg-stone-100 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider mb-2">
-                {text.saveTitle}
+                GOALS
               </span>
-              <h3 className="text-lg font-bold text-stone-900 mb-1.5">{text.saveSubtitle}</h3>
-              <p className="text-sm text-stone-600 leading-relaxed font-medium">{text.saveDesc}</p>
+              <h3 className="text-lg font-bold text-stone-900 mb-1.5">Personal Savings Goals</h3>
+              <p className="text-sm text-stone-600 leading-relaxed font-medium">Plan and fund major purchases like laptops or trips with flexible deposits—no EMI debt.</p>
             </div>
             <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-stone-900">
-              <span>{user ? 'Open AI Copilot' : 'Sign Up for AI Copilot'}</span>
+              <span>{user ? 'Open Goals Planner' : 'Sign Up to Set Goals'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>

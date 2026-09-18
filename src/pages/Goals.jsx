@@ -159,16 +159,16 @@ export default function GoalsPage() {
   const text = t[lang] || t.en;
 
   return (
-    <div className="flex flex-col animate-fade-in text-left space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in text-left">
       
       {/* 1. Header & Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-stone-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
             <span>{text.badge}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-black text-stone-900 tracking-tight">
             {text.headline}
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
@@ -179,7 +179,7 @@ export default function GoalsPage() {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="min-h-[48px] px-5 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-[0.98] self-start sm:self-auto shrink-0"
+          className="min-h-[48px] px-6 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-[0.98] self-start sm:self-auto shrink-0"
         >
           <Plus className="w-4 h-4 text-amber-400" />
           <span>{text.newGoalBtn}</span>
@@ -187,23 +187,23 @@ export default function GoalsPage() {
       </div>
 
       {/* 2. Overview Banner */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border-2 border-stone-300 shadow-sm">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+      <div className="bg-white p-6 sm:p-7 rounded-3xl border-2 border-stone-200 shadow-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-4">
           <div>
-            <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">{text.totalSavedLabel}</span>
-            <span className="text-xl sm:text-2xl font-black text-emerald-700">₹{totalSaved.toLocaleString()}</span>
+            <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">{text.totalSavedLabel}</span>
+            <span className="text-2xl sm:text-3xl font-black text-emerald-700">₹{totalSaved.toLocaleString()}</span>
           </div>
           <div>
-            <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">{text.totalTargetLabel}</span>
-            <span className="text-xl sm:text-2xl font-black text-stone-900">₹{totalTarget.toLocaleString()}</span>
+            <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">{text.totalTargetLabel}</span>
+            <span className="text-2xl sm:text-3xl font-black text-stone-900">₹{totalTarget.toLocaleString()}</span>
           </div>
-          <div className="col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-stone-100 pt-2 sm:pt-0 sm:pl-4">
-            <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">{text.overallProgress}</span>
-            <span className="text-xl sm:text-2xl font-black text-amber-700">{totalPercent}% Complete</span>
+          <div className="col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-stone-100 pt-3 sm:pt-0 sm:pl-6">
+            <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">{text.overallProgress}</span>
+            <span className="text-2xl sm:text-3xl font-black text-stone-900">{totalPercent}%</span>
           </div>
         </div>
 
-        <div className="w-full h-3.5 bg-stone-100 rounded-full overflow-hidden p-0.5 border border-stone-200">
+        <div className="w-full h-3.5 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
           <div
             className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-amber-500 rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, totalPercent)}%` }}
@@ -211,8 +211,8 @@ export default function GoalsPage() {
         </div>
       </div>
 
-      {/* 3. Goals List */}
-      <div className="space-y-4">
+      {/* 3. Goals List: 2-Column Responsive Grid on Laptops */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {goals.map((goal) => {
           const percent = Math.min(100, Math.round((goal.savedAmount / goal.targetAmount) * 100));
           const remaining = Math.max(0, goal.targetAmount - goal.savedAmount);

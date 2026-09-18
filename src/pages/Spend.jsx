@@ -225,19 +225,19 @@ export default function SpendPage() {
   }, {});
 
   return (
-    <div className="flex flex-col animate-fade-in text-left space-y-6">
+    <div className="w-full max-w-5xl mx-auto space-y-8 animate-fade-in text-left">
       
       {/* 1. Header & Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-stone-200">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-2">
             <Wallet className="w-3.5 h-3.5" />
             <span>Income & Daily Expense Tracker</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-black text-stone-900 tracking-tight leading-tight">
             Daily Cashflow
           </h1>
-          <p className="text-xs sm:text-sm text-stone-500 font-medium">
+          <p className="text-xs sm:text-sm text-stone-500 font-medium mt-0.5">
             Log your irregular income, monitor daily chai & food expenses, and stay under daily caps.
           </p>
         </div>
@@ -249,20 +249,20 @@ export default function SpendPage() {
             setFormCategory('Food & Dining');
             setIsModalOpen(true);
           }}
-          className="min-h-[46px] px-5 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
+          className="min-h-[48px] px-6 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4 text-amber-400" />
           <span>Add Income / Expense</span>
         </button>
       </div>
 
-      {/* 2. Top Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* 2. Top Metrics Cards (Laptop Grid) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Net Available Balance */}
-        <div className="p-4 bg-white rounded-3xl border-2 border-stone-200 shadow-sm">
-          <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Net Balance</span>
-          <span className="text-xl sm:text-2xl font-black text-stone-900 block mt-1">
+        <div className="p-5 sm:p-6 bg-white rounded-3xl border-2 border-stone-200 shadow-sm hover:border-stone-400 transition-colors">
+          <span className="text-xs font-bold text-stone-500 uppercase tracking-wider block">Net Balance</span>
+          <span className="text-2xl sm:text-3xl font-black text-stone-900 block mt-1">
             ₹{netBalance.toLocaleString()}
           </span>
           <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">

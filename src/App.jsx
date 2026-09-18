@@ -82,15 +82,11 @@ export default function App() {
           />
           <Route
             path="chat"
-            element={
-              <ProtectedRoute user={user}>
-                <ChatPage />
-              </ProtectedRoute>
-            }
+            element={<Navigate to="/dashboard" replace />}
           />
           <Route
             path="save"
-            element={<Navigate to="/chat" replace />}
+            element={<Navigate to="/dashboard" replace />}
           />
           <Route
             path="goals"
