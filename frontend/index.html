@@ -2828,30 +2828,90 @@
       useEffect(() => {
         if (!supabase) return;
 
-        // Check if there is an active session
-        supabase.auth.getSession().then(({ data, error }) => {
-          if (error) {
-            console.warn('Supabase getSession error:', error);
-            return;
-          }
-          if (data?.session?.user) {
-            processSupabaseUser(data.session.user);
-          }
-        }).catch(err => {
-          console.warn('Supabase getSession caught error:', err);
-        });
+        let isMounted = true;
 
-        // Listen for OAuth callbacks (SIGNED_IN) or SIGNED_OUT
+        const initAuth = async () => {
+          // 1. Extract 'code' from search query OR hash query
+          let code = new URLSearchParams(window.location.search).get('code');
+          const rawHash = window.location.hash || '';
+          if (!code && rawHash.includes('code=')) {
+            const hashPart = rawHash.includes('?') ? rawHash.split('?')[1] : rawHash.replace(/^#\/?/, '');
+            code = new URLSearchParams(hashPart).get('code');
+          }
+
+          if (code) {
+            try {
+              const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+              if (!error && data?.session?.user && isMounted) {
+                processSupabaseUser(data.session.user);
+                return;
+              }
+            } catch (err) {
+              console.warn('PKCE exchangeCodeForSession notice:', err);
+            }
+          }
+
+          // 2. Extract access_token & refresh_token from hash OR search
+          if (rawHash.includes('access_token=') || window.location.search.includes('access_token=')) {
+            try {
+              const combined = (rawHash + '&' + window.location.search).replace(/^#\/?/, '');
+              const params = new URLSearchParams(combined);
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+              if (accessToken) {
+                const { data, error } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken || ''
+                });
+                if (!error && data?.session?.user && isMounted) {
+                  processSupabaseUser(data.session.user);
+                  return;
+                }
+              }
+            } catch (err) {
+              console.warn('Hash setSession notice:', err);
+            }
+          }
+
+          // 3. Check for existing session
+          try {
+            const { data, error } = await supabase.auth.getSession();
+            if (!error && data?.session?.user && isMounted) {
+              processSupabaseUser(data.session.user);
+              return;
+            }
+          } catch (err) {
+            console.warn('Supabase getSession notice:', err);
+          }
+        };
+
+        initAuth();
+
+        // 4. Listen for OAuth callbacks (SIGNED_IN, INITIAL_SESSION) or SIGNED_OUT
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_IN' && session?.user) {
+          if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user && isMounted) {
             processSupabaseUser(session.user);
-          } else if (event === 'SIGNED_OUT') {
+          } else if (event === 'SIGNED_OUT' && isMounted) {
             setUser(null);
             try { localStorage.removeItem('kavach_user'); } catch(e) {}
           }
         });
 
+        // 5. Timeout safety: if on /dashboard without user after 3.5s, return to /auth
+        const timeoutId = setTimeout(() => {
+          if (isMounted) {
+            const saved = localStorage.getItem('kavach_user');
+            if (!saved && (window.location.hash.includes('code=') || window.location.hash.includes('access_token=') || window.location.search.includes('code='))) {
+              console.warn('OAuth session handover timed out, redirecting to /auth');
+              window.history.replaceState(null, '', window.location.pathname + '#/auth');
+              setRoute('/auth');
+            }
+          }
+        }, 3500);
+
         return () => {
+          isMounted = false;
+          clearTimeout(timeoutId);
           subscription?.unsubscribe();
         };
       }, []);
@@ -3258,9 +3318,22 @@
                 {route === '/auth' && <AuthPage onNavigate={navigate} onLogin={handleLogin} />}
                 {route === '/dashboard' && (
                   user ? <DashboardPage onNavigate={navigate} /> : (
-                    <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-3 animate-fade-in">
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4 animate-fade-in text-center p-4">
                       <div className="w-10 h-10 rounded-full border-3 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 animate-spin" />
-                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Arming Kavach Shield...</p>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Arming Kavach Shield...</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Verifying Google authentication with Supabase</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.location.hash = '/auth';
+                          setRoute('/auth');
+                        }}
+                        className="text-xs text-blue-600 dark:text-blue-400 underline font-semibold hover:text-blue-700 cursor-pointer pt-2"
+                      >
+                        Taking longer than expected? Return to Sign-In
+                      </button>
                     </div>
                   )
                 )}
