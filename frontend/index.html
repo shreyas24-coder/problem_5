@@ -1,16 +1,3054 @@
 <!DOCTYPE html>
 <html lang="en" class="light">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kavach — Money Copilot for Digital India | Technofora '26</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-[#fbfbf9] dark:bg-[#0b0f17] text-stone-900 dark:text-slate-100 antialiased selection:bg-amber-200 dark:selection:bg-blue-900/60 min-h-screen">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kavach — Money Copilot for Digital India</title>
+  
+  <!-- Tailwind CSS CDN with dark mode and custom tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+            },
+            surface: {
+              light: '#ffffff',
+              dark: '#111827',
+              darker: '#0b0f17',
+              card: '#151d2c',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+          },
+          boxShadow: {
+            'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.04)',
+            'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+            'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+            'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
+            'floating': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- React and ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+    html.dark {
+      --bg-page: #0b0f17;
+      --bg-surface: #111827;
+      --border-color: #1f293d;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      transition: background-color 0.2s ease, color 0.2s ease;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    /* Clean custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    html.dark ::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-100 dark:selection:bg-blue-900/60 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ==========================================
+    // STANDARDIZED SVG ICONS (Clean stroke, scalable)
+    // ==========================================
+    const IconShield = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    );
+
+    const IconShieldAlert = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    );
+
+    const IconAlertTriangle = ({ className = "w-6 h-6" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    );
+
+    const IconRotateCcw = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+    );
+
+    const IconWallet = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+      </svg>
+    );
+
+    const IconCoins = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="8" cy="8" r="6"/>
+        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+        <path d="M7 6h1v4"/>
+        <path d="m16.71 13.88.7.71-2.82 2.82"/>
+      </svg>
+    );
+
+    const IconHome = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    );
+
+    const IconDashboard = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="7" height="9" x="3" y="3" rx="1.5"/>
+        <rect width="7" height="5" x="14" y="3" rx="1.5"/>
+        <rect width="7" height="9" x="14" y="12" rx="1.5"/>
+        <rect width="7" height="5" x="3" y="16" rx="1.5"/>
+      </svg>
+    );
+
+    const IconTarget = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="12" r="6"/>
+        <circle cx="12" cy="12" r="2"/>
+      </svg>
+    );
+
+    const IconHelpCircle = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    );
+
+    const IconSparkles = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+      </svg>
+    );
+
+    const IconArrowRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    );
+
+    const IconArrowLeft = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    );
+
+    const IconChevronRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    );
+
+    const IconLock = ({ className = "w-3.5 h-3.5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    );
+
+    const IconCheckCircle2 = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    );
+
+    const IconX = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    );
+
+    const IconTrendingUp = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+        <polyline points="16 7 22 7 22 13"/>
+      </svg>
+    );
+
+    const IconTrendingDown = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/>
+        <polyline points="16 17 22 17 22 11"/>
+      </svg>
+    );
+
+    const IconPlus = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    );
+
+    const IconCalendar = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    );
+
+    const IconTrash2 = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+    );
+
+    const IconTrophy = ({ className = "w-8 h-8" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+        <path d="M4 22h16"/>
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+      </svg>
+    );
+
+    const IconFlame = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/>
+      </svg>
+    );
+
+    const IconBarChart3 = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+    );
+
+    const IconPieChart = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+        <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+      </svg>
+    );
+
+    const IconBookOpen = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+    );
+
+    const IconBot = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 8V4H8"/>
+        <rect width="16" height="12" x="4" y="8" rx="2"/>
+        <path d="M2 14h2"/>
+        <path d="M20 14h2"/>
+        <path d="M15 13v2"/>
+        <path d="M9 13v2"/>
+      </svg>
+    );
+
+    const IconLogOut = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    );
+
+    const IconSend = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    );
+
+    const IconArrowDownLeft = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="17" y1="7" x2="7" y2="17"/>
+        <polyline points="17 17 7 17 7 7"/>
+      </svg>
+    );
+
+    const IconArrowUpRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="7" y1="17" x2="7" y2="7"/>
+        <polyline points="7 7 17 7 17 17"/>
+      </svg>
+    );
+
+    // Clean 3-horizontal-line hamburger icon
+    const IconMenu = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="3.5" y1="6.5" x2="20.5" y2="6.5"/>
+        <line x1="3.5" y1="12" x2="20.5" y2="12"/>
+        <line x1="3.5" y1="17.5" x2="20.5" y2="17.5"/>
+      </svg>
+    );
+
+    const IconChevronDown = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m6 9 6 6 6-6"/>
+      </svg>
+    );
+
+    const IconClock = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    );
+
+    const IconSun = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    );
+
+    const IconMoon = ({ className = "w-4 h-4" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    );
+
+
+    // ==========================================
+    // 1. SIGN UP MODAL
+    // ==========================================
+    function SignUpModal({ isOpen, onClose, onComplete, lang }) {
+      const [step, setStep] = useState(1);
+      const [name, setName] = useState('');
+      const [phone, setPhone] = useState('');
+      const [otp, setOtp] = useState(['', '', '', '']);
+      const [errorMsg, setErrorMsg] = useState('');
+
+      if (!isOpen) return null;
+
+      const handleStep1 = (e) => {
+        e.preventDefault();
+        if (!name.trim() || phone.length < 10) {
+          setErrorMsg('Please enter your name and 10-digit number');
+          return;
+        }
+        setErrorMsg('');
+        setStep(2);
+      };
+
+      const handleStep2 = (e) => {
+        e.preventDefault();
+        if (otp.join('').length < 4) {
+          setErrorMsg('Please enter 4 digits');
+          return;
+        }
+        setErrorMsg('');
+        setStep(3);
+        if (onComplete) onComplete({ name: name || 'Shreyas Patel', phone: phone || '9876543210' });
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 text-slate-900 dark:text-slate-100">
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
+              aria-label="Close modal"
+            >
+              <IconX className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-1.5 mb-5">
+              {[1, 2, 3].map((s) => (
+                <div
+                  key={s}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    s === step
+                      ? 'w-8 bg-blue-600 dark:bg-blue-500'
+                      : s < step
+                      ? 'w-4 bg-emerald-500'
+                      : 'w-4 bg-slate-200 dark:bg-slate-800'
+                  }`}
+                />
+              ))}
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 ml-auto uppercase tracking-wider">Step {step} of 3</span>
+            </div>
+
+            {step === 1 && (
+              <form onSubmit={handleStep1} className="space-y-4 text-left">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Join Kavach Free</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter details linked with your primary UPI number.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Your Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="e.g. Shreyas Patel"
+                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Mobile Number (UPI)</label>
+                  <div className="flex items-center">
+                    <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center font-bold text-xs text-slate-600 dark:text-slate-400">+91</span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={phone}
+                      onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="98765 43210"
+                      className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+                {errorMsg && <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>}
+                <button
+                  type="submit"
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                >
+                  <span>Send OTP</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {step === 2 && (
+              <form onSubmit={handleStep2} className="space-y-4 text-left">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Verify Code</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Code sent to +91 {phone || '9876543210'}</p>
+                </div>
+                <div className="flex justify-between gap-2 max-w-[240px] mx-auto py-2">
+                  {otp.map((d, i) => (
+                    <input
+                      key={i}
+                      id={`otp-${i}`}
+                      type="text"
+                      maxLength={1}
+                      value={d}
+                      onChange={e => {
+                        const n = [...otp]; n[i] = e.target.value; setOtp(n);
+                        if (e.target.value && i < 3) document.getElementById(`otp-${i+1}`)?.focus();
+                      }}
+                      className="w-12 h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl outline-none transition-all text-slate-900 dark:text-white"
+                    />
+                  ))}
+                </div>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setOtp(['2','4','2','6'])}
+                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+                  >
+                    ⚡ Auto-Fill 2426
+                  </button>
+                </div>
+                {errorMsg && <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold text-center">{errorMsg}</p>}
+                <button
+                  type="submit"
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                >
+                  <span>Verify & Start</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {step === 3 && (
+              <div className="text-center space-y-4 py-2">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-200 dark:border-emerald-800">
+                  <IconShield className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Protection Active!</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Welcome, {name || 'Shreyas'}. Your UPI pre-transaction shield is armed.</p>
+                <button
+                  onClick={onClose}
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                >
+                  Enter App
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 2. DASHBOARD PAGE
+    // ==========================================
+    function DashboardPage({ lang, onNavigate }) {
+      const weeklyData = [
+        { day: 'Mon', amount: 320, h: '40%' },
+        { day: 'Tue', amount: 580, h: '65%' },
+        { day: 'Wed', amount: 210, h: '28%' },
+        { day: 'Thu', amount: 840, h: '92%', peak: true },
+        { day: 'Fri', amount: 460, h: '52%' },
+        { day: 'Sat', amount: 690, h: '78%' },
+        { day: 'Sun', amount: 310, h: '38%' }
+      ];
+
+      return (
+        <div className="flex flex-col animate-fade-in text-left space-y-6 w-full max-w-6xl mx-auto">
+          {/* Header context */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-[11px] font-semibold tracking-wide uppercase mb-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
+                <span>Live Telemetry</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Financial Pulse & Analytics</h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Live cashflow breakdown, spending velocity, and savings pace.</p>
+            </div>
+            
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <button
+                onClick={() => onNavigate('/spend')}
+                className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <IconWallet className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>Log Cashflow</span>
+              </button>
+              <button
+                onClick={() => onNavigate('/shield')}
+                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <IconShieldAlert className="w-3.5 h-3.5 text-amber-300" />
+                <span>Scan Scam</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Metric Summary Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Stipend Inflow</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹12,000</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-1">
+                <IconTrendingUp className="w-3 h-3" /> Credited via Razorpay
+              </span>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Spent</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹3,421</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">Across 14 UPI taps</span>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Saved</span>
+              <span className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400 block tracking-tight">₹2,100</span>
+              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-1">Smart micro-savings + pots</span>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Safe Daily Burn</span>
+              <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 block tracking-tight">₹475/day</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">24 days remaining</span>
+            </div>
+          </div>
+
+          {/* Weekly Spending Bar Chart */}
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                    <IconBarChart3 className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Weekly Spending Velocity</h2>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Average: ₹487/day. Peak on Thursday due to college dining split.</p>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs font-semibold">
+                <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 dark:bg-blue-500"></span>
+                  <span>Normal Spend</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
+                  <span>Peak Burn</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Bar columns */}
+            <div className="h-52 sm:h-56 w-full flex items-end justify-between gap-2 sm:gap-4 pt-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              {weeklyData.map((d) => (
+                <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group cursor-pointer">
+                  <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                    ₹{d.amount}
+                  </span>
+                  <div
+                    className={`w-full max-w-[42px] sm:max-w-[48px] rounded-t-lg transition-all duration-200 ${
+                      d.peak
+                        ? 'bg-amber-500 hover:bg-amber-600 shadow-sm shadow-amber-500/20'
+                        : 'bg-blue-600 dark:bg-blue-500 group-hover:bg-blue-700 dark:group-hover:bg-blue-400'
+                    }`}
+                    style={{ height: d.h }}
+                  />
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">{d.day}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Allocation Breakdown & Goal Pace */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <IconPieChart className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Category Breakdown</span>
+              </h3>
+              <div className="space-y-3.5">
+                {[
+                  { name: 'Food & Dining', percent: '42%', amt: '₹1,436', col: 'bg-amber-500' },
+                  { name: 'Commute & Travel', percent: '24%', amt: '₹820', col: 'bg-blue-500' },
+                  { name: 'Subscriptions', percent: '18%', amt: '₹615', col: 'bg-rose-500' },
+                  { name: 'Savings Pots', percent: '16%', amt: '₹550', col: 'bg-emerald-500' }
+                ].map((c) => (
+                  <div key={c.name}>
+                    <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                      <span>{c.name}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{c.amt} ({c.percent})</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className={`h-full ${c.col} rounded-full`} style={{ width: c.percent }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                  <IconTarget className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Goal Pace: ₹15,000 Laptop</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">64% Achieved • ₹9,600 saved so far</p>
+                
+                <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style={{ width: '64%' }} />
+                </div>
+
+                <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/70 dark:border-emerald-800/60 text-xs text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">
+                  ⚡ Ahead by 8 days thanks to ₹298 saved from smart round-up pots!
+                </div>
+              </div>
+
+              <button
+                onClick={() => onNavigate('/goals')}
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-4 flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <span>View All Personal Goals</span>
+                <IconArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 3. GOALS PAGE
+    // ==========================================
+    function GoalsPage() {
+      const [goals, setGoals] = useState([
+        { id: 1, title: "M2 Coding Laptop", target: 65000, saved: 38400, deadline: "15 Dec 2026", days: 88, icon: "💻" },
+        { id: 2, title: "Goa College Roadtrip", target: 12000, saved: 8500, deadline: "10 Nov 2026", days: 53, icon: "🏖️" },
+        { id: 3, title: "Sony WH-1000XM5 Headphones", target: 18000, saved: 6200, deadline: "28 Feb 2027", days: 163, icon: "🎧" }
+      ]);
+      const [customAmounts, setCustomAmounts] = useState({});
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [title, setTitle] = useState('');
+      const [target, setTarget] = useState('');
+      const [saved, setSaved] = useState('');
+      const [deadline, setDeadline] = useState('');
+
+      const handleDeposit = (id, amt) => {
+        setGoals(goals.map(g => g.id === id ? { ...g, saved: Math.min(g.target, g.saved + amt) } : g));
+      };
+
+      const handleCustomDeposit = (id) => {
+        const amt = Number(customAmounts[id]);
+        if (!amt || amt <= 0) return;
+        handleDeposit(id, amt);
+        setCustomAmounts(prev => ({ ...prev, [id]: '' }));
+      };
+
+      const handleAdd = (e) => {
+        e.preventDefault();
+        if (!title.trim() || !target) return;
+        setGoals([{
+          id: Date.now(),
+          title,
+          target: Number(target),
+          saved: Number(saved) || 0,
+          deadline: deadline || '2027-01-01',
+          days: 90,
+          icon: '🎯'
+        }, ...goals]);
+        setIsModalOpen(false);
+        setTitle(''); setTarget(''); setSaved(''); setDeadline('');
+      };
+
+      return (
+        <div className="w-full max-w-6xl mx-auto space-y-6 animate-fade-in text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold uppercase tracking-wider mb-1.5">
+                <IconSparkles className="w-3.5 h-3.5" />
+                <span>Future Buys Planner</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Personal Savings Goals</h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Track deadlines and fund major buys without borrowing on high-interest credit.</p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="min-h-[42px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-95 self-start sm:self-auto"
+            >
+              <IconPlus className="w-4 h-4 text-amber-300" />
+              <span>Add New Goal</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+            {goals.map(g => {
+              const p = Math.min(100, Math.round((g.saved / g.target) * 100));
+              const isDone = g.saved >= g.target;
+              return (
+                <div key={g.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all text-left">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-2 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-700">{g.icon}</span>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white">{g.title}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                          Target date: <strong className="text-slate-700 dark:text-slate-300">{g.deadline}</strong> • <span className="text-amber-600 dark:text-amber-400 font-semibold">{g.days} days left</span>
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setGoals(goals.filter(x => x.id !== g.id))}
+                      className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                      aria-label="Delete goal"
+                    >
+                      <IconTrash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="my-3.5">
+                    <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹{g.saved.toLocaleString()}</span>
+                      <span className="text-slate-400 dark:text-slate-500">Target: ₹{g.target.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300" style={{ width: `${p}%` }} />
+                    </div>
+                    <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 font-medium">
+                      <span>{p}% Saved</span>
+                      <span>{isDone ? 'Goal Complete! 🎉' : `₹${(g.target - g.saved).toLocaleString()} remaining`}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs text-slate-400 dark:text-slate-500 font-medium mr-1">Quick Add:</span>
+                      <button onClick={() => handleDeposit(g.id, 250)} disabled={isDone} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors">+ ₹250</button>
+                      <button onClick={() => handleDeposit(g.id, 500)} disabled={isDone} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors">+ ₹500</button>
+                      <button onClick={() => handleDeposit(g.id, 1000)} disabled={isDone} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors">+ ₹1,000</button>
+                    </div>
+
+                    {/* Custom Variable Deposit */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                      <div className="relative flex-1 sm:w-32">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold">₹</span>
+                        <input
+                          type="number"
+                          placeholder="Custom"
+                          value={customAmounts[g.id] || ''}
+                          onChange={(e) => setCustomAmounts({ ...customAmounts, [g.id]: e.target.value })}
+                          disabled={isDone}
+                          className="w-full pl-6 pr-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-600 disabled:opacity-40"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleCustomDeposit(g.id)}
+                        disabled={isDone || !customAmounts[g.id]}
+                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-xs shrink-0"
+                      >
+                        Deposit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {isModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
+              <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition-colors"
+                >
+                  <IconX className="w-4 h-4" />
+                </button>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Add Savings Goal</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Set up a target item and start funding micro-deposits.</p>
+
+                <form onSubmit={handleAdd} className="space-y-3.5 text-left">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">What are you buying?</label>
+                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. iPad Air, Camera" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" required />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Price (₹)</label>
+                    <input type="number" value={target} onChange={e => setTarget(e.target.value)} placeholder="45000" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" required />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Initial Deposit (₹)</label>
+                    <input type="number" value={saved} onChange={e => setSaved(e.target.value)} placeholder="2000" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Date</label>
+                    <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" required />
+                  </div>
+                  <button type="submit" className="w-full min-h-[46px] bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl mt-3 cursor-pointer shadow-xs transition-all active:scale-[0.98]">
+                    Save Goal
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 4. DAILY QUIZ PAGE
+    // ==========================================
+    function QuizPage({ lang, onNavigate }) {
+      const questions = [
+        {
+          id: 1,
+          q: "A text message says 'Claim your ₹3,500 refund here'. Clicking it asks for your UPI PIN. What happens if you enter it?",
+          opts: [
+            { id: 'a', t: "₹3,500 is credited to your bank account", ok: false },
+            { id: 'b', t: "₹3,500 is debited (taken away) from your account", ok: true },
+            { id: 'c', t: "Your bank sends an SMS confirmation", ok: false }
+          ],
+          exp: "Golden Rule: You NEVER need to enter your UPI PIN to receive refunds or money. Entering your PIN always debits money."
+        },
+        {
+          id: 2,
+          q: "When subscribing to a 'Free 7-Day OTT Trial' with AutoPay, when is the best time to cancel the mandate?",
+          opts: [
+            { id: 'a', t: "After a month when money is deducted", ok: false },
+            { id: 'b', t: "Immediately or on Day 5 before auto-debit triggers", ok: true },
+            { id: 'c', t: "Free trials cancel automatically", ok: false }
+          ],
+          exp: "AutoPay mandates automatically renew and deduct money once trials expire. Canceling before Day 7 keeps your wallet safe."
+        },
+        {
+          id: 3,
+          q: "What is the recommended Emergency Fund size for a student or young freelancer with irregular income?",
+          opts: [
+            { id: 'a', t: "1 week of pocket money", ok: false },
+            { id: 'b', t: "3 to 6 months of essential living expenses in liquid funds", ok: true },
+            { id: 'c', t: "All money invested in crypto", ok: false }
+          ],
+          exp: "A 3-6 month cash reserve prevents you from high-interest debt when client invoices or stipends are delayed."
+        },
+        {
+          id: 4,
+          q: "Why is saving ₹1,000/mo at age 20 often better than saving ₹3,000/mo starting at age 35?",
+          opts: [
+            { id: 'a', t: "Compound interest gives your money 15 extra years to multiply exponentially", ok: true },
+            { id: 'b', t: "Banks only pay interest under age 25", ok: false },
+            { id: 'c', t: "Stock market prices never drop in your 20s", ok: false }
+          ],
+          exp: "Time in the market beats timing the market. Compound interest turns early micro-savings into exponential returns."
+        }
+      ];
+
+      const [cur, setCur] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [done, setDone] = useState(false);
+
+      const q = questions[cur];
+      const isAns = answers[q.id] !== undefined;
+
+      const handlePick = (opt) => {
+        if (isAns) return;
+        setAnswers({ ...answers, [q.id]: { id: opt.id, ok: opt.ok } });
+      };
+
+      const score = Object.values(answers).filter(a => a.ok).length;
+
+      return (
+        <div className="flex flex-col animate-fade-in text-left space-y-6 max-w-xl mx-auto">
+          <div className="pb-3 border-b border-slate-200/80 dark:border-slate-800">
+            <div className="flex justify-between items-center mb-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                Daily Money IQ
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center gap-1 border border-amber-200/60 dark:border-amber-900/60">
+                <IconFlame className="w-3.5 h-3.5 text-amber-500" />
+                <span>3-Day Streak</span>
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Daily Money & Scam Quiz</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Test your digital money smarts in 90 seconds and build your financial literacy score.</p>
+          </div>
+
+          {!done ? (
+            <div className="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <div className="flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500 mb-2">
+                <span>Question {cur + 1} of {questions.length}</span>
+                <span>Score: {score} pts</span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full mb-5 overflow-hidden">
+                <div className="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300" style={{ width: `${((cur + 1) / questions.length) * 100}%` }} />
+              </div>
+
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4 leading-snug">{q.q}</h2>
+
+              <div className="space-y-2.5 mb-5">
+                {q.opts.map(opt => {
+                  const ans = answers[q.id];
+                  let style = "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600";
+                  if (isAns) {
+                    if (opt.ok) style = "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-semibold";
+                    else if (ans?.id === opt.id) style = "bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-950 dark:text-rose-200 font-semibold";
+                    else style = "opacity-40 border-slate-200 dark:border-slate-700";
+                  }
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => handlePick(opt)}
+                      disabled={isAns}
+                      className={`w-full p-3.5 rounded-xl border text-left text-xs sm:text-sm cursor-pointer transition-all ${style}`}
+                    >
+                      {opt.t}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {isAns && (
+                <div className="p-3.5 bg-blue-50/70 dark:bg-blue-950/30 rounded-xl text-xs text-slate-700 dark:text-slate-300 mb-4 border border-blue-200/60 dark:border-blue-900/40 leading-relaxed">
+                  <strong className="block mb-0.5 text-blue-900 dark:text-blue-200 font-bold">Financial Insight:</strong>
+                  {q.exp}
+                </div>
+              )}
+
+              {isAns && (
+                <button
+                  onClick={() => {
+                    if (cur < questions.length - 1) setCur(cur + 1);
+                    else setDone(true);
+                  }}
+                  className="w-full min-h-[46px] bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl cursor-pointer shadow-xs transition-all active:scale-[0.98]"
+                >
+                  {cur < questions.length - 1 ? "Next Question" : "View Score"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border border-amber-200/60 dark:border-amber-800/60">
+                <IconTrophy className="w-7 h-7" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Quiz Completed!</h2>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">You scored {score} / {questions.length} ({Math.round((score / questions.length) * 100)}%)</p>
+              
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700 max-w-sm mx-auto">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-0.5">Financial Knowledge Tier</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">
+                  {score >= 3 ? "🛡️ Kavach Grandmaster (High IQ)" : "🌱 Smart Learner (Keep Going!)"}
+                </span>
+              </div>
+              
+              <div className="space-y-2 pt-2 max-w-sm mx-auto">
+                <button
+                  onClick={() => { setAnswers({}); setCur(0); setDone(false); }}
+                  className="w-full min-h-[44px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-semibold text-sm cursor-pointer transition-colors"
+                >
+                  Retake Quiz
+                </button>
+                <button
+                  onClick={() => onNavigate('/dashboard')}
+                  className="w-full min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm cursor-pointer shadow-xs transition-all active:scale-[0.98]"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 5. SPEND / CASHFLOW & DAILY TRACKER PAGE
+    // ==========================================
+    function SpendPage() {
+      const defaultTransactions = [
+        {
+          id: 1,
+          title: "UI Design Client Advance",
+          category: "Freelance Gig",
+          date: "2026-09-18",
+          dateLabel: "Today, 18 Sep",
+          amount: 6500,
+          type: "income",
+          mode: "UPI (Razorpay)"
+        },
+        {
+          id: 2,
+          title: "Zepto Quick Delivery",
+          category: "Food & Dining",
+          date: "2026-09-18",
+          dateLabel: "Today, 18 Sep",
+          amount: 215,
+          type: "expense",
+          mode: "UPI (PhonePe)"
+        },
+        {
+          id: 3,
+          title: "Chai & Samosa Break",
+          category: "Food & Dining",
+          date: "2026-09-18",
+          dateLabel: "Today, 18 Sep",
+          amount: 45,
+          type: "expense",
+          mode: "UPI (GPay)"
+        },
+        {
+          id: 4,
+          title: "Monthly College Stipend",
+          category: "Stipend",
+          date: "2026-09-17",
+          dateLabel: "Yesterday, 17 Sep",
+          amount: 12000,
+          type: "income",
+          mode: "Bank NEFT"
+        },
+        {
+          id: 5,
+          title: "Swiggy Dinner with Roommates",
+          category: "Food & Dining",
+          date: "2026-09-17",
+          dateLabel: "Yesterday, 17 Sep",
+          amount: 380,
+          type: "expense",
+          mode: "UPI Auto-Split"
+        },
+        {
+          id: 6,
+          title: "Metro Smart Card Top-up",
+          category: "Commute & Travel",
+          date: "2026-09-17",
+          dateLabel: "Yesterday, 17 Sep",
+          amount: 200,
+          type: "expense",
+          mode: "NCMC Card"
+        },
+        {
+          id: 7,
+          title: "Cashback Reward",
+          category: "Cashback & Refunds",
+          date: "2026-09-16",
+          dateLabel: "16 Sep 2026",
+          amount: 75,
+          type: "income",
+          mode: "UPI (Cred)"
+        },
+        {
+          id: 8,
+          title: "Amazon Coding Cable & USB-C",
+          category: "Shopping & Tech",
+          date: "2026-09-16",
+          dateLabel: "16 Sep 2026",
+          amount: 499,
+          type: "expense",
+          mode: "UPI (AmazonPay)"
+        }
+      ];
+
+      const [transactions, setTransactions] = useState(() => {
+        try {
+          const saved = localStorage.getItem('kavach_transactions');
+          return saved ? JSON.parse(saved) : defaultTransactions;
+        } catch (e) {
+          return defaultTransactions;
+        }
+      });
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('kavach_transactions', JSON.stringify(transactions));
+        } catch (e) {}
+      }, [transactions]);
+
+      const [filter, setFilter] = useState('all');
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [formType, setFormType] = useState('expense');
+      const [formTitle, setFormTitle] = useState('');
+      const [formAmount, setFormAmount] = useState('');
+      const [formCategory, setFormCategory] = useState('Food & Dining');
+      const [formDate, setFormDate] = useState('2026-09-18');
+      const [formMode, setFormMode] = useState('UPI');
+
+      const expenseCategories = [
+        "Food & Dining",
+        "Commute & Travel",
+        "Shopping & Tech",
+        "Bills & Utilities",
+        "Education",
+        "Social & Entertainment",
+        "Other"
+      ];
+
+      const incomeCategories = [
+        "Stipend",
+        "Freelance Gig",
+        "Salary",
+        "Pocket Money",
+        "Cashback & Refunds",
+        "Investment Return",
+        "Other Income"
+      ];
+
+      const handleAddTransaction = (e) => {
+        e.preventDefault();
+        if (!formTitle.trim() || !formAmount || Number(formAmount) <= 0) return;
+
+        const todayStr = "2026-09-18";
+        let label = formDate;
+        if (formDate === todayStr) {
+          label = "Today, 18 Sep";
+        } else if (formDate === "2026-09-17") {
+          label = "Yesterday, 17 Sep";
+        } else {
+          label = new Date(formDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        const newTx = {
+          id: Date.now(),
+          title: formTitle.trim(),
+          category: formCategory,
+          date: formDate,
+          dateLabel: label,
+          amount: Number(formAmount),
+          type: formType,
+          mode: formMode
+        };
+
+        setTransactions([newTx, ...transactions]);
+        setIsModalOpen(false);
+        setFormTitle('');
+        setFormAmount('');
+      };
+
+      const handleDelete = (id) => {
+        setTransactions(transactions.filter((t) => t.id !== id));
+      };
+
+      const totalIncome = transactions
+        .filter((t) => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const totalExpense = transactions
+        .filter((t) => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const netBalance = totalIncome - totalExpense;
+
+      const todayExpense = transactions
+        .filter((t) => t.type === 'expense' && (t.date === '2026-09-18' || t.dateLabel?.startsWith('Today')))
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const dailyCap = 500;
+      const isOverDailyCap = todayExpense > dailyCap;
+
+      const filteredList = transactions.filter((t) => {
+        if (filter === 'all') return true;
+        return t.type === filter;
+      });
+
+      const groupedTransactions = filteredList.reduce((acc, curr) => {
+        const key = curr.dateLabel || curr.date;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(curr);
+        return acc;
+      }, {});
+
+      return (
+        <div className="w-full max-w-5xl mx-auto space-y-6 animate-fade-in text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-[11px] font-semibold uppercase tracking-wider mb-1.5">
+                <IconWallet className="w-3.5 h-3.5" />
+                <span>Income & Daily Expense Tracker</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Daily Cashflow
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                Log your irregular income, monitor daily chai & food expenses, and stay under daily caps.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormType('expense');
+                setFormCategory('Food & Dining');
+                setIsModalOpen(true);
+              }}
+              className="min-h-[42px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95 shrink-0 self-start sm:self-auto"
+            >
+              <IconPlus className="w-4 h-4 text-amber-300" />
+              <span>Add Income / Expense</span>
+            </button>
+          </div>
+
+          {/* Metrics summary cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Net Balance</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block mt-1 tracking-tight">
+                ₹{netBalance.toLocaleString()}
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-1">
+                <IconTrendingUp className="w-3 h-3" /> Inflow - Outflow
+              </span>
+            </div>
+
+            <div className={`p-4 bg-white dark:bg-slate-900 rounded-2xl border shadow-xs ${
+              isOverDailyCap ? 'border-rose-300 dark:border-rose-900' : 'border-slate-200/90 dark:border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Today's Spend</span>
+                <span className={`w-2 h-2 rounded-full ${isOverDailyCap ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+              </div>
+              <span className={`text-xl sm:text-2xl font-bold block mt-1 tracking-tight ${
+                isOverDailyCap ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
+              }`}>
+                ₹{todayExpense.toLocaleString()}
+              </span>
+              <span className={`text-[10px] font-medium mt-1 block ${
+                isOverDailyCap ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-500 dark:text-slate-400'
+              }`}>
+                {isOverDailyCap ? `Exceeded ₹${dailyCap} cap` : `₹${dailyCap - todayExpense} under daily cap`}
+              </span>
+            </div>
+
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Inflow</span>
+              <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 block mt-1 tracking-tight">
+                +₹{totalIncome.toLocaleString()}
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">Stipends, gigs & refunds</span>
+            </div>
+
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Spent</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-300 block mt-1 tracking-tight">
+                -₹{totalExpense.toLocaleString()}
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">Across all categories</span>
+            </div>
+          </div>
+
+          {/* Daily Cap Banner */}
+          <div className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
+            isOverDailyCap
+              ? 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60 text-rose-950 dark:text-rose-200'
+              : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-900/60 text-slate-900 dark:text-slate-100'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                isOverDailyCap ? 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300'
+              }`}>
+                <IconClock className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold">
+                  {isOverDailyCap ? '⚠️ Today’s Expense Cap Exceeded!' : '🎯 Daily Expense Cap: ₹500/day'}
+                </h3>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+                  {isOverDailyCap
+                    ? `You have spent ₹${todayExpense} today (₹${todayExpense - dailyCap} over target). Cool down on discretionary food & cab taps!`
+                    : `You spent ₹${todayExpense} today. ₹${dailyCap - todayExpense} left before hitting your daily limit.`}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormType('income');
+                setFormCategory('Stipend');
+                setIsModalOpen(true);
+              }}
+              className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer shrink-0 shadow-xs transition-colors"
+            >
+              + Add Income
+            </button>
+          </div>
+
+          {/* Filter pills */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+              <button
+                type="button"
+                onClick={() => setFilter('all')}
+                className={`min-h-[34px] px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                  filter === 'all'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                }`}
+              >
+                All Activity ({transactions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('expense')}
+                className={`min-h-[34px] px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                  filter === 'expense'
+                    ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                }`}
+              >
+                Expenses Only
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('income')}
+                className={`min-h-[34px] px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                  filter === 'income'
+                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                }`}
+              >
+                Incomes Only
+              </button>
+            </div>
+
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium hidden sm:inline-block">
+              Grouped by Day
+            </span>
+          </div>
+
+          {/* Transaction groups */}
+          <div className="space-y-4">
+            {Object.keys(groupedTransactions).length === 0 ? (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200/90 dark:border-slate-800 text-center text-slate-400">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">No transactions found</p>
+                <p className="text-xs">Click "+ Add Income / Expense" above to record your cashflow.</p>
+              </div>
+            ) : (
+              Object.entries(groupedTransactions).map(([dateTitle, list]) => {
+                const dayExpense = list.filter((x) => x.type === 'expense').reduce((s, x) => s + x.amount, 0);
+                const dayIncome = list.filter((x) => x.type === 'income').reduce((s, x) => s + x.amount, 0);
+
+                return (
+                  <div key={dateTitle} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
+                    <div className="px-4 sm:px-5 py-3 bg-slate-50/80 dark:bg-slate-800/40 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <IconCalendar className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">{dateTitle}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs font-semibold">
+                        {dayExpense > 0 && (
+                          <span className="text-rose-600 dark:text-rose-400">Spent: ₹{dayExpense.toLocaleString()}</span>
+                        )}
+                        {dayIncome > 0 && (
+                          <span className="text-emerald-600 dark:text-emerald-400">Inflow: +₹{dayIncome.toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {list.map((item) => {
+                        const isIncome = item.type === 'income';
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="p-3.5 sm:p-4 flex items-center justify-between hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                isIncome
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                              }`}>
+                                {isIncome ? (
+                                  <IconArrowDownLeft className="w-4 h-4" />
+                                ) : (
+                                  <IconArrowUpRight className="w-4 h-4" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-semibold text-slate-900 dark:text-white leading-snug">{item.title}</h4>
+                                <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                                  <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 font-medium">{item.category}</span>
+                                  <span>•</span>
+                                  <span>{item.mode}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <span className={`text-sm sm:text-base font-bold tracking-tight ${
+                                isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
+                              }`}>
+                                {isIncome ? `+₹${item.amount.toLocaleString()}` : `-₹${item.amount.toLocaleString()}`}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(item.id)}
+                                title="Delete transaction"
+                                className="w-8 h-8 rounded-lg text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors cursor-pointer"
+                              >
+                                <IconTrash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Add transaction modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
+              <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 text-slate-900 dark:text-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition-colors cursor-pointer"
+                >
+                  <IconX className="w-4 h-4" />
+                </button>
+
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Add Cashflow Entry</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Record new income or log a daily payment.</p>
+
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-slate-200/80 dark:border-slate-700/60">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormType('expense');
+                      setFormCategory('Food & Dining');
+                    }}
+                    className={`min-h-[38px] rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      formType === 'expense'
+                        ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs font-bold'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    💸 Expense (-)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormType('income');
+                      setFormCategory('Stipend');
+                    }}
+                    className={`min-h-[38px] rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      formType === 'income'
+                        ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs font-bold'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    💰 Income (+)
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddTransaction} className="space-y-3.5 text-left">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                      Amount (₹)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        value={formAmount}
+                        onChange={(e) => setFormAmount(e.target.value)}
+                        placeholder="e.g. 350"
+                        className="w-full min-h-[44px] pl-8 pr-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                      {formType === 'income' ? 'Source / Description' : 'Merchant / Expense Description'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formTitle}
+                      onChange={(e) => setFormTitle(e.target.value)}
+                      placeholder={formType === 'income' ? 'e.g. Freelance project payment' : 'e.g. Zepto groceries or Chai tap'}
+                      className="w-full min-h-[44px] px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                      Category
+                    </label>
+                    <select
+                      value={formCategory}
+                      onChange={(e) => setFormCategory(e.target.value)}
+                      className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                    >
+                      {(formType === 'income' ? incomeCategories : expenseCategories).map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formDate}
+                        onChange={(e) => setFormDate(e.target.value)}
+                        className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                        Payment Mode
+                      </label>
+                      <select
+                        value={formMode}
+                        onChange={(e) => setFormMode(e.target.value)}
+                        className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                      >
+                        <option value="UPI">UPI (GPay/PhonePe)</option>
+                        <option value="Bank Transfer">Bank NEFT/IMPS</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Debit/Credit Card</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full min-h-[46px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs mt-3 active:scale-[0.98] transition-all"
+                  >
+                    <span>{formType === 'income' ? 'Record Income (+)' : 'Log Expense (-)'}</span>
+                    <IconCheckCircle2 className="w-4 h-4 text-amber-300" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 6. 1-ON-1 AI FINTECH CHATBOT (Kavach Copilot)
+    // ==========================================
+    function ChatWidget({ user, onNavigate }) {
+      const [isOpen, setIsOpen] = useState(false);
+      const [inputMessage, setInputMessage] = useState('');
+      const [isTyping, setIsTyping] = useState(false);
+      const messagesEndRef = useRef(null);
+
+      const [messages, setMessages] = useState([
+        {
+          id: 1,
+          sender: 'bot',
+          time: 'Just now',
+          text: `Hello ${user ? user.name.split(' ')[0] : 'there'}! I am your Kavach FinTech Copilot. I can answer questions about UPI fraud traps, irregular stipend budgeting, daily spend caps, or savings pace. What would you like to check today?`,
+          suggestions: [
+            "How to save ₹5,000 on a student stipend?",
+            "Is this SMS a scam: 'Electricity unpaid, pay now'?",
+            "Liquid Mutual Funds vs 2.7% Savings Account",
+            "How do I set a daily expense budget?"
+          ]
+        }
+      ]);
+
+      const scrollToBottom = () => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+
+      useEffect(() => {
+        if (isOpen) {
+          scrollToBottom();
+        }
+      }, [messages, isTyping, isOpen]);
+
+      const getBotResponse = (query) => {
+        const q = query.toLowerCase();
+
+        if (q.includes('scam') || q.includes('electricity') || q.includes('pin') || q.includes('refund') || q.includes('fake') || q.includes('qr')) {
+          return {
+            text: "🚨 UPI Safety Warning: Legitimate refunds or bill payments NEVER require entering your UPI PIN or scanning a QR code sent over WhatsApp/SMS! Fraudsters frequently impersonate power boards or customer care. If a screen asks for your UPI PIN, money is being DEBITED from your bank.",
+            action: { label: "Test in Scam Shield", path: "/shield" }
+          };
+        }
+
+        if (q.includes('stipend') || q.includes('save') || q.includes('5000') || q.includes('budget') || q.includes('salary')) {
+          return {
+            text: "💡 Smart Payout Strategy: When your stipend or gig money lands, immediately lock away 25-30% into your Savings Goals. Divide the remaining money by the days until your next payout to set a strict Daily Spend Cap (e.g. ₹250/day). Any unspent money rolls over to your weekend fun pot!",
+            action: { label: "Track in Cashflow", path: "/spend" }
+          };
+        }
+
+        if (q.includes('liquid') || q.includes('fund') || q.includes('interest') || q.includes('invest') || q.includes('sip')) {
+          return {
+            text: "📈 Micro-Investing Hack: Leaving stipend money in a regular bank account earns barely 2.5–3% p.a. Overnight and Liquid mutual funds invest in government-backed T-bills, earning ~6.8% with instant 1-day UPI withdrawal. It keeps your emergency cash beating inflation with zero stock market drama.",
+            action: { label: "Take Daily Quiz", path: "/quiz" }
+          };
+        }
+
+        if (q.includes('chai') || q.includes('expense') || q.includes('track') || q.includes('daily') || q.includes('food')) {
+          return {
+            text: "☕ Micro-Expense Leak: Small ₹30 chai taps and ₹150 food deliveries often add up to over ₹4,500 every month without you realizing it. Use our Cashflow tab to log your daily expenses with one tap and see today's spent total instantly!",
+            action: { label: "Log Daily Expense", path: "/spend" }
+          };
+        }
+
+        if (q.includes('laptop') || q.includes('goal') || q.includes('buy') || q.includes('target')) {
+          return {
+            text: "🎯 Custom Goal Deposits: For any purchase like an M2 laptop or phone, break it down into flexible deposits. With Kavach, you can now deposit ANY variable amount (like ₹250, ₹640, or ₹2,000) whenever you get extra freelance or pocket money!",
+            action: { label: "Open Goals Planner", path: "/goals" }
+          };
+        }
+
+        return {
+          text: "That's a great question! Staying on top of your digital finances is all about pre-transaction awareness and smart daily tracking. You can log income & daily expenses in Cashflow, check suspicious payment requests in Shield, or set variable savings in Goals. Let me know what specific goal you are working towards!",
+          action: { label: "View Analytics Dashboard", path: "/dashboard" }
+        };
+      };
+
+      const handleSendMessage = (textToSend) => {
+        const text = textToSend || inputMessage;
+        if (!text.trim()) return;
+
+        const userMsg = {
+          id: Date.now(),
+          sender: 'user',
+          time: 'Just now',
+          text: text.trim()
+        };
+
+        setMessages((prev) => [...prev, userMsg]);
+        setInputMessage('');
+        setIsTyping(true);
+
+        setTimeout(() => {
+          const reply = getBotResponse(text);
+          const botMsg = {
+            id: Date.now() + 1,
+            sender: 'bot',
+            time: 'Just now',
+            text: reply.text,
+            action: reply.action
+          };
+          setMessages((prev) => [...prev, botMsg]);
+          setIsTyping(false);
+        }, 600);
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+        }
+      };
+
+      return (
+        <React.Fragment>
+          {/* Floating Launcher Button */}
+          <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5">
+            {!isOpen && (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 dark:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-lg animate-fade-in border border-slate-700/60">
+                <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Kavach Copilot</span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle Kavach Chatbot"
+              className="relative w-13 h-13 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 transition-all cursor-pointer hover:scale-105 active:scale-95 border border-blue-400/30"
+            >
+              {isOpen ? (
+                <IconX className="w-5 h-5 text-white" />
+              ) : (
+                <React.Fragment>
+                  <IconBot className="w-6 h-6 text-white" />
+                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
+                </React.Fragment>
+              )}
+            </button>
+          </div>
+
+          {/* Floating Popover Chat Window */}
+          {isOpen && (
+            <div className="fixed bottom-22 right-4 sm:right-6 z-40 w-[92vw] sm:w-[390px] h-[540px] max-h-[80vh] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-fade-in text-left">
+              
+              {/* Header */}
+              <div className="bg-slate-900 dark:bg-slate-950 text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
+                    <IconBot className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold tracking-tight flex items-center gap-1.5 text-white">
+                      Kavach Copilot
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    </h3>
+                    <span className="text-[10px] text-slate-400 font-medium block">
+                      Always-Active Money Assistant
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMessages([
+                        {
+                          id: Date.now(),
+                          sender: 'bot',
+                          time: 'Just now',
+                          text: `Chat reset! How can I help you optimize your money today, ${user ? user.name.split(' ')[0] : 'friend'}?`,
+                          suggestions: [
+                            "How to save ₹5,000 on a student stipend?",
+                            "Is this SMS a scam: 'Electricity unpaid, pay now'?",
+                            "Liquid Mutual Funds vs 2.7% Savings Account",
+                            "How do I set a daily expense budget?"
+                          ]
+                        }
+                      ]);
+                    }}
+                    title="Reset conversation"
+                    className="w-8 h-8 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <IconRotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    title="Minimize chat"
+                    className="w-8 h-8 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <IconChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Messages Stream */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60 dark:bg-slate-900/60">
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
+                  >
+                    <div className="flex items-end gap-2 max-w-[88%]">
+                      {m.sender === 'bot' && (
+                        <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs shrink-0 mb-1">
+                          <IconBot className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+
+                      <div
+                        className={`p-3 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                          m.sender === 'user'
+                            ? 'bg-blue-600 text-white rounded-br-xs shadow-xs font-medium'
+                            : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700/60 rounded-bl-xs shadow-xs'
+                        }`}
+                      >
+                        <p className="whitespace-pre-line">{m.text}</p>
+
+                        {m.action && (
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsOpen(false);
+                                if (onNavigate) onNavigate(m.action.path);
+                              }}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-700 dark:text-blue-300 text-xs font-semibold cursor-pointer transition-colors"
+                            >
+                              <span>{m.action.label}</span>
+                              <IconArrowRight className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {m.sender === 'user' && (
+                        <div className="w-6 h-6 rounded-lg bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center shrink-0 mb-1">
+                          {user && user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Suggestion Chips */}
+                    {m.suggestions && (
+                      <div className="flex flex-wrap gap-1.5 mt-2.5 ml-8 max-w-sm">
+                        {m.suggestions.map((s, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSendMessage(s)}
+                            className="text-[11px] bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs transition-all cursor-pointer text-left active:scale-95"
+                          >
+                            ✨ {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs shrink-0">
+                      <IconBot className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 shadow-xs flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]" />
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Composer */}
+              <div className="p-2.5 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="flex items-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 focus-within:border-blue-600 transition-colors"
+                >
+                  <input
+                    type="text"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask Kavach Copilot anything..."
+                    className="flex-1 min-h-[36px] px-3 bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputMessage.trim()}
+                    className="min-h-[34px] px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs disabled:opacity-30 disabled:pointer-events-none"
+                  >
+                    <span>Send</span>
+                    <IconSend className="w-3 h-3 text-amber-300" />
+                  </button>
+                </form>
+              </div>
+
+            </div>
+          )}
+        </React.Fragment>
+      );
+    }
+
+    // ==========================================
+    // 7. SHIELD PAGE (Hero Scam Scanner)
+    // ==========================================
+    function ShieldPage({ lang }) {
+      const [inputText, setInputText] = useState('');
+      const [scanState, setScanState] = useState('idle');
+      const TARGET_SCAM = "Urgent: Claim your ₹4,999 refund here";
+
+      const handleScan = (e) => {
+        e.preventDefault();
+        if (!inputText.trim()) return;
+        setScanState('scanning');
+        setTimeout(() => {
+          if (inputText.trim() === TARGET_SCAM) setScanState('danger');
+          else setScanState('safe');
+        }, 2000);
+      };
+
+      return (
+        <div className="flex flex-col items-center text-center animate-fade-in max-w-2xl mx-auto py-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-3">
+            <IconShield className="w-3.5 h-3.5" />
+            <span>Pre-Transaction Scam Shield</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+            Shield your UPI before you tap.
+          </h1>
+          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mb-6">
+            Stop collect request traps, fake cashback QR codes, and phishing links before PIN prompt.
+          </p>
+
+          <div className="w-full max-w-xl">
+            {scanState === 'idle' && (
+              <form onSubmit={handleScan} className="space-y-3.5">
+                <textarea
+                  rows={3}
+                  value={inputText}
+                  onChange={e => setInputText(e.target.value)}
+                  placeholder="Paste or drop any SMS, WhatsApp link, or collect request text you were asked to pay..."
+                  className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-600 dark:focus:border-blue-500 rounded-2xl text-sm text-slate-900 dark:text-white outline-none resize-none shadow-xs transition-all"
+                />
+                
+                <button
+                  type="submit"
+                  className="w-full min-h-[48px] bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                >
+                  <IconShieldAlert className="w-4 h-4 text-amber-300" />
+                  <span>Scan for Fraud</span>
+                </button>
+
+                <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">
+                  Try test prompt:{" "}
+                  <button
+                    type="button"
+                    onClick={() => setInputText(TARGET_SCAM)}
+                    className="text-blue-600 dark:text-blue-400 font-semibold underline cursor-pointer hover:text-blue-700 dark:hover:text-blue-300"
+                  >
+                    "{TARGET_SCAM}" ↵ Fill
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {scanState === 'scanning' && (
+              <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs text-center space-y-4">
+                <div className="w-12 h-12 rounded-full border-3 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 animate-spin mx-auto" />
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Scanning in real-time...</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Checking UPI VPA signatures & known collect request exploits...</p>
+                </div>
+              </div>
+            )}
+
+            {scanState === 'danger' && (
+              <div className="p-6 sm:p-7 bg-[#b91c1c] text-white rounded-2xl text-left space-y-4 shadow-xl animate-fade-in border border-red-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-white text-red-700 flex items-center justify-center font-bold shrink-0">
+                    <IconAlertTriangle className="w-6 h-6 text-red-700" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-black/30 px-2 py-0.5 rounded">
+                      COLLECT REQUEST TRAP
+                    </span>
+                    <h2 className="text-lg font-bold">High-Risk Threat Detected</h2>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-black/25 rounded-xl border border-red-400/30 text-sm leading-relaxed font-semibold">
+                  "This is a collect request. Approving it takes money from you. Refunds are never collect requests."
+                </div>
+
+                <button
+                  onClick={() => { setInputText(''); setScanState('idle'); }}
+                  className="min-h-[42px] px-5 bg-white text-red-700 hover:bg-red-50 font-bold text-xs rounded-xl cursor-pointer shadow-xs transition-colors"
+                >
+                  Reset & Test Another
+                </button>
+              </div>
+            )}
+
+            {scanState === 'safe' && (
+              <div className="p-6 bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 rounded-2xl text-left space-y-3 shadow-xs">
+                <div className="flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400">
+                  <IconCheckCircle2 className="w-6 h-6" />
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">No malicious pattern detected</h3>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  This does not match recognized UPI collect request traps. Always verify recipient VPA before tapping your PIN.
+                </p>
+                <button
+                  onClick={() => { setInputText(''); setScanState('idle'); }}
+                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 7B. DEDICATED AUTHENTICATION PAGE
+    // ==========================================
+    function AuthPage({ onNavigate, onLogin }) {
+      const [step, setStep] = useState(1);
+      const [name, setName] = useState('');
+      const [phone, setPhone] = useState('');
+      const [otp, setOtp] = useState(['', '', '', '']);
+      const [selectedPersona, setSelectedPersona] = useState('student');
+      const [errorMsg, setErrorMsg] = useState('');
+      const [isVerifying, setIsVerifying] = useState(false);
+
+      const handleStep1 = (e) => {
+        e.preventDefault();
+        if (!name.trim()) {
+          setErrorMsg('Please enter your name');
+          return;
+        }
+        if (phone.replace(/\D/g, '').length < 10) {
+          setErrorMsg('Please enter a valid 10-digit mobile number');
+          return;
+        }
+        setErrorMsg('');
+        setStep(2);
+      };
+
+      const handleQuickDemoFill = () => {
+        setName('Shreyas Patel');
+        setPhone('9876543210');
+        setErrorMsg('');
+      };
+
+      const handleStep2 = (e) => {
+        e.preventDefault();
+        if (otp.join('').length < 4) {
+          setErrorMsg('Please enter 4 digits');
+          return;
+        }
+        setErrorMsg('');
+        setIsVerifying(true);
+        setTimeout(() => {
+          setIsVerifying(false);
+          setStep(3);
+        }, 600);
+      };
+
+      const handleComplete = () => {
+        const userData = {
+          name: name.trim() || 'Shreyas Patel',
+          phone: phone || '9876543210',
+          persona: selectedPersona
+        };
+        onLogin(userData);
+      };
+
+      return (
+        <div className="max-w-md mx-auto py-4 sm:py-8 animate-fade-in text-left">
+          {/* Back button to Home */}
+          <button
+            onClick={() => onNavigate('/')}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white mb-5 cursor-pointer transition-colors"
+          >
+            <IconArrowLeft className="w-4 h-4" />
+            <span>Back to Home</span>
+          </button>
+
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8">
+            {/* Step Indicators */}
+            <div className="flex items-center gap-2 mb-6">
+              {[1, 2, 3].map((s) => (
+                <div
+                  key={s}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    s === step
+                      ? 'w-10 bg-blue-600 dark:bg-blue-500'
+                      : s < step
+                      ? 'w-6 bg-emerald-500'
+                      : 'w-6 bg-slate-200 dark:bg-slate-800'
+                  }`}
+                />
+              ))}
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 ml-auto uppercase tracking-wider">
+                Step {step} of 3
+              </span>
+            </div>
+
+            {/* STEP 1: Name & Phone */}
+            {step === 1 && (
+              <form onSubmit={handleStep1} className="space-y-4">
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-200/60 dark:border-blue-900/60">
+                    <IconShield className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    Sign Up for Kavach
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Enter your details to unlock Scam Shield, Cashflow, and Goals.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Shreyas Patel"
+                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    UPI Mobile Number
+                  </label>
+                  <div className="flex items-center">
+                    <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center text-xs font-bold text-slate-600 dark:text-slate-400">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="98765 43210"
+                      className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-0.5">
+                  <button
+                    type="button"
+                    onClick={handleQuickDemoFill}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline cursor-pointer"
+                  >
+                    ⚡ Auto-Fill Demo Profile (Shreyas • 9876543210)
+                  </button>
+                </div>
+
+                {errorMsg && (
+                  <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all"
+                >
+                  <span>Send 4-Digit Verification Code</span>
+                  <IconArrowRight className="w-4 h-4 text-amber-300" />
+                </button>
+              </form>
+            )}
+
+            {/* STEP 2: OTP Verification */}
+            {step === 2 && (
+              <form onSubmit={handleStep2} className="space-y-4">
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-200/60 dark:border-blue-900/60">
+                    <IconCheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    Verify Mobile Number
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Enter the 4-digit code sent to +91 {phone || '9876543210'}
+                  </p>
+                </div>
+
+                <div className="flex justify-between gap-2.5 max-w-[240px] mx-auto py-2">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`auth-otp-idx-${idx}`}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const newOtp = [...otp];
+                        newOtp[idx] = val;
+                        setOtp(newOtp);
+                        if (val && idx < 3) {
+                          document.getElementById(`auth-otp-idx-${idx + 1}`)?.focus();
+                        }
+                      }}
+                      className="w-12 h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none text-slate-900 dark:text-white transition-all"
+                    />
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setOtp(['2', '4', '2', '6'])}
+                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg cursor-pointer transition-colors"
+                  >
+                    ⚡ Auto-Fill 2426
+                  </button>
+                </div>
+
+                {errorMsg && (
+                  <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold text-center">{errorMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isVerifying}
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 transition-all"
+                >
+                  {isVerifying ? (
+                    <span>Verifying...</span>
+                  ) : (
+                    <>
+                      <span>Verify & Continue</span>
+                      <IconArrowRight className="w-4 h-4 text-amber-300" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* STEP 3: Lifestyle Persona */}
+            {step === 3 && (
+              <div className="space-y-4">
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 border border-emerald-200/60 dark:border-emerald-800/60">
+                    <IconSparkles className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    Choose Your Lifestyle
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Kavach personalizes your payout cycles and safety rules based on this.
+                  </p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { id: 'student', title: 'College Student / Intern', desc: 'Irregular stipends, allowances, college projects', icon: '🎓' },
+                    { id: 'freelance', title: 'Freelancer / Creator', desc: 'Gig payouts, variable client invoices, Razorpay', icon: '💻' },
+                    { id: 'junior', title: 'Early Career Professional', desc: 'First salary, rent splits, weekend spends', icon: '💼' }
+                  ].map((p) => {
+                    const isSelected = selectedPersona === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPersona(p.id)}
+                        className={`w-full p-3.5 rounded-2xl border text-left flex items-center gap-3.5 cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 ring-1 ring-blue-500'
+                            : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                          isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                        }`}>
+                          {p.icon}
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{p.title}</h4>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">{p.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleComplete}
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all"
+                >
+                  <span>Activate Protection & Enter App</span>
+                  <IconArrowRight className="w-4 h-4 text-amber-300" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1.5">
+            <IconLock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN access</span>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 8. LANDING PAGE
+    // ==========================================
+    function LandingPage({ user, onNavigate }) {
+      const [modalArticle, setModalArticle] = useState(null);
+
+      const handleAction = (destination) => {
+        if (user) {
+          onNavigate(destination);
+        } else {
+          onNavigate('/auth');
+        }
+      };
+
+      const articles = [
+        {
+          id: 1, badge: "RBI Alert", title: "The 'Refund Collect Request' Trap Explained",
+          desc: "Why legitimate refunds NEVER require entering a UPI PIN.",
+          full: "NPCI & RBI strictly clarify that entering a UPI PIN always debits money from your account. You NEVER need to enter a PIN to receive refunds, cashbacks, or lottery payouts."
+        },
+        {
+          id: 2, badge: "Investing 101", title: "Liquid Funds vs 2.7% Bank Accounts for Stipends",
+          desc: "How young earners safely earn 6.8% with instant 1-day UPI withdrawal.",
+          full: "Overnight & Liquid mutual funds invest in government-backed securities, offer near-zero volatility, and earn more than double regular savings bank interest."
+        },
+        {
+          id: 3, badge: "Daily Caps", title: "Setting Daily Expense Limits to Protect Payouts",
+          desc: "Stop small ₹40 chai taps and delivery fees from draining your stipend.",
+          full: "Divide your monthly discretionary money by remaining days to set a strict daily cap. Check your Daily Tracker in Kavach before tapping UPI to keep your savings intact."
+        },
+        {
+          id: 4, badge: "Compounding", title: "Why Starting a ₹500 SIP at 20 Beats ₹2,500 at 30",
+          desc: "The mathematical proof that time in the market multiplies wealth.",
+          full: "Compounding growth means your earnings earn their own earnings. 10 extra years of compounding yields over 3x higher corpus by age 50."
+        }
+      ];
+
+      return (
+        <div className="flex flex-col animate-fade-in text-left space-y-10 py-2">
+          {/* Hero */}
+          <section className="text-center max-w-3xl mx-auto pt-4">
+            <span className="px-3.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold inline-flex items-center gap-1.5 mb-4">
+              <IconSparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>India's #1 Digital Money Copilot</span>
+            </span>
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+              Save. Spend. <span className="text-blue-600 dark:text-blue-400">Stay safe.</span>
+            </h1>
+            
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto mb-7 leading-relaxed">
+              A money copilot built for India's digital-payment generation. Pre-transaction fraud checks, irregular stipend cashflow tracking, and AI financial guidance.
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto mb-8">
+              <button
+                onClick={() => handleAction('/dashboard')}
+                className="min-h-[48px] px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+              >
+                <span>{user ? 'Open Dashboard' : 'Sign Up for Free'}</span>
+                <IconArrowRight className="w-4 h-4 text-amber-300" />
+              </button>
+              <button
+                onClick={() => handleAction('/shield')}
+                className="min-h-[48px] px-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-800 dark:text-slate-200 font-semibold text-sm rounded-xl cursor-pointer transition-all"
+              >
+                {user ? 'Open Scam Shield' : 'Sign Up to Explore'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 p-3.5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl text-center shadow-xs">
+              <div>
+                <span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white block">48,000+</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Youth Protected</span>
+              </div>
+              <div className="border-x border-slate-200 dark:border-slate-800">
+                <span className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 block">₹18.4 Cr</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Scanned</span>
+              </div>
+              <div>
+                <span className="text-base sm:text-lg font-bold text-amber-600 dark:text-amber-400 block">3.2x</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Faster Goals</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Feature Pillars */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div
+              onClick={() => handleAction('/shield')}
+              className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 cursor-pointer transition-all text-left shadow-xs hover:shadow-card group"
+            >
+              <span className="text-[10px] font-bold font-mono bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60 uppercase">
+                SHIELD
+              </span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mt-2.5 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                Pre-transaction Scam Checks
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                Pre-transaction scam checks in under 3 seconds.
+              </p>
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                {user ? 'Test Scam Shield' : 'Sign Up to Unlock'} <IconArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+
+            <div
+              onClick={() => handleAction('/spend')}
+              className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 cursor-pointer transition-all text-left shadow-xs hover:shadow-card group"
+            >
+              <span className="text-[10px] font-bold font-mono bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded border border-blue-200/60 dark:border-blue-900/60 uppercase">
+                CASHFLOW
+              </span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mt-2.5 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                Income & Daily Expense Tracker
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                Track irregular stipends, daily food & chai taps, and daily spend caps.
+              </p>
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                {user ? 'Track Cashflow' : 'Sign Up to Unlock'} <IconArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+
+            <div
+              onClick={() => handleAction('/goals')}
+              className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 cursor-pointer transition-all text-left shadow-xs hover:shadow-card group"
+            >
+              <span className="text-[10px] font-bold font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-900/60 uppercase">
+                GOALS
+              </span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mt-2.5 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                Personal Savings Goals
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                Plan targets like laptops or phones with flexible custom micro-deposits.
+              </p>
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                {user ? 'View Savings Goals' : 'Sign Up to Unlock'} <IconArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </section>
+
+          {/* Educational News & Investing Smarts */}
+          <section>
+            <div className="flex items-center gap-2 mb-1.5 text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              <IconBookOpen className="w-4 h-4" />
+              <span>Smart Money Academy & RBI Advisories</span>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Financial Smarts for Young Bharat</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {articles.map(a => (
+                <div
+                  key={a.id}
+                  onClick={() => setModalArticle(a)}
+                  className="p-4.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-all shadow-xs group"
+                >
+                  <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 uppercase">
+                    {a.badge}
+                  </span>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-1.5 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    {a.title}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2.5 leading-relaxed">{a.desc}</p>
+                  <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                    <span>Read 2-Min Rule</span>
+                    <IconChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Ready Card */}
+          <section className="bg-slate-900 dark:bg-slate-950 text-white rounded-3xl p-7 text-center shadow-lg border border-slate-800">
+            <div className="max-w-md mx-auto">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <IconSparkles className="w-5 h-5 text-amber-300" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">Ready to take control of your digital money?</h3>
+              <p className="text-slate-300 text-xs sm:text-sm mb-5 leading-relaxed">Join thousands of students and young professionals who never worry before tapping UPI.</p>
+              <button
+                onClick={() => handleAction('/dashboard')}
+                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm cursor-pointer active:scale-[0.98] transition-all shadow-sm shadow-blue-600/20"
+              >
+                {user ? 'Open Dashboard' : 'Sign Up for Free'}
+              </button>
+            </div>
+          </section>
+
+          {/* Footer Impact */}
+          <footer className="p-5 bg-white dark:bg-slate-900 rounded-2xl text-center border border-slate-200/80 dark:border-slate-800">
+            <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-1.5">
+              "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves."
+            </p>
+            <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5">
+              <IconLock className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Non-custodial • 100% On-device privacy • Zero UPI PIN access</span>
+            </span>
+          </footer>
+
+          {modalArticle && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
+              <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+                <button
+                  onClick={() => setModalArticle(null)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <IconX className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded uppercase">
+                  {modalArticle.badge}
+                </span>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-2 mb-2">{modalArticle.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 mb-4">
+                  {modalArticle.full}
+                </p>
+                <button
+                  onClick={() => setModalArticle(null)}
+                  className="w-full min-h-[42px] bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl cursor-pointer transition-all"
+                >
+                  Close Article
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // MAIN ROOT APP (With Hover-Slide Navigation & Theme Toggle)
+    // ==========================================
+    function App() {
+      // User authentication state
+      const [user, setUser] = useState(() => {
+        try {
+          const saved = localStorage.getItem('kavach_user');
+          return saved ? JSON.parse(saved) : null;
+        } catch(e) {
+          return null;
+        }
+      });
+
+      // Navigation drawer state & hover timeout
+      const [isNavOpen, setIsNavOpen] = useState(false);
+      const navTimeoutRef = useRef(null);
+
+      // Theme state with localStorage persistence (default: light)
+      const [theme, setTheme] = useState(() => {
+        try {
+          return localStorage.getItem('kavach_theme') || 'light';
+        } catch (e) {
+          return 'light';
+        }
+      });
+
+      // Apply theme to document root
+      useEffect(() => {
+        try {
+          localStorage.setItem('kavach_theme', theme);
+        } catch (e) {}
+
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      }, [theme]);
+
+      // Route management
+      const getRoute = () => {
+        const h = window.location.hash.replace(/^#/, '') || '/';
+        return h.startsWith('/') ? h : '/' + h;
+      };
+
+      const [route, setRoute] = useState(getRoute());
+
+      useEffect(() => {
+        const onHash = () => {
+          const current = getRoute();
+          if (!user && current !== '/' && current !== '/auth') {
+            window.location.hash = '/auth';
+            setRoute('/auth');
+            return;
+          }
+          setRoute(current);
+        };
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+      }, [user]);
+
+      useEffect(() => {
+        if (!user && route !== '/' && route !== '/auth') {
+          window.location.hash = '/auth';
+          setRoute('/auth');
+        }
+      }, [user, route]);
+
+      const navigate = (p) => {
+        setIsNavOpen(false);
+        if (!user && p !== '/' && p !== '/auth') {
+          window.location.hash = '/auth';
+          setRoute('/auth');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        window.location.hash = p;
+        setRoute(p);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const handleLogin = (u) => {
+        setUser(u);
+        try {
+          localStorage.setItem('kavach_user', JSON.stringify(u));
+        } catch(e) {}
+        navigate('/dashboard');
+      };
+
+      const handleSignOut = () => {
+        setUser(null);
+        try {
+          localStorage.removeItem('kavach_user');
+        } catch(e) {}
+        navigate('/');
+      };
+
+      // Desktop Hover Interaction Handlers (with grace tolerance)
+      const handleTriggerEnter = () => {
+        if (window.innerWidth >= 768) {
+          if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+          setIsNavOpen(true);
+        }
+      };
+
+      const handleTriggerLeave = () => {
+        if (window.innerWidth >= 768) {
+          navTimeoutRef.current = setTimeout(() => {
+            setIsNavOpen(false);
+          }, 240);
+        }
+      };
+
+      const handleDrawerEnter = () => {
+        if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+      };
+
+      const handleDrawerLeave = () => {
+        if (window.innerWidth >= 768) {
+          navTimeoutRef.current = setTimeout(() => {
+            setIsNavOpen(false);
+          }, 240);
+        }
+      };
+
+      const navItems = [
+        { to: '/dashboard', label: 'Dashboard', icon: IconDashboard, desc: 'Pulse & analytics' },
+        { to: '/shield', label: 'Scam Shield', icon: IconShield, desc: 'Pre-tap fraud check' },
+        { to: '/spend', label: 'Daily Cashflow', icon: IconWallet, desc: 'Income & spend log' },
+        { to: '/goals', label: 'Savings Goals', icon: IconTarget, desc: 'Future buy planner' },
+        { to: '/quiz', label: 'Daily Quiz', icon: IconHelpCircle, desc: 'Test financial IQ' }
+      ];
+
+      const showSidebar = user && route !== '/auth' && route !== '/';
+
+      return (
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 font-sans flex flex-col selection:bg-blue-100 dark:selection:bg-blue-900/60 transition-colors duration-200">
+          
+          {/* Subtle ambient lighting */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[54rem] h-[22rem] bg-gradient-to-b from-blue-100/40 dark:from-blue-950/20 via-slate-100/20 dark:via-transparent to-transparent blur-3xl rounded-full" />
+            <div className="absolute top-72 -left-20 w-80 h-80 bg-emerald-100/25 dark:bg-emerald-950/15 blur-3xl rounded-full" />
+            <div className="absolute top-96 -right-20 w-80 h-80 bg-blue-100/25 dark:bg-blue-950/15 blur-3xl rounded-full" />
+          </div>
+
+          {/* TOP HEADER: Compact, balanced, icon-only hamburger trigger */}
+          <header className="sticky top-0 z-30 w-full backdrop-blur-md bg-white/90 dark:bg-[#111827]/90 border-b border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors duration-200">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              
+              {/* Left Side: Icon-only Hamburger Trigger & Brand Logo */}
+              <div className="flex items-center gap-3 w-1/3">
+                {showSidebar && (
+                  <button
+                    type="button"
+                    onClick={() => setIsNavOpen(!isNavOpen)}
+                    onMouseEnter={handleTriggerEnter}
+                    onMouseLeave={handleTriggerLeave}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shrink-0"
+                    aria-label="Toggle navigation menu"
+                    title={isNavOpen ? "Close navigation" : "Open navigation"}
+                  >
+                    <IconMenu className="w-5 h-5" />
+                  </button>
+                )}
+
+                <button
+                  onClick={() => navigate(user ? '/dashboard' : '/')}
+                  className="flex items-center gap-2.5 group cursor-pointer text-left"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                    <IconShield className="w-4.5 h-4.5 text-amber-300" />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 leading-tight">
+                      Kavach
+                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider -mt-0.5 uppercase">
+                      Money Copilot
+                    </span>
+                  </div>
+                </button>
+              </div>
+
+              {/* CENTER: Subtle live status pill */}
+              <div className="w-1/3 flex items-center justify-center text-center">
+                <div className="hidden sm:inline-flex items-center gap-2 py-1 px-3 bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs">
+                  <IconShield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span className="font-bold text-slate-900 dark:text-white">Kavach</span>
+                  <span className="text-slate-300 dark:text-slate-600">•</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Active Money Shield</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+              </div>
+
+              {/* RIGHT: Profile badge & Logout button (or Sign In button) */}
+              <div className="flex items-center justify-end gap-2.5 w-1/3">
+                {user ? (
+                  <div className="flex items-center gap-2.5">
+                    {/* User profile pill */}
+                    <div className="flex items-center gap-2 p-1 pr-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl shadow-2xs">
+                      <div className="relative">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+                      </div>
+                      <div className="hidden md:flex flex-col text-left">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight max-w-[110px] truncate">
+                          {user.name}
+                        </span>
+                        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 leading-none">
+                          {user.persona === 'freelance' ? 'Creator' : user.persona === 'junior' ? 'Early Career' : 'Student'} • Protected
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Logout button */}
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      title="Logout from Kavach"
+                      className="min-h-[36px] px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <IconLogOut className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Logout</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/auth')}
+                    className="min-h-[38px] px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-sm shadow-blue-500/20 transition-all cursor-pointer active:scale-95"
+                  >
+                    <IconSparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Sign Up</span>
+                  </button>
+                )}
+              </div>
+
+            </div>
+          </header>
+
+          {/* WORKSPACE: Slide-In Drawer Navigation + Main Content Area */}
+          <div className="flex-1 flex w-full relative">
+            
+            {showSidebar && (
+              <React.Fragment>
+                {/* Backdrop Blur Overlay */}
+                {isNavOpen && (
+                  <div
+                    onClick={() => setIsNavOpen(false)}
+                    className="fixed inset-0 z-40 bg-slate-950/30 dark:bg-black/60 backdrop-blur-xs transition-opacity duration-300"
+                    aria-hidden="true"
+                  />
+                )}
+
+                {/* Left Drawer that slides rightward into view */}
+                <aside
+                  onMouseEnter={handleDrawerEnter}
+                  onMouseLeave={handleDrawerLeave}
+                  className={`fixed top-0 left-0 z-50 h-full w-72 sm:w-80 bg-white dark:bg-[#111827] border-r border-slate-200/90 dark:border-slate-800/90 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-out ${
+                    isNavOpen ? 'translate-x-0' : '-translate-x-full'
+                  }`}
+                  aria-label="Navigation Drawer"
+                >
+                  <div className="p-5 space-y-6">
+                    {/* Drawer Header */}
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-xs">
+                          <IconShield className="w-4.5 h-4.5 text-amber-300" />
+                        </div>
+                        <div>
+                          <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1 leading-tight">
+                            Kavach
+                            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                            Navigation
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsNavOpen(false)}
+                        className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                        aria-label="Close navigation"
+                      >
+                        <IconX className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Nav Items */}
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase block mb-2 pl-2">
+                        Features
+                      </span>
+
+                      <nav className="space-y-1.5" aria-label="Sidebar Navigation">
+                        {navItems.map((item) => {
+                          const Icon = item.icon;
+                          const isActive = route === item.to;
+
+                          return (
+                            <button
+                              key={item.to}
+                              type="button"
+                              onClick={() => {
+                                navigate(item.to);
+                                setIsNavOpen(false);
+                              }}
+                              className={`w-full p-2.5 rounded-xl flex items-center gap-3 transition-all text-left group cursor-pointer ${
+                                isActive
+                                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-l-3 border-blue-600 dark:border-blue-400 font-bold shadow-2xs'
+                                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/60 font-medium'
+                              }`}
+                            >
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                  isActive
+                                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'
+                                }`}
+                              >
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <span className="text-xs sm:text-sm font-semibold block leading-tight">
+                                  {item.label}
+                                </span>
+                                <span className={`text-[10px] block leading-tight mt-0.5 ${isActive ? 'text-blue-600/75 dark:text-blue-400/80 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+                                  {item.desc}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </nav>
+                    </div>
+                  </div>
+
+                  {/* Drawer Footer: Integrated Light / Dark Theme Switch */}
+                  <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+                    <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-1">
+                      Theme Switcher
+                    </div>
+                    <div className="grid grid-cols-2 p-1 bg-slate-200/70 dark:bg-slate-800/90 rounded-xl border border-slate-300/40 dark:border-slate-700/60 text-xs font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setTheme('light')}
+                        className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                          theme === 'light'
+                            ? 'bg-white text-slate-900 shadow-xs font-bold'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                        aria-pressed={theme === 'light'}
+                      >
+                        <IconSun className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Light</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTheme('dark')}
+                        className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                          theme === 'dark'
+                            ? 'bg-slate-900 text-white shadow-xs font-bold'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                        aria-pressed={theme === 'dark'}
+                      >
+                        <IconMoon className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Dark</span>
+                      </button>
+                    </div>
+                  </div>
+                </aside>
+              </React.Fragment>
+            )}
+
+            {/* MAIN CONTENT AREA */}
+            <main className={`flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 overflow-y-auto transition-all duration-300 ${
+              isNavOpen ? 'opacity-90' : ''
+            }`}>
+              <div className="w-full max-w-6xl mx-auto">
+                {route === '/' && <LandingPage user={user} onNavigate={navigate} />}
+                {route === '/auth' && <AuthPage onNavigate={navigate} onLogin={handleLogin} />}
+                {user && route === '/dashboard' && <DashboardPage onNavigate={navigate} />}
+                {user && route === '/shield' && <ShieldPage />}
+                {user && route === '/spend' && <SpendPage />}
+                {user && (route === '/chat' || route === '/save') && <DashboardPage onNavigate={navigate} />}
+                {user && route === '/goals' && <GoalsPage />}
+                {user && route === '/quiz' && <QuizPage onNavigate={navigate} />}
+              </div>
+            </main>
+
+          </div>
+
+          {/* GLOBAL FLOATING CHATBOT COPILOT */}
+          {user && route !== '/' && route !== '/auth' && (
+            <ChatWidget user={user} onNavigate={navigate} />
+          )}
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
 </html>
