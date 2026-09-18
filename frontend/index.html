@@ -1746,12 +1746,14 @@
       const [isTyping, setIsTyping] = useState(false);
       const messagesEndRef = useRef(null);
 
+      const firstName = (user && typeof user.name === 'string') ? (user.name.split(' ')[0] || 'there') : 'there';
+
       const [messages, setMessages] = useState([
         {
           id: 1,
           sender: 'bot',
           time: 'Just now',
-          text: `Hello ${user ? user.name.split(' ')[0] : 'there'}! I am your Kavach FinTech Copilot. I can answer questions about UPI fraud traps, irregular stipend budgeting, daily spend caps, or savings pace. What would you like to check today?`,
+          text: `Hello ${firstName}! I am your Kavach FinTech Copilot. I can answer questions about UPI fraud traps, irregular stipend budgeting, daily spend caps, or savings pace. What would you like to check today?`,
           suggestions: [
             "How to save ₹5,000 on a student stipend?",
             "Is this SMS a scam: 'Electricity unpaid, pay now'?",
@@ -1910,7 +1912,7 @@
                           id: Date.now(),
                           sender: 'bot',
                           time: 'Just now',
-                          text: `Chat reset! How can I help you optimize your money today, ${user ? user.name.split(' ')[0] : 'friend'}?`,
+                          text: `Chat reset! How can I help you optimize your money today, ${(user && typeof user.name === 'string') ? (user.name.split(' ')[0] || 'friend') : 'friend'}?`,
                           suggestions: [
                             "How to save ₹5,000 on a student stipend?",
                             "Is this SMS a scam: 'Electricity unpaid, pay now'?",
@@ -2759,30 +2761,48 @@
       });
 
       // Process and persist authenticated Supabase User
-      const processSupabaseUser = async (authUser) => {
+      const processSupabaseUser = (authUser) => {
         if (!authUser) return;
-        const email = authUser.email || '';
-        const name = authUser.user_metadata?.full_name || authUser.user_metadata?.name || (email ? email.split('@')[0] : 'Kavach User');
-        const phone = authUser.phone || authUser.user_metadata?.phone || '9876543210';
-        const avatar = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null;
+        const email = String(authUser.email || '');
+        let rawName = 'Kavach User';
+        if (typeof authUser.user_metadata?.full_name === 'string' && authUser.user_metadata.full_name.trim()) {
+          rawName = authUser.user_metadata.full_name.trim();
+        } else if (typeof authUser.user_metadata?.name === 'string' && authUser.user_metadata.name.trim()) {
+          rawName = authUser.user_metadata.name.trim();
+        } else if (typeof authUser.user_metadata?.user_name === 'string' && authUser.user_metadata.user_name.trim()) {
+          rawName = authUser.user_metadata.user_name.trim();
+        } else if (email && email.includes('@')) {
+          rawName = email.split('@')[0];
+        }
+        const name = String(rawName || 'Kavach User');
+        const phone = String(authUser.phone || authUser.user_metadata?.phone || '9876543210');
+        const avatar = (authUser.user_metadata?.avatar_url && typeof authUser.user_metadata.avatar_url === 'string')
+          ? authUser.user_metadata.avatar_url
+          : (authUser.user_metadata?.picture && typeof authUser.user_metadata.picture === 'string')
+          ? authUser.user_metadata.picture
+          : null;
 
-        // Defensive Sync: Ensure row exists in public.users to prevent foreign key violations on transactions/goals
+        // Defensive Sync: Run asynchronously without blocking navigation
         if (supabase) {
           try {
-            await supabase.from('users').upsert({
+            supabase.from('users').upsert({
               id: authUser.id,
               email: email,
               name: name,
               monthly_income: 45000.0,
               monthly_budget_cap: 20000.0
-            }, { onConflict: 'id' });
+            }, { onConflict: 'id' }).then(({ error }) => {
+              if (error) console.warn('Defensive sync to public.users warning:', error);
+            }).catch(err => {
+              console.warn('Defensive sync error:', err);
+            });
           } catch (err) {
-            console.warn('Defensive sync to public.users warning:', err);
+            console.warn('Defensive sync caught error:', err);
           }
         }
 
         const kavachUser = {
-          id: authUser.id,
+          id: String(authUser.id || ''),
           name: name,
           email: email,
           phone: phone,
@@ -2809,16 +2829,22 @@
         if (!supabase) return;
 
         // Check if there is an active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session?.user) {
-            processSupabaseUser(session.user);
+        supabase.auth.getSession().then(({ data, error }) => {
+          if (error) {
+            console.warn('Supabase getSession error:', error);
+            return;
           }
+          if (data?.session?.user) {
+            processSupabaseUser(data.session.user);
+          }
+        }).catch(err => {
+          console.warn('Supabase getSession caught error:', err);
         });
 
         // Listen for OAuth callbacks (SIGNED_IN) or SIGNED_OUT
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_IN' && session?.user) {
-            await processSupabaseUser(session.user);
+            processSupabaseUser(session.user);
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
             try { localStorage.removeItem('kavach_user'); } catch(e) {}
@@ -3230,7 +3256,14 @@
               <div className="w-full max-w-6xl mx-auto">
                 {route === '/' && <LandingPage user={user} onNavigate={navigate} />}
                 {route === '/auth' && <AuthPage onNavigate={navigate} onLogin={handleLogin} />}
-                {user && route === '/dashboard' && <DashboardPage onNavigate={navigate} />}
+                {route === '/dashboard' && (
+                  user ? <DashboardPage onNavigate={navigate} /> : (
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-3 animate-fade-in">
+                      <div className="w-10 h-10 rounded-full border-3 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 animate-spin" />
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Arming Kavach Shield...</p>
+                    </div>
+                  )
+                )}
                 {user && route === '/shield' && <ShieldPage />}
                 {user && route === '/spend' && <SpendPage />}
                 {user && (route === '/chat' || route === '/save') && <DashboardPage onNavigate={navigate} />}
@@ -3250,7 +3283,58 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    // ==========================================
+    // TOP-LEVEL REACT ERROR BOUNDARY
+    // ==========================================
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+
+      componentDidCatch(error, errorInfo) {
+        console.error("Kavach Caught Error:", error, errorInfo);
+      }
+
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0b0f17] p-6 text-slate-900 dark:text-slate-100 text-center font-sans">
+              <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto">
+                  <IconShieldAlert className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold">Session Recovery</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {this.state.error?.message || "An unexpected error occurred while loading your profile."}
+                </p>
+                <button
+                  onClick={() => {
+                    try { localStorage.removeItem('kavach_user'); } catch(e) {}
+                    window.location.hash = '/auth';
+                    window.location.reload();
+                  }}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-sm shadow-blue-500/20"
+                >
+                  Clear Session & Return to Login
+                </button>
+              </div>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
   </script>
 </body>
 </html>
