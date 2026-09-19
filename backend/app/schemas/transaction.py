@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict, Any
 from enum import Enum
 import datetime
 from pydantic import BaseModel, Field, ConfigDict
@@ -37,5 +37,7 @@ class TransactionOut(TransactionBase):
     user_id: Union[int, str]
     goal_id: Optional[Union[int, str]] = None
     created_at: Optional[datetime.datetime] = None
+    allocation_result: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)
+

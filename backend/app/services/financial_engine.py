@@ -287,3 +287,159 @@ def withdraw_from_goal(db: Session, user: User, goal_id: int, amount: float) -> 
 
     new_totals = get_user_financial_totals(db, user.id)
     return goal, new_totals["general_available_savings"]
+
+
+# ---------------------------------------------------------------------------
+# AUTOMATIC 50/30/20 INCOME ALLOCATION ENGINE
+# ---------------------------------------------------------------------------
+INCOME_ALLOCATION_RATIOS = {
+    "Food & Dining": 0.25,          # 25% Essentials
+    "Bills & Utilities": 0.15,      # 15% Essentials
+    "Commute & Travel": 0.10,       # 10% Essentials
+    "Shopping & Tech": 0.15,        # 15% Wants
+    "Social & Entertainment": 0.15, # 15% Wants
+    "Savings & Investments": 0.20,  # 20% Savings & Goals
+}
+
+
+def auto_allocate_income(
+    db: Session,
+    user: User,
+    income_amount: float,
+    txn_date: Optional[datetime.date] = None,
+) -> Dict[str, Any]:
+    """
+    Automated 50/30/20 Income Allocation Engine:
+    When an income transaction is entered, dynamically creates or expands
+    budget boundaries for the current month across categories and deposits
+    the 20% savings portion into the user's primary active financial goal.
+    """
+    if income_amount <= 0:
+        return {}
+
+    date_obj = txn_date or datetime.date.today()
+    month = date_obj.month
+    year = date_obj.year
+
+    is_supabase_user = isinstance(user.id, str) and len(str(user.id)) > 15
+    target_user_id = user.id
+    if is_supabase_user and hasattr(user, "email") and user.email:
+        local_u = db.query(User).filter(User.email == user.email.lower().strip()).first()
+        if local_u:
+            target_user_id = local_u.id
+
+    allocations = {}
+    for category, ratio in INCOME_ALLOCATION_RATIOS.items():
+        allocated_amt = round(income_amount * ratio, 2)
+        allocations[category] = allocated_amt
+
+        boundary = (
+            db.query(BudgetBoundary)
+            .filter(
+                BudgetBoundary.user_id == target_user_id,
+                BudgetBoundary.category == category,
+                BudgetBoundary.month == month,
+                BudgetBoundary.year == year,
+            )
+            .first()
+        )
+        if boundary:
+            boundary.limit_amount = round(boundary.limit_amount + allocated_amt, 2)
+        else:
+            boundary = BudgetBoundary(
+                user_id=target_user_id,
+                category=category,
+                limit_amount=allocated_amt,
+                month=month,
+                year=year,
+            )
+            db.add(boundary)
+
+    # Also update overall total budget boundary (category=None)
+    overall_boundary = (
+        db.query(BudgetBoundary)
+        .filter(
+            BudgetBoundary.user_id == target_user_id,
+            BudgetBoundary.category == None,
+            BudgetBoundary.month == month,
+            BudgetBoundary.year == year,
+        )
+        .first()
+    )
+    if overall_boundary:
+        overall_boundary.limit_amount = round(overall_boundary.limit_amount + income_amount, 2)
+    else:
+        overall_boundary = BudgetBoundary(
+            user_id=target_user_id,
+            category=None,
+            limit_amount=income_amount,
+            month=month,
+            year=year,
+        )
+        db.add(overall_boundary)
+
+    db.commit()
+
+    # Automatic Savings Allocation (20% to Goal)
+    savings_amt = allocations.get("Savings & Investments", 0.0)
+    deposited_goal = None
+    if savings_amt > 0:
+        if is_supabase_user:
+            try:
+                from app.services.supabase_service import SupabaseService
+                goals = SupabaseService.get_goals(str(user.id))
+                active_goal = next(
+                    (g for g in goals if float(g.get("current_amount", 0.0)) < float(g.get("target_amount", 1.0))),
+                    None
+                )
+                if active_goal:
+                    needed = max(0.0, float(active_goal["target_amount"]) - float(active_goal.get("current_amount", 0.0)))
+                    deposit_amt = min(savings_amt, needed)
+                    if deposit_amt > 0:
+                        up_goal = SupabaseService.deposit_to_goal(str(user.id), str(active_goal["id"]), deposit_amt)
+                        deposited_goal = {
+                            "id": up_goal.get("id"),
+                            "title": up_goal.get("title"),
+                            "deposited_amount": deposit_amt,
+                            "current_amount": up_goal.get("current_amount"),
+                            "target_amount": up_goal.get("target_amount"),
+                            "progress_percentage": round((float(up_goal.get("current_amount", 0)) / float(up_goal.get("target_amount", 1))) * 100, 1),
+                        }
+            except Exception:
+                pass
+        else:
+            active_goal = (
+                db.query(FinancialGoal)
+                .filter(
+                    FinancialGoal.user_id == user.id,
+                    FinancialGoal.status != "CANCELLED",
+                    FinancialGoal.status != "COMPLETED",
+                )
+                .order_by(FinancialGoal.created_at.asc())
+                .first()
+            )
+            if active_goal:
+                needed = max(0.0, active_goal.target_amount - active_goal.current_amount)
+                totals = get_user_financial_totals(db, user.id)
+                avail = max(0.0, totals.get("general_available_savings", 0.0))
+                deposit_amt = min(savings_amt, needed, avail)
+                if deposit_amt > 0:
+                    try:
+                        goal_obj, _ = deposit_to_goal(db, user, active_goal.id, deposit_amt)
+                        deposited_goal = {
+                            "id": goal_obj.id,
+                            "title": goal_obj.title,
+                            "deposited_amount": deposit_amt,
+                            "current_amount": goal_obj.current_amount,
+                            "target_amount": goal_obj.target_amount,
+                            "progress_percentage": round((goal_obj.current_amount / goal_obj.target_amount) * 100, 1),
+                        }
+                    except Exception:
+                        pass
+
+    return {
+        "income_amount": income_amount,
+        "allocations": allocations,
+        "deposited_goal": deposited_goal,
+    }
+

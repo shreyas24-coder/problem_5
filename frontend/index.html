@@ -433,55 +433,65 @@
     // 1. SIGN UP MODAL
     // ==========================================
     function SignUpModal({ isOpen, onClose, onComplete, lang }) {
-      const [step, setStep] = useState(1);
+      const [mode, setMode] = useState('signin');
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
       const [name, setName] = useState('');
-      const [phone, setPhone] = useState('');
-      const [otp, setOtp] = useState(['', '', '', '']);
       const [errorMsg, setErrorMsg] = useState('');
-      const [googleLoading, setGoogleLoading] = useState(false);
+      const [isSubmitting, setIsSubmitting] = useState(false);
 
       if (!isOpen) return null;
 
-      const handleGoogleSignIn = async () => {
-        if (!supabase) {
-          setErrorMsg('Supabase authentication is not configured.');
+      const handleQuickDemo = () => {
+        if (onComplete) {
+          onComplete({ name: 'Alex Rivera', email: 'demo@technofora.com', persona: 'student' });
+        }
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        const cleanEmail = email.trim().toLowerCase();
+        if (!cleanEmail) {
+          setErrorMsg('Please enter your email address.');
           return;
         }
-        setGoogleLoading(true);
-        setErrorMsg('');
+        if (!password) {
+          setErrorMsg('Please enter your password.');
+          return;
+        }
+
+        setIsSubmitting(true);
+        const endpoint = mode === 'signup' ? '/api/auth/register' : '/api/auth/login';
+        const payload = mode === 'signup'
+          ? { email: cleanEmail, password, full_name: name.trim() || 'Alex Rivera' }
+          : { email: cleanEmail, password };
+
         try {
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-              redirectTo: window.location.origin
-            }
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
           });
-          if (error) throw error;
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.detail || 'Authentication failed. Please check your credentials.');
+          }
+          if (data.access_token) {
+            localStorage.setItem('kavach_token', data.access_token);
+          }
+          if (onComplete) {
+            onComplete({
+              name: data.user?.full_name || name.trim() || cleanEmail.split('@')[0],
+              email: cleanEmail,
+              persona: 'student'
+            });
+          }
         } catch (err) {
-          setErrorMsg(err.message || 'Google sign-in failed. Please try again.');
-          setGoogleLoading(false);
+          setErrorMsg(err.message || 'Error authenticating');
+        } finally {
+          setIsSubmitting(false);
         }
-      };
-
-      const handleStep1 = (e) => {
-        e.preventDefault();
-        if (!name.trim() || phone.length < 10) {
-          setErrorMsg('Please enter your name and 10-digit number');
-          return;
-        }
-        setErrorMsg('');
-        setStep(2);
-      };
-
-      const handleStep2 = (e) => {
-        e.preventDefault();
-        if (otp.join('').length < 4) {
-          setErrorMsg('Please enter 4 digits');
-          return;
-        }
-        setErrorMsg('');
-        setStep(3);
-        if (onComplete) onComplete({ name: name || 'Shreyas Patel', phone: phone || '9876543210' });
       };
 
       return (
@@ -495,164 +505,167 @@
               <IconX className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-1.5 mb-5">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    s === step
-                      ? 'w-8 bg-blue-600 dark:bg-blue-500'
-                      : s < step
-                      ? 'w-4 bg-emerald-500'
-                      : 'w-4 bg-slate-200 dark:bg-slate-800'
-                  }`}
-                />
-              ))}
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 ml-auto uppercase tracking-wider">Step {step} of 3</span>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200/60 dark:border-blue-900/60">
+                <IconShield className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  {mode === 'signin' ? 'Sign In to Kavach' : 'Create an Account'}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {mode === 'signin' ? 'Enter your email & password' : 'Sign up for instant fraud protection'}
+                </p>
+              </div>
             </div>
 
-            {step === 1 && (
-              <div className="space-y-4 text-left">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Join Kavach Free</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Get instant access via Google or your UPI mobile number.</p>
-                </div>
+            {/* Mode Switcher */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => { setMode('signin'); setErrorMsg(''); }}
+                className={`py-1.5 rounded-lg transition-all ${mode === 'signin' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode('signup'); setErrorMsg(''); }}
+                className={`py-1.5 rounded-lg transition-all ${mode === 'signup' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+              >
+                Sign Up
+              </button>
+            </div>
 
-                {/* Google OAuth Button */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    disabled={googleLoading}
-                    className="w-full min-h-[46px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-3 cursor-pointer shadow-xs transition-all active:scale-[0.99] disabled:opacity-60"
-                  >
-                    <IconGoogle className="w-5 h-5 flex-shrink-0" />
-                    <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
-                  </button>
-                </div>
-
-                {/* Divider */}
-                <div className="relative flex items-center justify-center my-2">
-                  <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-                  <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 absolute">
-                    or continue with mobile OTP
-                  </span>
-                </div>
-
-                <form onSubmit={handleStep1} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Your Name</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      placeholder="e.g. Shreyas Patel"
-                      className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Mobile Number (UPI)</label>
-                    <div className="flex items-center">
-                      <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center font-bold text-xs text-slate-600 dark:text-slate-400">+91</span>
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        value={phone}
-                        onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="98765 43210"
-                        className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-                  {errorMsg && <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>}
-                  <button
-                    type="submit"
-                    className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
-                  >
-                    <span>Send OTP</span>
-                    <IconArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
+            {errorMsg && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                {errorMsg}
               </div>
             )}
 
-            {step === 2 && (
-              <form onSubmit={handleStep2} className="space-y-4 text-left">
+            <form onSubmit={handleSubmit} className="space-y-3 text-left">
+              {mode === 'signup' && (
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Verify Code</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Code sent to +91 {phone || '9876543210'}</p>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="e.g. Alex Rivera"
+                    className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                    required
+                  />
                 </div>
-                <div className="flex justify-between gap-2 max-w-[240px] mx-auto py-2">
-                  {otp.map((d, i) => (
-                    <input
-                      key={i}
-                      id={`otp-${i}`}
-                      type="text"
-                      maxLength={1}
-                      value={d}
-                      onChange={e => {
-                        const n = [...otp]; n[i] = e.target.value; setOtp(n);
-                        if (e.target.value && i < 3) document.getElementById(`otp-${i+1}`)?.focus();
-                      }}
-                      className="w-12 h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl outline-none transition-all text-slate-900 dark:text-white"
-                    />
-                  ))}
-                </div>
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => setOtp(['2','4','2','6'])}
-                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
-                  >
-                    ⚡ Auto-Fill 2426
-                  </button>
-                </div>
-                {errorMsg && <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold text-center">{errorMsg}</p>}
-                <button
-                  type="submit"
-                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
-                >
-                  <span>Verify & Start</span>
-                  <IconArrowRight className="w-4 h-4" />
-                </button>
-              </form>
-            )}
+              )}
 
-            {step === 3 && (
-              <div className="text-center space-y-4 py-2">
-                <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-200 dark:border-emerald-800">
-                  <IconShield className="w-6 h-6" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Protection Active!</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Welcome, {name || 'Shreyas'}. Your UPI pre-transaction shield is armed.</p>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="e.g. demo@technofora.com"
+                  className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div className="pt-1">
                 <button
-                  onClick={onClose}
-                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                  type="button"
+                  onClick={handleQuickDemo}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline cursor-pointer"
                 >
-                  Enter App
+                  ⚡ One-Click Demo Login (demo@technofora.com)
                 </button>
               </div>
-            )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full min-h-[46px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50 mt-2"
+              >
+                {isSubmitting ? 'Authenticating...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
+                <IconArrowRight className="w-4 h-4 text-amber-300" />
+              </button>
+            </form>
           </div>
         </div>
       );
     }
 
-    // ==========================================
-    // 2. DASHBOARD PAGE
+        // ==========================================
+    // 2. DASHBOARD PAGE (Live Database Connection)
     // ==========================================
     function DashboardPage({ lang, onNavigate }) {
-      const weeklyData = [
-        { day: 'Mon', amount: 320, h: '40%' },
-        { day: 'Tue', amount: 580, h: '65%' },
-        { day: 'Wed', amount: 210, h: '28%' },
-        { day: 'Thu', amount: 840, h: '92%', peak: true },
-        { day: 'Fri', amount: 460, h: '52%' },
-        { day: 'Sat', amount: 690, h: '78%' },
-        { day: 'Sun', amount: 310, h: '38%' }
-      ];
+      const [summary, setSummary] = useState(null);
+      const [goals, setGoals] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        let isMounted = true;
+        const fetchDashboardData = async () => {
+          try {
+            const token = localStorage.getItem('kavach_token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            
+            const [sumRes, goalsRes] = await Promise.all([
+              fetch('/api/dashboard/summary', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
+              fetch('/api/goals/', { headers }).then(r => r.ok ? r.json() : []).catch(() => [])
+            ]);
+
+            if (isMounted) {
+              setSummary(sumRes || {
+                total_income: 0,
+                total_expenses: 0,
+                locked_goal_savings: 0,
+                total_goal_deposits: 0,
+                net_balance: 0,
+                category_spending: [],
+                monthly_trend: [],
+                recent_transactions: []
+              });
+              setGoals(goalsRes || []);
+            }
+          } catch (err) {
+            console.error('Error fetching dashboard telemetry:', err);
+          } finally {
+            if (isMounted) setLoading(false);
+          }
+        };
+
+        fetchDashboardData();
+        return () => { isMounted = false; };
+      }, []);
+
+      const totalIncome = Number(summary?.total_income || 0);
+      const totalExpenses = Number(summary?.total_expenses || 0);
+      const lockedSavings = Number(summary?.locked_goal_savings || summary?.total_goal_deposits || 0);
+      const netBalance = Number(summary?.net_balance || (totalIncome - totalExpenses));
+      const categories = summary?.category_spending || [];
+      const trends = summary?.monthly_trend || [];
+      const primaryGoal = goals.length > 0 ? goals[0] : null;
+
+      const hasActivity = totalIncome > 0 || totalExpenses > 0;
+      const trendHasData = trends.some(t => Number(t.income) > 0 || Number(t.expense) > 0);
 
       return (
         <div className="flex flex-col animate-fade-in text-left space-y-6 w-full max-w-6xl mx-auto">
@@ -661,10 +674,10 @@
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-[11px] font-semibold tracking-wide uppercase mb-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
-                <span>Live Telemetry</span>
+                <span>Live Database Telemetry</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Financial Pulse & Analytics</h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Live cashflow breakdown, spending velocity, and savings pace.</p>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Live data fetched directly from your account database.</p>
             </div>
             
             <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -688,33 +701,48 @@
           {/* Metric Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
             <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Stipend Inflow</span>
-              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹12,000</span>
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Inflow</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">
+                ₹{totalIncome.toLocaleString('en-IN')}
+              </span>
               <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-1">
-                <IconTrendingUp className="w-3 h-3" /> Credited via Razorpay
+                <IconTrendingUp className="w-3 h-3" />
+                <span>{totalIncome > 0 ? 'Recorded in database' : 'No income recorded yet'}</span>
               </span>
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
               <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Spent</span>
-              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹3,421</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">Across 14 UPI taps</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">
+                ₹{totalExpenses.toLocaleString('en-IN')}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
+                {totalExpenses > 0 ? `${summary?.recent_transactions?.length || 'Logged'} transactions` : 'No expenses logged'}
+              </span>
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Saved</span>
-              <span className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400 block tracking-tight">₹2,100</span>
-              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-1">Smart micro-savings + pots</span>
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Locked in Goals</span>
+              <span className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400 block tracking-tight">
+                ₹{lockedSavings.toLocaleString('en-IN')}
+              </span>
+              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-1">
+                {goals.length > 0 ? `${goals.length} active goal${goals.length > 1 ? 's' : ''}` : 'No active goals'}
+              </span>
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Safe Daily Burn</span>
-              <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 block tracking-tight">₹475/day</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">24 days remaining</span>
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Liquid Balance</span>
+              <span className={`text-xl sm:text-2xl font-bold block tracking-tight ${netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                ₹{netBalance.toLocaleString('en-IN')}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
+                {netBalance >= 0 ? 'Available liquid funds' : 'Current deficit'}
+              </span>
             </div>
           </div>
 
-          {/* Weekly Spending Bar Chart */}
+          {/* Monthly Trend / Velocity */}
           <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
               <div>
@@ -722,93 +750,133 @@
                   <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                     <IconBarChart3 className="w-4 h-4" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Weekly Spending Velocity</h2>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Spending Velocity & Trends</h2>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Average: ₹487/day. Peak on Thursday due to college dining split.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {trendHasData ? 'Historical 6-month trajectory calculated from logged transactions.' : 'No transactions recorded yet in the database.'}
+                </p>
               </div>
 
               <div className="flex items-center gap-4 text-xs font-semibold">
-                <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
                   <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 dark:bg-blue-500"></span>
-                  <span>Normal Spend</span>
+                  <span>Income</span>
                 </span>
                 <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                   <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
-                  <span>Peak Burn</span>
+                  <span>Expense</span>
                 </span>
               </div>
             </div>
 
-            {/* Bar columns */}
-            <div className="h-52 sm:h-56 w-full flex items-end justify-between gap-2 sm:gap-4 pt-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-              {weeklyData.map((d) => (
-                <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group cursor-pointer">
-                  <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                    ₹{d.amount}
-                  </span>
-                  <div
-                    className={`w-full max-w-[42px] sm:max-w-[48px] rounded-t-lg transition-all duration-200 ${
-                      d.peak
-                        ? 'bg-amber-500 hover:bg-amber-600 shadow-sm shadow-amber-500/20'
-                        : 'bg-blue-600 dark:bg-blue-500 group-hover:bg-blue-700 dark:group-hover:bg-blue-400'
-                    }`}
-                    style={{ height: d.h }}
-                  />
-                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">{d.day}</span>
+            {/* Bars or Empty State */}
+            {trendHasData ? (
+              <div className="h-52 sm:h-56 w-full flex items-end justify-between gap-2 sm:gap-4 pt-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                {trends.map((t, idx) => {
+                  const maxVal = Math.max(...trends.map(item => Math.max(Number(item.income) || 0, Number(item.expense) || 0, 100)));
+                  const incH = `${Math.min(100, Math.round(((Number(t.income) || 0) / maxVal) * 100))}%`;
+                  const expH = `${Math.min(100, Math.round(((Number(t.expense) || 0) / maxVal) * 100))}%`;
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
+                      <div className="flex items-end gap-1 w-full justify-center h-full">
+                        <div className="w-3 sm:w-4 bg-blue-500/80 rounded-t-md transition-all" style={{ height: incH }} title={`Income: ₹${t.income}`} />
+                        <div className="w-3 sm:w-4 bg-amber-500 rounded-t-md transition-all" style={{ height: expH }} title={`Expense: ₹${t.expense}`} />
+                      </div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">{t.month_name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center text-center p-4">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-2">
+                  <IconBarChart3 className="w-5 h-5" />
                 </div>
-              ))}
-            </div>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No spending data in database</p>
+                <p className="text-xs text-slate-400 max-w-xs mt-0.5 mb-3">Your financial velocity bars will render here automatically as you log expenses.</p>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('/spend')}
+                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer transition-all"
+                >
+                  Log Your First Expense
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Allocation Breakdown & Goal Pace */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Category Breakdown */}
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <IconPieChart className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Category Breakdown</span>
               </h3>
-              <div className="space-y-3.5">
-                {[
-                  { name: 'Food & Dining', percent: '42%', amt: '₹1,436', col: 'bg-amber-500' },
-                  { name: 'Commute & Travel', percent: '24%', amt: '₹820', col: 'bg-blue-500' },
-                  { name: 'Subscriptions', percent: '18%', amt: '₹615', col: 'bg-rose-500' },
-                  { name: 'Savings Pots', percent: '16%', amt: '₹550', col: 'bg-emerald-500' }
-                ].map((c) => (
-                  <div key={c.name}>
-                    <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">
-                      <span>{c.name}</span>
-                      <span className="text-slate-500 dark:text-slate-400">{c.amt} ({c.percent})</span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className={`h-full ${c.col} rounded-full`} style={{ width: c.percent }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {categories.length > 0 ? (
+                <div className="space-y-3.5">
+                  {categories.map((c, idx) => {
+                    const colors = ['bg-amber-500', 'bg-blue-500', 'bg-rose-500', 'bg-emerald-500', 'bg-purple-500'];
+                    const col = colors[idx % colors.length];
+                    return (
+                      <div key={c.category}>
+                        <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                          <span>{c.category}</span>
+                          <span className="text-slate-500 dark:text-slate-400">₹{Number(c.total_amount).toLocaleString('en-IN')} ({c.percentage}%)</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div className={`h-full ${col} rounded-full`} style={{ width: `${c.percentage}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-slate-400 text-xs flex flex-col items-center justify-center space-y-1">
+                  <IconPieChart className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1" />
+                  <p className="font-semibold text-slate-600 dark:text-slate-300">No categories recorded</p>
+                  <p className="text-slate-400">Category spending will populate automatically as transactions are recorded.</p>
+                </div>
+              )}
             </div>
 
+            {/* Goal Pace Card */}
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-                  <IconTarget className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>Goal Pace: ₹15,000 Laptop</span>
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">64% Achieved • ₹9,600 saved so far</p>
-                
-                <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style={{ width: '64%' }} />
+              {primaryGoal ? (
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <IconTarget className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Goal Pace: {primaryGoal.title}</span>
+                  </h3>
+                  {(() => {
+                    const saved = Number(primaryGoal.current_amount || primaryGoal.saved || 0);
+                    const target = Number(primaryGoal.target_amount || primaryGoal.target || 1);
+                    const pct = Math.min(100, Math.round((saved / target) * 100));
+                    return (
+                      <div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">
+                          {pct}% Achieved • ₹{saved.toLocaleString('en-IN')} of ₹{target.toLocaleString('en-IN')} saved
+                        </p>
+                        <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                          <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
-
-                <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/70 dark:border-emerald-800/60 text-xs text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">
-                  ⚡ Ahead by 8 days thanks to ₹298 saved from smart round-up pots!
+              ) : (
+                <div className="py-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center space-y-1 my-auto">
+                  <IconTarget className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1" />
+                  <p className="font-semibold text-slate-600 dark:text-slate-300">No active savings goals</p>
+                  <p className="text-slate-400 max-w-xs">Create a savings target to track your milestone progress and unlock safe spending envelopes.</p>
                 </div>
-              </div>
+              )}
 
               <button
                 onClick={() => onNavigate('/goals')}
                 className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-4 flex items-center gap-1 cursor-pointer transition-colors"
               >
-                <span>View All Personal Goals</span>
+                <span>{primaryGoal ? 'View All Personal Goals' : 'Create a New Goal'}</span>
                 <IconArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -816,25 +884,66 @@
         </div>
       );
     }
-
     // ==========================================
-    // 3. GOALS PAGE
+    // 3. GOALS PAGE (Live Database Connection)
     // ==========================================
     function GoalsPage() {
-      const [goals, setGoals] = useState([
-        { id: 1, title: "M2 Coding Laptop", target: 65000, saved: 38400, deadline: "15 Dec 2026", days: 88, icon: "💻" },
-        { id: 2, title: "Goa College Roadtrip", target: 12000, saved: 8500, deadline: "10 Nov 2026", days: 53, icon: "🏖️" },
-        { id: 3, title: "Sony WH-1000XM5 Headphones", target: 18000, saved: 6200, deadline: "28 Feb 2027", days: 163, icon: "🎧" }
-      ]);
+      const [goals, setGoals] = useState([]);
+      const [loading, setLoading] = useState(true);
       const [customAmounts, setCustomAmounts] = useState({});
       const [isModalOpen, setIsModalOpen] = useState(false);
       const [title, setTitle] = useState('');
       const [target, setTarget] = useState('');
       const [saved, setSaved] = useState('');
       const [deadline, setDeadline] = useState('');
+      const [submitting, setSubmitting] = useState(false);
 
-      const handleDeposit = (id, amt) => {
-        setGoals(goals.map(g => g.id === id ? { ...g, saved: Math.min(g.target, g.saved + amt) } : g));
+      const fetchGoals = async () => {
+        try {
+          const token = localStorage.getItem('kavach_token');
+          const res = await fetch('/api/goals/', {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setGoals(data.map(g => ({
+              id: g.id,
+              title: g.title,
+              target: Number(g.target_amount),
+              saved: Number(g.current_amount || 0),
+              deadline: g.target_date || '',
+              days: g.target_date ? Math.max(0, Math.ceil((new Date(g.target_date) - new Date()) / (1000 * 60 * 60 * 24))) : null,
+              icon: '🎯'
+            })));
+          }
+        } catch (e) {
+          console.error('Error loading goals from database:', e);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchGoals();
+      }, []);
+
+      const handleDeposit = async (id, amt) => {
+        try {
+          const token = localStorage.getItem('kavach_token');
+          const res = await fetch(`/api/goals/${id}/deposit`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ amount: Number(amt) })
+          });
+          if (res.ok) {
+            fetchGoals();
+          }
+        } catch (e) {
+          console.error('Deposit error:', e);
+        }
       };
 
       const handleCustomDeposit = (id) => {
@@ -844,20 +953,36 @@
         setCustomAmounts(prev => ({ ...prev, [id]: '' }));
       };
 
-      const handleAdd = (e) => {
+      const handleAdd = async (e) => {
         e.preventDefault();
         if (!title.trim() || !target) return;
-        setGoals([{
-          id: Date.now(),
-          title,
-          target: Number(target),
-          saved: Number(saved) || 0,
-          deadline: deadline || '2027-01-01',
-          days: 90,
-          icon: '🎯'
-        }, ...goals]);
-        setIsModalOpen(false);
-        setTitle(''); setTarget(''); setSaved(''); setDeadline('');
+        setSubmitting(true);
+        try {
+          const token = localStorage.getItem('kavach_token');
+          const res = await fetch('/api/goals/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              title: title.trim(),
+              target_amount: Number(target),
+              category: 'General',
+              target_date: deadline || null,
+              initial_deposit: Number(saved) || 0
+            })
+          });
+          if (res.ok) {
+            setIsModalOpen(false);
+            setTitle(''); setTarget(''); setSaved(''); setDeadline('');
+            fetchGoals();
+          }
+        } catch (err) {
+          console.error('Error creating goal in database:', err);
+        } finally {
+          setSubmitting(false);
+        }
       };
 
       return (
@@ -869,7 +994,7 @@
                 <span>Future Buys Planner</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Personal Savings Goals</h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Track deadlines and fund major buys without borrowing on high-interest credit.</p>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Track milestones and fund major buys from your database.</p>
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
@@ -880,92 +1005,105 @@
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-            {goals.map(g => {
-              const p = Math.min(100, Math.round((g.saved / g.target) * 100));
-              const isDone = g.saved >= g.target;
-              return (
-                <div key={g.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all text-left">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl p-2 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-700">{g.icon}</span>
-                      <div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">{g.title}</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-                          Target date: <strong className="text-slate-700 dark:text-slate-300">{g.deadline}</strong> • <span className="text-amber-600 dark:text-amber-400 font-semibold">{g.days} days left</span>
-                        </p>
+          {goals.length === 0 ? (
+            <div className="py-16 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-center p-6 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                <IconTarget className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No savings goals in database</h3>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                New accounts start clean with zero mock goals. Set up a target like a laptop, camera, or emergency cushion to begin saving!
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs cursor-pointer transition-all"
+              >
+                Create Your First Goal
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+              {goals.map(g => {
+                const p = Math.min(100, Math.round((g.saved / g.target) * 100));
+                const isDone = g.saved >= g.target;
+                return (
+                  <div key={g.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all text-left">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-2xl">{g.icon}</span>
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white leading-snug">{g.title}</h3>
+                          <span className="text-xs text-slate-400">
+                            {g.deadline ? `Target: ${g.deadline}` : 'Open Deadline'} {g.days !== null ? `• ${g.days} days left` : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                        isDone ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}>
+                        {p}%
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 my-3">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-slate-500">₹{g.saved.toLocaleString('en-IN')} saved</span>
+                        <span className="text-slate-900 dark:text-white">Target: ₹{g.target.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-300 ${isDone ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${p}%` }} />
                       </div>
                     </div>
-                    <button
-                      onClick={() => setGoals(goals.filter(x => x.id !== g.id))}
-                      className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                      aria-label="Delete goal"
-                    >
-                      <IconTrash2 className="w-4 h-4" />
-                    </button>
-                  </div>
 
-                  <div className="my-3.5">
-                    <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹{g.saved.toLocaleString()}</span>
-                      <span className="text-slate-400 dark:text-slate-500">Target: ₹{g.target.toLocaleString()}</span>
-                    </div>
-                    <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300" style={{ width: `${p}%` }} />
-                    </div>
-                    <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 font-medium">
-                      <span>{p}% Saved</span>
-                      <span>{isDone ? 'Goal Complete! 🎉' : `₹${(g.target - g.saved).toLocaleString()} remaining`}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs text-slate-400 dark:text-slate-500 font-medium mr-1">Quick Add:</span>
-                      <button onClick={() => handleDeposit(g.id, 250)} disabled={isDone} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors">+ ₹250</button>
-                      <button onClick={() => handleDeposit(g.id, 500)} disabled={isDone} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors">+ ₹500</button>
-                      <button onClick={() => handleDeposit(g.id, 1000)} disabled={isDone} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors">+ ₹1,000</button>
-                    </div>
-
-                    {/* Custom Variable Deposit */}
-                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                      <div className="relative flex-1 sm:w-32">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold">₹</span>
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-400">Quick Deposit:</span>
+                      {[250, 500, 1000].map(amt => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => handleDeposit(g.id, amt)}
+                          className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 transition-colors cursor-pointer"
+                        >
+                          +₹{amt}
+                        </button>
+                      ))}
+                      <div className="flex items-center gap-1.5 ml-auto">
                         <input
                           type="number"
-                          placeholder="Custom"
+                          placeholder="₹ Custom"
                           value={customAmounts[g.id] || ''}
                           onChange={(e) => setCustomAmounts({ ...customAmounts, [g.id]: e.target.value })}
-                          disabled={isDone}
-                          className="w-full pl-6 pr-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-600 disabled:opacity-40"
+                          className="w-20 px-2 py-1 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:border-blue-600"
                         />
+                        <button
+                          type="button"
+                          onClick={() => handleCustomDeposit(g.id)}
+                          className="px-2.5 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer transition-colors"
+                        >
+                          Add
+                        </button>
                       </div>
-                      <button
-                        onClick={() => handleCustomDeposit(g.id)}
-                        disabled={isDone || !customAmounts[g.id]}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-xs shrink-0"
-                      >
-                        Deposit
-                      </button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
+          {/* Add Goal Modal */}
           {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
-              <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-md shadow-2xl relative">
                 <button
+                  type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition-colors"
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
                 >
-                  <IconX className="w-4 h-4" />
+                  <IconX className="w-5 h-5" />
                 </button>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Add Savings Goal</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Set up a target item and start funding micro-deposits.</p>
-
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Create Savings Goal</h3>
+                <p className="text-xs text-slate-400 mb-4">Set up a goal to save towards major milestones.</p>
                 <form onSubmit={handleAdd} className="space-y-3.5 text-left">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">What are you buying?</label>
@@ -973,18 +1111,18 @@
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Price (₹)</label>
-                    <input type="number" value={target} onChange={e => setTarget(e.target.value)} placeholder="45000" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" required />
+                    <input type="number" min="1" value={target} onChange={e => setTarget(e.target.value)} placeholder="45000" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" required />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Initial Deposit (₹)</label>
-                    <input type="number" value={saved} onChange={e => setSaved(e.target.value)} placeholder="2000" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" />
+                    <input type="number" min="0" value={saved} onChange={e => setSaved(e.target.value)} placeholder="0" className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Date</label>
-                    <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" required />
+                    <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600" />
                   </div>
-                  <button type="submit" className="w-full min-h-[46px] bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl mt-3 cursor-pointer shadow-xs transition-all active:scale-[0.98]">
-                    Save Goal
+                  <button type="submit" disabled={submitting} className="w-full min-h-[46px] bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl mt-3 cursor-pointer shadow-xs transition-all active:scale-[0.98] disabled:opacity-50">
+                    {submitting ? 'Saving...' : 'Save Goal to Database'}
                   </button>
                 </form>
               </div>
@@ -993,9 +1131,7 @@
         </div>
       );
     }
-
-    // ==========================================
-    // 4. DAILY QUIZ PAGE
+// 4. DAILY QUIZ PAGE
     // ==========================================
     function QuizPage({ lang, onNavigate }) {
       const questions = [
@@ -1160,115 +1296,54 @@
     }
 
     // ==========================================
-    // 5. SPEND / CASHFLOW & DAILY TRACKER PAGE
+        // ==========================================
+    // 5. SPEND / CASHFLOW & DAILY TRACKER PAGE (Live Database Connection)
     // ==========================================
     function SpendPage() {
-      const defaultTransactions = [
-        {
-          id: 1,
-          title: "UI Design Client Advance",
-          category: "Freelance Gig",
-          date: "2026-09-18",
-          dateLabel: "Today, 18 Sep",
-          amount: 6500,
-          type: "income",
-          mode: "UPI (Razorpay)"
-        },
-        {
-          id: 2,
-          title: "Zepto Quick Delivery",
-          category: "Food & Dining",
-          date: "2026-09-18",
-          dateLabel: "Today, 18 Sep",
-          amount: 215,
-          type: "expense",
-          mode: "UPI (PhonePe)"
-        },
-        {
-          id: 3,
-          title: "Chai & Samosa Break",
-          category: "Food & Dining",
-          date: "2026-09-18",
-          dateLabel: "Today, 18 Sep",
-          amount: 45,
-          type: "expense",
-          mode: "UPI (GPay)"
-        },
-        {
-          id: 4,
-          title: "Monthly College Stipend",
-          category: "Stipend",
-          date: "2026-09-17",
-          dateLabel: "Yesterday, 17 Sep",
-          amount: 12000,
-          type: "income",
-          mode: "Bank NEFT"
-        },
-        {
-          id: 5,
-          title: "Swiggy Dinner with Roommates",
-          category: "Food & Dining",
-          date: "2026-09-17",
-          dateLabel: "Yesterday, 17 Sep",
-          amount: 380,
-          type: "expense",
-          mode: "UPI Auto-Split"
-        },
-        {
-          id: 6,
-          title: "Metro Smart Card Top-up",
-          category: "Commute & Travel",
-          date: "2026-09-17",
-          dateLabel: "Yesterday, 17 Sep",
-          amount: 200,
-          type: "expense",
-          mode: "NCMC Card"
-        },
-        {
-          id: 7,
-          title: "Cashback Reward",
-          category: "Cashback & Refunds",
-          date: "2026-09-16",
-          dateLabel: "16 Sep 2026",
-          amount: 75,
-          type: "income",
-          mode: "UPI (Cred)"
-        },
-        {
-          id: 8,
-          title: "Amazon Coding Cable & USB-C",
-          category: "Shopping & Tech",
-          date: "2026-09-16",
-          dateLabel: "16 Sep 2026",
-          amount: 499,
-          type: "expense",
-          mode: "UPI (AmazonPay)"
-        }
-      ];
-
-      const [transactions, setTransactions] = useState(() => {
-        try {
-          const saved = localStorage.getItem('kavach_transactions');
-          return saved ? JSON.parse(saved) : defaultTransactions;
-        } catch (e) {
-          return defaultTransactions;
-        }
-      });
-
-      useEffect(() => {
-        try {
-          localStorage.setItem('kavach_transactions', JSON.stringify(transactions));
-        } catch (e) {}
-      }, [transactions]);
-
+      const [transactions, setTransactions] = useState([]);
+      const [loading, setLoading] = useState(true);
       const [filter, setFilter] = useState('all');
       const [isModalOpen, setIsModalOpen] = useState(false);
       const [formType, setFormType] = useState('expense');
       const [formTitle, setFormTitle] = useState('');
       const [formAmount, setFormAmount] = useState('');
       const [formCategory, setFormCategory] = useState('Food & Dining');
-      const [formDate, setFormDate] = useState('2026-09-18');
+      const [formDate, setFormDate] = useState(new Date().toISOString().split('T')[0]);
       const [formMode, setFormMode] = useState('UPI');
+      const [submitting, setSubmitting] = useState(false);
+      const [allocationSuccess, setAllocationSuccess] = useState(null);
+
+      const fetchTransactions = async () => {
+        try {
+          const token = localStorage.getItem('kavach_token');
+          const res = await fetch('/api/transactions/', {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setTransactions(data.map(t => ({
+              id: t.id,
+              title: t.description || 'Transaction',
+              category: t.category || 'General',
+              date: t.date,
+              dateLabel: t.date,
+              amount: Number(t.amount),
+              type: (t.type || 'EXPENSE').toLowerCase(),
+              mode: t.payment_method || 'UPI'
+            })));
+          }
+        } catch (e) {
+          console.error('Error fetching transactions from database:', e);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        // Clear old mock transactions from previous session
+        localStorage.removeItem('kavach_transactions');
+        fetchTransactions();
+      }, []);
 
       const expenseCategories = [
         "Food & Dining",
@@ -1290,39 +1365,75 @@
         "Other Income"
       ];
 
-      const handleAddTransaction = (e) => {
+      const handleAddTransaction = async (e) => {
         e.preventDefault();
         if (!formTitle.trim() || !formAmount || Number(formAmount) <= 0) return;
 
-        const todayStr = "2026-09-18";
-        let label = formDate;
-        if (formDate === todayStr) {
-          label = "Today, 18 Sep";
-        } else if (formDate === "2026-09-17") {
-          label = "Yesterday, 17 Sep";
-        } else {
-          label = new Date(formDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const enteredAmount = Number(formAmount);
+        const isIncomeTxn = formType === 'income';
+
+        setSubmitting(true);
+        try {
+          const token = localStorage.getItem('kavach_token');
+          const res = await fetch('/api/transactions/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              amount: enteredAmount,
+              type: formType.toUpperCase(),
+              category: formCategory,
+              description: formTitle.trim(),
+              payment_method: formMode,
+              date: formDate
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            setIsModalOpen(false);
+            setFormTitle('');
+            setFormAmount('');
+            fetchTransactions();
+
+            if (isIncomeTxn) {
+              const allocResult = data?.allocation_result || {
+                income_amount: enteredAmount,
+                allocations: {
+                  "Food & Dining": Math.round(enteredAmount * 0.25),
+                  "Bills & Utilities": Math.round(enteredAmount * 0.15),
+                  "Commute & Travel": Math.round(enteredAmount * 0.10),
+                  "Shopping & Tech": Math.round(enteredAmount * 0.15),
+                  "Social & Entertainment": Math.round(enteredAmount * 0.15),
+                  "Savings & Investments": Math.round(enteredAmount * 0.20),
+                },
+                deposited_goal: data?.allocation_result?.deposited_goal || null
+              };
+              setAllocationSuccess(allocResult);
+            }
+          }
+        } catch (err) {
+          console.error('Error creating transaction in database:', err);
+        } finally {
+          setSubmitting(false);
         }
-
-        const newTx = {
-          id: Date.now(),
-          title: formTitle.trim(),
-          category: formCategory,
-          date: formDate,
-          dateLabel: label,
-          amount: Number(formAmount),
-          type: formType,
-          mode: formMode
-        };
-
-        setTransactions([newTx, ...transactions]);
-        setIsModalOpen(false);
-        setFormTitle('');
-        setFormAmount('');
       };
 
-      const handleDelete = (id) => {
-        setTransactions(transactions.filter((t) => t.id !== id));
+      const handleDelete = async (id) => {
+        try {
+          const token = localStorage.getItem('kavach_token');
+          const res = await fetch(`/api/transactions/${id}`, {
+            method: 'DELETE',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          if (res.ok) {
+            setTransactions(transactions.filter(t => t.id !== id));
+          }
+        } catch (err) {
+          console.error('Delete error:', err);
+        }
       };
 
       const totalIncome = transactions
@@ -1335,8 +1446,9 @@
 
       const netBalance = totalIncome - totalExpense;
 
+      const todayStr = new Date().toISOString().split('T')[0];
       const todayExpense = transactions
-        .filter((t) => t.type === 'expense' && (t.date === '2026-09-18' || t.dateLabel?.startsWith('Today')))
+        .filter((t) => t.type === 'expense' && t.date === todayStr)
         .reduce((sum, t) => sum + t.amount, 0);
 
       const dailyCap = 500;
@@ -1347,131 +1459,68 @@
         return t.type === filter;
       });
 
-      const groupedTransactions = filteredList.reduce((acc, curr) => {
-        const key = curr.dateLabel || curr.date;
+      const groupedTransactions = filteredList.reduce((acc, txn) => {
+        const key = txn.dateLabel || txn.date || 'Recent';
         if (!acc[key]) acc[key] = [];
-        acc[key].push(curr);
+        acc[key].push(txn);
         return acc;
       }, {});
 
       return (
-        <div className="w-full max-w-5xl mx-auto space-y-6 animate-fade-in text-left">
+        <div className="flex flex-col animate-fade-in text-left space-y-6 w-full max-w-6xl mx-auto">
+          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80 dark:border-slate-800">
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-[11px] font-semibold uppercase tracking-wider mb-1.5">
                 <IconWallet className="w-3.5 h-3.5" />
-                <span>Income & Daily Expense Tracker</span>
+                <span>Live Database Ledger</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Daily Cashflow
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Log your irregular income, monitor daily chai & food expenses, and stay under daily caps.
-              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Daily Cashflow Ledger</h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">All records fetched live from your database account.</p>
             </div>
-
+            
             <button
               type="button"
-              onClick={() => {
-                setFormType('expense');
-                setFormCategory('Food & Dining');
-                setIsModalOpen(true);
-              }}
-              className="min-h-[42px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95 shrink-0 self-start sm:self-auto"
+              onClick={() => setIsModalOpen(true)}
+              className="min-h-[42px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-95 self-start sm:self-auto"
             >
               <IconPlus className="w-4 h-4 text-amber-300" />
-              <span>Add Income / Expense</span>
+              <span>Log Transaction</span>
             </button>
           </div>
 
-          {/* Metrics summary cards */}
+          {/* Metric Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Net Balance</span>
-              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block mt-1 tracking-tight">
-                ₹{netBalance.toLocaleString()}
-              </span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-1">
-                <IconTrendingUp className="w-3 h-3" /> Inflow - Outflow
-              </span>
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Inflow</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹{totalIncome.toLocaleString('en-IN')}</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-1">Recorded Incomes</span>
             </div>
 
-            <div className={`p-4 bg-white dark:bg-slate-900 rounded-2xl border shadow-xs ${
-              isOverDailyCap ? 'border-rose-300 dark:border-rose-900' : 'border-slate-200/90 dark:border-slate-800'
-            }`}>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Today's Spend</span>
-                <span className={`w-2 h-2 rounded-full ${isOverDailyCap ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></span>
-              </div>
-              <span className={`text-xl sm:text-2xl font-bold block mt-1 tracking-tight ${
-                isOverDailyCap ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
-              }`}>
-                ₹{todayExpense.toLocaleString()}
-              </span>
-              <span className={`text-[10px] font-medium mt-1 block ${
-                isOverDailyCap ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-500 dark:text-slate-400'
-              }`}>
-                {isOverDailyCap ? `Exceeded ₹${dailyCap} cap` : `₹${dailyCap - todayExpense} under daily cap`}
-              </span>
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Spent</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹{totalExpense.toLocaleString('en-IN')}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">Recorded Expenditures</span>
             </div>
 
-            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Inflow</span>
-              <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 block mt-1 tracking-tight">
-                +₹{totalIncome.toLocaleString()}
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Liquid Balance</span>
+              <span className={`text-xl sm:text-2xl font-bold block tracking-tight ${netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                ₹{netBalance.toLocaleString('en-IN')}
               </span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">Stipends, gigs & refunds</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">Net Balance</span>
             </div>
 
-            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Spent</span>
-              <span className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-300 block mt-1 tracking-tight">
-                -₹{totalExpense.toLocaleString()}
-              </span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">Across all categories</span>
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Today's Spend</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white block tracking-tight">₹{todayExpense.toLocaleString('en-IN')}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">Daily Cap: ₹{dailyCap}</span>
             </div>
           </div>
 
-          {/* Daily Cap Banner */}
-          <div className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
-            isOverDailyCap
-              ? 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60 text-rose-950 dark:text-rose-200'
-              : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-900/60 text-slate-900 dark:text-slate-100'
-          }`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                isOverDailyCap ? 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300'
-              }`}>
-                <IconClock className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="text-xs sm:text-sm font-bold">
-                  {isOverDailyCap ? '⚠️ Today’s Expense Cap Exceeded!' : '🎯 Daily Expense Cap: ₹500/day'}
-                </h3>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-                  {isOverDailyCap
-                    ? `You have spent ₹${todayExpense} today (₹${todayExpense - dailyCap} over target). Cool down on discretionary food & cab taps!`
-                    : `You spent ₹${todayExpense} today. ₹${dailyCap - todayExpense} left before hitting your daily limit.`}
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setFormType('income');
-                setFormCategory('Stipend');
-                setIsModalOpen(true);
-              }}
-              className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer shrink-0 shadow-xs transition-colors"
-            >
-              + Add Income
-            </button>
-          </div>
-
-          {/* Filter pills */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          {/* Filter Tabs */}
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
               <button
                 type="button"
                 onClick={() => setFilter('all')}
@@ -1506,239 +1555,306 @@
                 Incomes Only
               </button>
             </div>
-
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium hidden sm:inline-block">
-              Grouped by Day
-            </span>
           </div>
 
           {/* Transaction groups */}
           <div className="space-y-4">
             {Object.keys(groupedTransactions).length === 0 ? (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200/90 dark:border-slate-800 text-center text-slate-400">
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">No transactions found</p>
-                <p className="text-xs">Click "+ Add Income / Expense" above to record your cashflow.</p>
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-12 border border-slate-200/90 dark:border-slate-800 text-center text-slate-400 space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                  <IconWallet className="w-6 h-6" />
+                </div>
+                <p className="text-base font-bold text-slate-700 dark:text-slate-300">No transactions recorded in database</p>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  New accounts start clean. Click below to log your first income or UPI expense!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs cursor-pointer transition-all"
+                >
+                  Log First Transaction
+                </button>
               </div>
             ) : (
-              Object.entries(groupedTransactions).map(([dateTitle, list]) => {
-                const dayExpense = list.filter((x) => x.type === 'expense').reduce((s, x) => s + x.amount, 0);
-                const dayIncome = list.filter((x) => x.type === 'income').reduce((s, x) => s + x.amount, 0);
-
-                return (
-                  <div key={dateTitle} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
-                    <div className="px-4 sm:px-5 py-3 bg-slate-50/80 dark:bg-slate-800/40 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <IconCalendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">{dateTitle}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs font-semibold">
-                        {dayExpense > 0 && (
-                          <span className="text-rose-600 dark:text-rose-400">Spent: ₹{dayExpense.toLocaleString()}</span>
-                        )}
-                        {dayIncome > 0 && (
-                          <span className="text-emerald-600 dark:text-emerald-400">Inflow: +₹{dayIncome.toLocaleString()}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                      {list.map((item) => {
-                        const isIncome = item.type === 'income';
-
-                        return (
-                          <div
-                            key={item.id}
-                            className="p-3.5 sm:p-4 flex items-center justify-between hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                                isIncome
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60'
-                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                              }`}>
-                                {isIncome ? (
-                                  <IconArrowDownLeft className="w-4 h-4" />
-                                ) : (
-                                  <IconArrowUpRight className="w-4 h-4" />
-                                )}
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-semibold text-slate-900 dark:text-white leading-snug">{item.title}</h4>
-                                <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                                  <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 font-medium">{item.category}</span>
-                                  <span>•</span>
-                                  <span>{item.mode}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                              <span className={`text-sm sm:text-base font-bold tracking-tight ${
-                                isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
-                              }`}>
-                                {isIncome ? `+₹${item.amount.toLocaleString()}` : `-₹${item.amount.toLocaleString()}`}
-                              </span>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(item.id)}
-                                title="Delete transaction"
-                                className="w-8 h-8 rounded-lg text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors cursor-pointer"
-                              >
-                                <IconTrash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+              Object.keys(groupedTransactions).map((dayGroup) => (
+                <div key={dayGroup} className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      {dayGroup}
+                    </span>
+                    <span className="text-xs font-medium text-slate-400">
+                      {groupedTransactions[dayGroup].length} transaction{groupedTransactions[dayGroup].length > 1 ? 's' : ''}
+                    </span>
                   </div>
-                );
-              })
+
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 shadow-xs overflow-hidden">
+                    {groupedTransactions[dayGroup].map((t) => (
+                      <div
+                        key={t.id}
+                        className="p-4 sm:px-5 flex items-center justify-between gap-3 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                            t.type === 'income' ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600' : 'bg-rose-50 dark:bg-rose-950/50 text-rose-600'
+                          }`}>
+                            <IconWallet className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{t.title}</h4>
+                            <p className="text-xs text-slate-400 mt-0.5">{t.category} • {t.mode}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className={`text-sm sm:text-base font-bold ${
+                            t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
+                          }`}>
+                            {t.type === 'income' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(t.id)}
+                            className="text-slate-300 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            title="Delete transaction"
+                          >
+                            <IconTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
             )}
           </div>
 
-          {/* Add transaction modal */}
+          {/* Modal to log new transaction */}
           {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
-              <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 text-slate-900 dark:text-slate-100">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-fade-in">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 w-full max-w-md relative text-left">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition-colors cursor-pointer"
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
                 >
-                  <IconX className="w-4 h-4" />
+                  <IconX className="w-5 h-5" />
                 </button>
 
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Add Cashflow Entry</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Record new income or log a daily payment.</p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Log Transaction</h3>
+                <p className="text-xs text-slate-400 mb-4">Record new income or expense to your database ledger.</p>
 
-                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-slate-200/80 dark:border-slate-700/60">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormType('expense');
-                      setFormCategory('Food & Dining');
-                    }}
-                    className={`min-h-[38px] rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      formType === 'expense'
-                        ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs font-bold'
-                        : 'text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    💸 Expense (-)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormType('income');
-                      setFormCategory('Stipend');
-                    }}
-                    className={`min-h-[38px] rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      formType === 'income'
-                        ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs font-bold'
-                        : 'text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    💰 Income (+)
-                  </button>
-                </div>
-
-                <form onSubmit={handleAddTransaction} className="space-y-3.5 text-left">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                      Amount (₹)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
-                      <input
-                        type="number"
-                        min="1"
-                        required
-                        value={formAmount}
-                        onChange={(e) => setFormAmount(e.target.value)}
-                        placeholder="e.g. 350"
-                        className="w-full min-h-[44px] pl-8 pr-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
-                      />
-                    </div>
+                <form onSubmit={handleAddTransaction} className="space-y-3.5">
+                  {/* Type switcher */}
+                  <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => { setFormType('expense'); setFormCategory('Food & Dining'); }}
+                      className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                        formType === 'expense' ? 'bg-white dark:bg-slate-700 text-rose-600 shadow-xs' : 'text-slate-400'
+                      }`}
+                    >
+                      Expense (-)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setFormType('income'); setFormCategory('Stipend'); }}
+                      className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                        formType === 'income' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-xs' : 'text-slate-400'
+                      }`}
+                    >
+                      Income (+)
+                    </button>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                      {formType === 'income' ? 'Source / Description' : 'Merchant / Expense Description'}
-                    </label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Amount (₹)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={formAmount}
+                      onChange={e => setFormAmount(e.target.value)}
+                      placeholder="e.g. 350"
+                      className="w-full min-h-[44px] px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-blue-600"
+                    />
+                  </div>
+
+                  {formType === 'income' && Number(formAmount) > 0 && (
+                    <div className="p-3 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 rounded-xl space-y-1.5 text-left">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-bold text-blue-900 dark:text-blue-300">
+                          ⚡ 50/30/20 Auto-Allocation Preview
+                        </span>
+                        <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/60 px-1.5 py-0.5 rounded">
+                          Automatic
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[10px]">
+                        <div className="bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block">🍽️ Food (25%)</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">₹{Math.round(Number(formAmount) * 0.25).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block">💡 Bills (15%)</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">₹{Math.round(Number(formAmount) * 0.15).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block">🚌 Travel (10%)</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">₹{Math.round(Number(formAmount) * 0.10).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block">🛍️ Shop (15%)</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">₹{Math.round(Number(formAmount) * 0.15).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block">🎬 Social (15%)</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">₹{Math.round(Number(formAmount) * 0.15).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="bg-emerald-50 dark:bg-emerald-950/50 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                          <span className="text-emerald-700 dark:text-emerald-400 font-semibold block">💎 Savings (20%)</span>
+                          <span className="font-black text-emerald-800 dark:text-emerald-300">₹{Math.round(Number(formAmount) * 0.20).toLocaleString('en-IN')}</span>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                        20% will be transferred to your active savings goal automatically.
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
                     <input
                       type="text"
                       required
                       value={formTitle}
-                      onChange={(e) => setFormTitle(e.target.value)}
-                      placeholder={formType === 'income' ? 'e.g. Freelance project payment' : 'e.g. Zepto groceries or Chai tap'}
-                      className="w-full min-h-[44px] px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                      onChange={e => setFormTitle(e.target.value)}
+                      placeholder="e.g. Swiggy food or Freelance payout"
+                      className="w-full min-h-[44px] px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                      Category
-                    </label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Category</label>
                     <select
                       value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value)}
-                      className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                      onChange={e => setFormCategory(e.target.value)}
+                      className="w-full min-h-[44px] px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-blue-600"
                     >
-                      {(formType === 'income' ? incomeCategories : expenseCategories).map((c) => (
-                        <option key={c} value={c}>{c}</option>
+                      {(formType === 'expense' ? expenseCategories : incomeCategories).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                        Date
-                      </label>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Date</label>
                       <input
                         type="date"
                         value={formDate}
-                        onChange={(e) => setFormDate(e.target.value)}
-                        className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                        onChange={e => setFormDate(e.target.value)}
+                        className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:border-blue-600"
                       />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                        Payment Mode
-                      </label>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
                       <select
                         value={formMode}
-                        onChange={(e) => setFormMode(e.target.value)}
-                        className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none"
+                        onChange={e => setFormMode(e.target.value)}
+                        className="w-full min-h-[44px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:border-blue-600"
                       >
-                        <option value="UPI">UPI (GPay/PhonePe)</option>
-                        <option value="Bank Transfer">Bank NEFT/IMPS</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Net Banking">Net Banking</option>
                         <option value="Cash">Cash</option>
-                        <option value="Card">Debit/Credit Card</option>
                       </select>
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full min-h-[46px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs mt-3 active:scale-[0.98] transition-all"
+                    disabled={submitting}
+                    className="w-full min-h-[46px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50 mt-4"
                   >
-                    <span>{formType === 'income' ? 'Record Income (+)' : 'Log Expense (-)'}</span>
+                    <span>{submitting ? 'Saving...' : (formType === 'income' ? 'Record Income & Auto-Allocate' : 'Log Expense (-)')}</span>
                     <IconCheckCircle2 className="w-4 h-4 text-amber-300" />
                   </button>
                 </form>
               </div>
             </div>
           )}
+
+          {/* Celebratory Auto-Allocation Modal */}
+          {allocationSuccess && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-fade-in">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 w-full max-w-md relative text-center">
+                <button
+                  type="button"
+                  onClick={() => setAllocationSuccess(null)}
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  <IconX className="w-5 h-5" />
+                </button>
+
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 text-xl">
+                  ⚡
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  Income Auto-Allocated!
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
+                  ₹{allocationSuccess.income_amount?.toLocaleString('en-IN')} has been distributed across envelopes (50/30/20 rule).
+                </p>
+
+                {allocationSuccess.deposited_goal ? (
+                  <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl text-left mb-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold">
+                      🎯
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300 block">
+                        +₹{allocationSuccess.deposited_goal.deposited_amount?.toLocaleString('en-IN')} Locked into Goal!
+                      </span>
+                      <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+                        Transferred directly to <strong>{allocationSuccess.deposited_goal.title}</strong> ({allocationSuccess.deposited_goal.progress_percentage}% achieved)
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-600 dark:text-slate-400 mb-4 text-left">
+                    💎 20% (₹{allocationSuccess.allocations?.['Savings & Investments']?.toLocaleString('en-IN')}) saved to your available general savings.
+                  </div>
+                )}
+
+                <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 text-left space-y-1.5 mb-4">
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-1">
+                    <span>Category Envelope</span>
+                    <span>Expanded Limit</span>
+                  </div>
+                  {Object.entries(allocationSuccess.allocations || {}).map(([cat, amt]) => (
+                    <div key={cat} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-700 dark:text-slate-300 font-medium">{cat}</span>
+                      <span className="font-bold text-slate-900 dark:text-white">+₹{amt?.toLocaleString('en-IN')}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setAllocationSuccess(null)}
+                  className="w-full min-h-[46px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] transition-all"
+                >
+                  Done & Continue
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
-
-    // ==========================================
-    // 6. 1-ON-1 AI FINTECH CHATBOT (Kavach Copilot)
+// 6. 1-ON-1 AI FINTECH CHATBOT (Kavach Copilot)
     // ==========================================
     function ChatWidget({ user, onNavigate }) {
       const [isOpen, setIsOpen] = useState(false);
@@ -2180,83 +2296,136 @@
     // 7B. DEDICATED AUTHENTICATION PAGE
     // ==========================================
     function AuthPage({ onNavigate, onLogin }) {
-      const [step, setStep] = useState(1);
+      const [mode, setMode] = useState('signin');
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
       const [name, setName] = useState('');
-      const [phone, setPhone] = useState('');
-      const [otp, setOtp] = useState(['', '', '', '']);
       const [selectedPersona, setSelectedPersona] = useState('student');
+      const [showPassword, setShowPassword] = useState(false);
       const [errorMsg, setErrorMsg] = useState('');
-      const [isVerifying, setIsVerifying] = useState(false);
-      const [googleLoading, setGoogleLoading] = useState(false);
+      const [isSubmitting, setIsSubmitting] = useState(false);
 
-      const handleGoogleSignIn = async () => {
-        if (!supabase) {
-          setErrorMsg('Supabase authentication is not configured.');
-          return;
-        }
-        setGoogleLoading(true);
+      const handleQuickDemoFill = async () => {
         setErrorMsg('');
+        setIsSubmitting(true);
         try {
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-              redirectTo: window.location.origin
-            }
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'demo@technofora.com', password: 'Demo@12345' }),
           });
-          if (error) throw error;
-        } catch (err) {
-          setErrorMsg(err.message || 'Google sign-in failed. Please try again.');
-          setGoogleLoading(false);
+          const data = await res.json();
+          if (res.ok && data.access_token) {
+            localStorage.setItem('kavach_token', data.access_token);
+            const userObj = {
+              name: data.user?.full_name || 'Alex Rivera',
+              email: data.user?.email || 'demo@technofora.com',
+              persona: 'student'
+            };
+            onLogin(userObj);
+            return;
+          }
+        } catch (e) {
+          console.warn('API demo login fallback:', e);
         }
-      };
-
-      const handleStep1 = (e) => {
-        e.preventDefault();
-        if (!name.trim()) {
-          setErrorMsg('Please enter your name');
-          return;
-        }
-        if (phone.replace(/\D/g, '').length < 10) {
-          setErrorMsg('Please enter a valid 10-digit mobile number');
-          return;
-        }
-        setErrorMsg('');
-        setStep(2);
-      };
-
-      const handleQuickDemoFill = () => {
-        setName('Shreyas Patel');
-        setPhone('9876543210');
-        setErrorMsg('');
-      };
-
-      const handleStep2 = (e) => {
-        e.preventDefault();
-        if (otp.join('').length < 4) {
-          setErrorMsg('Please enter 4 digits');
-          return;
-        }
-        setErrorMsg('');
-        setIsVerifying(true);
-        setTimeout(() => {
-          setIsVerifying(false);
-          setStep(3);
-        }, 600);
-      };
-
-      const handleComplete = () => {
-        const userData = {
-          name: name.trim() || 'Shreyas Patel',
-          phone: phone || '9876543210',
-          persona: selectedPersona
+        const userObj = {
+          name: 'Alex Rivera',
+          email: 'demo@technofora.com',
+          persona: 'student'
         };
-        onLogin(userData);
+        onLogin(userObj);
+      };
+
+      const handleSignIn = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        const cleanEmail = email.trim().toLowerCase();
+        if (!cleanEmail) {
+          setErrorMsg('Please enter your email address.');
+          return;
+        }
+        if (!password) {
+          setErrorMsg('Please enter your password.');
+          return;
+        }
+
+        setIsSubmitting(true);
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: cleanEmail, password }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.detail || 'Incorrect email or password.');
+          }
+          if (data.access_token) {
+            localStorage.setItem('kavach_token', data.access_token);
+          }
+          const userObj = {
+            name: data.user?.full_name || cleanEmail.split('@')[0],
+            email: cleanEmail,
+            persona: 'student'
+          };
+          onLogin(userObj);
+        } catch (err) {
+          setErrorMsg(err.message || 'Invalid email or password.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+
+      const handleSignUp = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        const cleanEmail = email.trim().toLowerCase();
+        if (!cleanEmail) {
+          setErrorMsg('Please enter a valid email address.');
+          return;
+        }
+        if (!password || password.length < 6) {
+          setErrorMsg('Password must be at least 6 characters.');
+          return;
+        }
+
+        setIsSubmitting(true);
+        try {
+          const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: cleanEmail,
+              password,
+              full_name: name.trim() || 'Alex Rivera',
+              expected_monthly_savings: selectedPersona === 'freelance' ? 20000 : 12000
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.detail || 'Registration failed. Email may already exist.');
+          }
+          if (data.access_token) {
+            localStorage.setItem('kavach_token', data.access_token);
+          }
+          const userObj = {
+            name: data.user?.full_name || name.trim() || 'Alex Rivera',
+            email: cleanEmail,
+            persona: selectedPersona
+          };
+          onLogin(userObj);
+        } catch (err) {
+          setErrorMsg(err.message || 'Registration failed. Email may already exist.');
+        } finally {
+          setIsSubmitting(false);
+        }
       };
 
       return (
         <div className="max-w-md mx-auto py-4 sm:py-8 animate-fade-in text-left">
           {/* Back button to Home */}
           <button
+            type="button"
             onClick={() => onNavigate('/')}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white mb-5 cursor-pointer transition-colors"
           >
@@ -2265,245 +2434,215 @@
           </button>
 
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8">
-            {/* Step Indicators */}
-            <div className="flex items-center gap-2 mb-6">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    s === step
-                      ? 'w-10 bg-blue-600 dark:bg-blue-500'
-                      : s < step
-                      ? 'w-6 bg-emerald-500'
-                      : 'w-6 bg-slate-200 dark:bg-slate-800'
-                  }`}
-                />
-              ))}
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 ml-auto uppercase tracking-wider">
-                Step {step} of 3
+            <div className="flex items-center justify-between mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200/60 dark:border-blue-900/60 shadow-xs">
+                <IconShield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                <IconCheckCircle2 className="w-3.5 h-3.5" />
+                <span>256-Bit SSL Encrypted</span>
               </span>
             </div>
 
-            {/* STEP 1: Name & Phone */}
-            {step === 1 && (
-              <div className="space-y-4">
-                <div>
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-200/60 dark:border-blue-900/60">
-                    <IconShield className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    Sign Up for Kavach
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Sign in with Google or enter mobile number to unlock Scam Shield, Cashflow, and Goals.
-                  </p>
-                </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {mode === 'signin' ? 'Sign In to Kavach' : 'Create Your Account'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 mb-6">
+              {mode === 'signin'
+                ? 'Access your personal financial copilot, scam shield, and goals.'
+                : 'Join Kavach to safeguard digital transactions and optimize savings.'}
+            </p>
 
-                {/* Google Sign-in Option */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    disabled={googleLoading}
-                    className="w-full min-h-[48px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-3 cursor-pointer shadow-xs transition-all active:scale-[0.99] disabled:opacity-60"
-                  >
-                    <IconGoogle className="w-5 h-5 flex-shrink-0" />
-                    <span>{googleLoading ? 'Redirecting to Google...' : 'Continue with Google'}</span>
-                  </button>
-                </div>
+            {/* Mode Switcher */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-6 border border-slate-200 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => { setMode('signin'); setErrorMsg(''); }}
+                className={`py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+                  mode === 'signin'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode('signup'); setErrorMsg(''); }}
+                className={`py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+                  mode === 'signup'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
 
-                {/* Divider */}
-                <div className="relative flex items-center justify-center my-2">
-                  <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-                  <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 absolute">
-                    or continue with mobile OTP
-                  </span>
-                </div>
-
-                <form onSubmit={handleStep1} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Shreyas Patel"
-                      className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      UPI Mobile Number
-                    </label>
-                    <div className="flex items-center">
-                      <span className="min-h-[48px] px-3.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 rounded-l-xl flex items-center text-xs font-bold text-slate-600 dark:text-slate-400">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="98765 43210"
-                        className="flex-1 min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-r-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-0.5">
-                    <button
-                      type="button"
-                      onClick={handleQuickDemoFill}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline cursor-pointer"
-                    >
-                      ⚡ Auto-Fill Demo Profile (Shreyas • 9876543210)
-                    </button>
-                  </div>
-
-                  {errorMsg && (
-                    <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold">{errorMsg}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all"
-                  >
-                    <span>Send 4-Digit Verification Code</span>
-                    <IconArrowRight className="w-4 h-4 text-amber-300" />
-                  </button>
-                </form>
+            {errorMsg && (
+              <div className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                {errorMsg}
               </div>
             )}
 
-            {/* STEP 2: OTP Verification */}
-            {step === 2 && (
-              <form onSubmit={handleStep2} className="space-y-4">
+            {/* SIGN IN FORM */}
+            {mode === 'signin' && (
+              <form onSubmit={handleSignIn} className="space-y-4 text-left">
                 <div>
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-200/60 dark:border-blue-900/60">
-                    <IconCheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    Verify Mobile Number
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Enter the 4-digit code sent to +91 {phone || '9876543210'}
-                  </p>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="e.g. demo@technofora.com"
+                    autoComplete="email"
+                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                    required
+                  />
                 </div>
 
-                <div className="flex justify-between gap-2.5 max-w-[240px] mx-auto py-2">
-                  {otp.map((digit, idx) => (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Password
+                  </label>
+                  <div className="relative">
                     <input
-                      key={idx}
-                      id={`auth-otp-idx-${idx}`}
-                      type="text"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const newOtp = [...otp];
-                        newOtp[idx] = val;
-                        setOtp(newOtp);
-                        if (val && idx < 3) {
-                          document.getElementById(`auth-otp-idx-${idx + 1}`)?.focus();
-                        }
-                      }}
-                      className="w-12 h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none text-slate-900 dark:text-white transition-all"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 pr-10 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                      required
                     />
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="text-center">
+                <div className="pt-1">
                   <button
                     type="button"
-                    onClick={() => setOtp(['2', '4', '2', '6'])}
-                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg cursor-pointer transition-colors"
+                    onClick={handleQuickDemoFill}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline cursor-pointer"
                   >
-                    ⚡ Auto-Fill 2426
+                    ⚡ One-Click Demo Login (demo@technofora.com)
                   </button>
                 </div>
 
-                {errorMsg && (
-                  <p className="text-rose-600 dark:text-rose-400 text-xs font-semibold text-center">{errorMsg}</p>
-                )}
-
                 <button
                   type="submit"
-                  disabled={isVerifying}
-                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 transition-all"
+                  disabled={isSubmitting}
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
-                  {isVerifying ? (
-                    <span>Verifying...</span>
-                  ) : (
-                    <>
-                      <span>Verify & Continue</span>
-                      <IconArrowRight className="w-4 h-4 text-amber-300" />
-                    </>
-                  )}
+                  {isSubmitting ? 'Signing in...' : 'Sign In'}
+                  <IconArrowRight className="w-4 h-4 text-amber-300" />
                 </button>
               </form>
             )}
 
-            {/* STEP 3: Lifestyle Persona */}
-            {step === 3 && (
-              <div className="space-y-4">
+            {/* SIGN UP FORM */}
+            {mode === 'signup' && (
+              <form onSubmit={handleSignUp} className="space-y-4 text-left">
                 <div>
-                  <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 border border-emerald-200/60 dark:border-emerald-800/60">
-                    <IconSparkles className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    Choose Your Lifestyle
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Kavach personalizes your payout cycles and safety rules based on this.
-                  </p>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="e.g. Alex Rivera"
+                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                    required
+                  />
                 </div>
 
-                <div className="space-y-2.5">
-                  {[
-                    { id: 'student', title: 'College Student / Intern', desc: 'Irregular stipends, allowances, college projects', icon: '🎓' },
-                    { id: 'freelance', title: 'Freelancer / Creator', desc: 'Gig payouts, variable client invoices, Razorpay', icon: '💻' },
-                    { id: 'junior', title: 'Early Career Professional', desc: 'First salary, rent splits, weekend spends', icon: '💼' }
-                  ].map((p) => {
-                    const isSelected = selectedPersona === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setSelectedPersona(p.id)}
-                        className={`w-full p-3.5 rounded-2xl border text-left flex items-center gap-3.5 cursor-pointer transition-all ${
-                          isSelected
-                            ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 ring-1 ring-blue-500'
-                            : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'
-                        }`}
-                      >
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-                          isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                        }`}>
-                          {p.icon}
-                        </div>
-                        <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{p.title}</h4>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">{p.desc}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="e.g. alex@example.com"
+                    autoComplete="email"
+                    className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Create Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      autoComplete="new-password"
+                      className="w-full min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 pr-10 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 outline-none transition-all"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Choose Financial Persona
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'student', title: 'Student', icon: '🎓' },
+                      { id: 'freelance', title: 'Creator', icon: '💻' },
+                      { id: 'junior', title: 'Pro', icon: '💼' }
+                    ].map(p => {
+                      const isSelected = selectedPersona === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setSelectedPersona(p.id)}
+                          className={`p-2.5 rounded-xl border text-center flex flex-col items-center gap-1 cursor-pointer transition-all ${
+                            isSelected
+                              ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold ring-1 ring-blue-500'
+                              : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300'
+                          }`}
+                        >
+                          <span className="text-base">{p.icon}</span>
+                          <span className="text-xs">{p.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <button
-                  type="button"
-                  onClick={handleComplete}
-                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all"
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-500/20 mt-3 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
-                  <span>Activate Protection & Enter App</span>
+                  {isSubmitting ? 'Creating account...' : 'Create Account & Enter App'}
                   <IconArrowRight className="w-4 h-4 text-amber-300" />
                 </button>
-              </div>
+              </form>
             )}
           </div>
 
@@ -2515,7 +2654,6 @@
       );
     }
 
-    // ==========================================
     // 8. LANDING PAGE
     // ==========================================
     function LandingPage({ user, onNavigate }) {

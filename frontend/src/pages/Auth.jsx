@@ -2,300 +2,255 @@ import React, { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
   Shield,
-  Smartphone,
-  CheckCircle2,
-  ArrowRight,
   Lock,
-  Sparkles,
+  Mail,
+  User,
+  Eye,
+  EyeOff,
+  ArrowRight,
   ArrowLeft,
+  Sparkles,
   GraduationCap,
   Laptop,
-  Briefcase
+  Briefcase,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { loginDemo, register } = useAuth();
+  const { login, register, loginDemo } = useAuth();
 
-  const [step, setStep] = useState(1); // 1: Info & Phone, 2: OTP, 3: Lifestyle Persona
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '']);
+  // Mode: 'signin' or 'signup'
+  const [mode, setMode] = useState('signin');
+
+  // Form fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [selectedPersona, setSelectedPersona] = useState('student');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // States
   const [errorMsg, setErrorMsg] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingDemo, setLoadingDemo] = useState(false);
 
-  const text = {
-    backHome: "Back to Home",
-    title: "Sign Up for Kavach",
-    sub: "Create your free account to unlock Scam Shield, Stipend Budgeting, and Goals.",
-    step1Title: "1. Your Primary Details",
-    step1Sub: "Enter your full name and primary UPI mobile number.",
-    nameLabel: "Full Name",
-    namePlaceholder: "e.g. Alex Rivera",
-    phoneLabel: "Mobile Number (Linked with UPI)",
-    phonePlaceholder: "98765 43210",
-    sendOtpBtn: "Send 4-Digit Verification Code",
-    demoQuickFill: "⚡ Auto-Login Demo Profile (Alex Rivera • demo@technofora.com)",
-    step2Title: "2. Verify Mobile Number",
-    step2Sub: `Enter the 4-digit code sent to +91 ${phone || '9876543210'}`,
-    otpHint: "Click below for instant presentation verification:",
-    autoFillOtpBtn: "Auto-Fill 2426",
-    verifyBtn: "Verify & Continue",
-    step3Title: "3. Choose Your Money Lifestyle",
-    step3Sub: "Kavach personalizes your payout cycles based on your lifestyle.",
-    personaStudent: "College Student / Intern",
-    personaStudentDesc: "Irregular stipends, allowances, college projects",
-    personaFreelance: "Freelancer / Creator",
-    personaFreelanceDesc: "Gig payouts, client invoices, Razorpay payouts",
-    personaJunior: "Early Career Professional",
-    personaJuniorDesc: "First salary, rent splits, weekend social spends",
-    completeBtn: "Activate Protection & Enter App",
-    securityNote: "Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN access"
-  };
-
+  // Handle direct demo profile login
   const handleQuickDemoFill = async () => {
-    setName('Alex Rivera');
-    setPhone('9876543210');
     setErrorMsg('');
     setLoadingDemo(true);
     try {
       await loginDemo();
       navigate('/dashboard');
     } catch (err) {
-      setErrorMsg(err.message || 'Demo login failed');
+      setErrorMsg(err.message || 'Demo login failed. Please try again.');
     } finally {
       setLoadingDemo(false);
     }
   };
 
-  // Step 1: Submit info
-  const handleStep1 = (e) => {
+  // Handle Sign In submission
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    if (!name.trim()) {
-      setErrorMsg('Please enter your name');
-      return;
-    }
-    if (phone.replace(/\D/g, '').length < 10) {
-      setErrorMsg('Please enter a valid 10-digit number');
-      return;
-    }
     setErrorMsg('');
-    setStep(2);
-  };
 
-  // Step 2: OTP
-  const handleStep2 = (e) => {
-    e.preventDefault();
-    if (otp.join('').length < 4) {
-      setErrorMsg('Please enter 4 digits');
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setErrorMsg('Please enter your email address.');
       return;
     }
-    setErrorMsg('');
-    setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
-      setStep(3);
-    }, 400);
-  };
+    if (!password) {
+      setErrorMsg('Please enter your password.');
+      return;
+    }
 
-  // Step 3: Complete & log in
-  const handleComplete = async () => {
     try {
-      setIsVerifying(true);
-      // Register or login with generated demo-friendly email
-      const safePhone = phone.replace(/\D/g, '') || '9876543210';
-      const email = `${safePhone}@kavach.in`;
-      try {
-        await register({
-          email,
-          password: 'Password@123',
-          full_name: name || 'Alex Rivera',
-          expected_monthly_savings: selectedPersona === 'freelance' ? 20000 : 12000,
-        });
-      } catch (regErr) {
-        // If already exists, fallback to demo login
-        await loginDemo();
-      }
+      setIsSubmitting(true);
+      await login(cleanEmail, password);
       navigate('/dashboard');
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to authenticate');
+      setErrorMsg(err.message || 'Invalid email or password. Please check your credentials.');
     } finally {
-      setIsVerifying(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle Sign Up submission
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+    if (!password || password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters long.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await register({
+        email: cleanEmail,
+        password,
+        full_name: fullName.trim() || 'Alex Rivera',
+        expected_monthly_savings: selectedPersona === 'freelance' ? 20000 : 12000,
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      setErrorMsg(err.message || 'Registration failed. An account with this email may already exist.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="max-w-md mx-auto py-4 sm:py-8 animate-fade-in text-left">
-      
       {/* Back to Home Link */}
       <NavLink
         to="/"
         className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 mb-6 group transition-colors"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-        <span>{text.backHome}</span>
+        <span>Back to Home</span>
       </NavLink>
 
       {/* Main Authentication Card */}
       <div className="bg-white rounded-3xl border-2 border-stone-300 shadow-xl p-6 sm:p-8">
         
-        {/* Top Progress Bar */}
-        <div className="flex items-center gap-2 mb-6">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                s === step
-                  ? 'w-10 bg-stone-900'
-                  : s < step
-                  ? 'w-6 bg-emerald-500'
-                  : 'w-6 bg-stone-200'
-              }`}
-            />
-          ))}
-          <span className="text-[11px] font-bold text-stone-400 ml-auto uppercase tracking-wider">
-            Step {step} of 3
+        {/* Header Icon & Title */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-amber-100 text-stone-900 flex items-center justify-center shadow-sm">
+            <Shield className="w-6 h-6 text-amber-600" />
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>256-Bit SSL Encrypted</span>
           </span>
         </div>
 
-        {/* STEP 1: Name and Phone */}
-        {step === 1 && (
-          <form onSubmit={handleStep1} className="space-y-4">
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-3 shadow-sm">
-                <Smartphone className="w-6 h-6" />
-              </div>
-              <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {text.step1Title}
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 mt-1">
-                {text.step1Sub}
-              </p>
-            </div>
+        <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+          {mode === 'signin' ? 'Sign In to Kavach' : 'Create Your Account'}
+        </h2>
+        <p className="text-xs sm:text-sm text-stone-600 mt-1 mb-6">
+          {mode === 'signin'
+            ? 'Access your personal financial copilot, scam shield, and goals.'
+            : 'Join Kavach to safeguard digital transactions and optimize savings.'}
+        </p>
 
+        {/* Mode Switcher Tabs */}
+        <div className="grid grid-cols-2 p-1 bg-stone-100 rounded-2xl mb-6 border border-stone-200">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signin');
+              setErrorMsg('');
+            }}
+            className={`py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+              mode === 'signin'
+                ? 'bg-white text-stone-900 shadow-sm'
+                : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signup');
+              setErrorMsg('');
+            }}
+            className={`py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+              mode === 'signup'
+                ? 'bg-white text-stone-900 shadow-sm'
+                : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            Create Account
+          </button>
+        </div>
+
+        {/* Error Message Banner */}
+        {errorMsg && (
+          <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-700 text-xs font-semibold animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        {/* SIGN IN FORM */}
+        {mode === 'signin' && (
+          <form onSubmit={handleSignIn} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
-                {text.nameLabel}
+                Email Address
               </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={text.namePlaceholder}
-                className="w-full min-h-[50px] bg-stone-50 border border-stone-300 rounded-xl px-4 text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
-                {text.phoneLabel}
-              </label>
-              <div className="flex items-center">
-                <span className="min-h-[50px] px-3.5 bg-stone-100 border border-r-0 border-stone-300 rounded-l-xl flex items-center text-sm font-bold text-stone-600">
-                  +91
-                </span>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  type="tel"
-                  maxLength={10}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                  placeholder={text.phonePlaceholder}
-                  className="flex-1 min-h-[50px] bg-stone-50 border border-stone-300 rounded-r-xl px-4 text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. demo@technofora.com"
+                  autoComplete="email"
+                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl pl-10 pr-4 text-sm sm:text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
                   required
                 />
               </div>
             </div>
 
-            {/* Presentation Shortcut */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl pl-10 pr-11 text-sm sm:text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Demo Login Option */}
             <div className="pt-1">
               <button
                 type="button"
                 onClick={handleQuickDemoFill}
-                className="text-xs text-stone-600 hover:text-stone-900 font-bold underline cursor-pointer"
+                disabled={loadingDemo}
+                className="text-xs text-stone-600 hover:text-stone-900 font-bold underline cursor-pointer disabled:opacity-50"
               >
-                {text.demoQuickFill}
+                {loadingDemo ? 'Signing in demo profile...' : '⚡ One-Click Demo Login (demo@technofora.com)'}
               </button>
             </div>
 
-            {errorMsg && (
-              <p className="text-rose-600 text-xs font-bold">{errorMsg}</p>
-            )}
-
             <button
               type="submit"
-              className="w-full min-h-[52px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md mt-4 active:scale-[0.98]"
+              disabled={isSubmitting}
+              className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md mt-4 active:scale-[0.98] disabled:opacity-50"
             >
-              <span>{text.sendOtpBtn}</span>
-              <ArrowRight className="w-4 h-4 text-amber-400" />
-            </button>
-          </form>
-        )}
-
-        {/* STEP 2: OTP Verification */}
-        {step === 2 && (
-          <form onSubmit={handleStep2} className="space-y-5">
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3 shadow-sm">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {text.step2Title}
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 mt-1">
-                {text.step2Sub}
-              </p>
-            </div>
-
-            <div className="flex justify-between gap-3 max-w-[260px] mx-auto py-2">
-              {otp.map((digit, idx) => (
-                <input
-                  key={idx}
-                  id={`auth-otp-${idx}`}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    const newOtp = [...otp];
-                    newOtp[idx] = val;
-                    setOtp(newOtp);
-                    if (val && idx < 3) {
-                      document.getElementById(`auth-otp-${idx + 1}`)?.focus();
-                    }
-                  }}
-                  className="w-14 h-14 text-center text-2xl font-black bg-stone-50 border-2 border-stone-300 rounded-2xl focus:bg-white focus:border-stone-900 outline-none transition-all"
-                />
-              ))}
-            </div>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setOtp(['2', '4', '2', '6'])}
-                className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-xs font-bold text-stone-800 rounded-xl cursor-pointer shadow-sm"
-              >
-                ⚡ {text.autoFillOtpBtn}
-              </button>
-            </div>
-
-            {errorMsg && (
-              <p className="text-rose-600 text-xs font-bold text-center">{errorMsg}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isVerifying}
-              className="w-full min-h-[52px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-[0.98] disabled:opacity-50"
-            >
-              {isVerifying ? (
-                <span>Verifying...</span>
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{text.verifyBtn}</span>
+                  <span>Sign In</span>
                   <ArrowRight className="w-4 h-4 text-amber-400" />
                 </>
               )}
@@ -303,72 +258,126 @@ export default function AuthPage() {
           </form>
         )}
 
-        {/* STEP 3: Lifestyle Persona */}
-        {step === 3 && (
-          <div className="space-y-4">
+        {/* SIGN UP FORM */}
+        {mode === 'signup' && (
+          <form onSubmit={handleSignUp} className="space-y-4">
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3 shadow-sm">
-                <Sparkles className="w-6 h-6" />
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                Full Name
+              </label>
+              <div className="relative">
+                <User className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. Alex Rivera"
+                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl pl-10 pr-4 text-sm sm:text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
+                  required
+                />
               </div>
-              <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {text.step3Title}
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 mt-1">
-                {text.step3Sub}
-              </p>
             </div>
 
-            <div className="space-y-2.5">
-              {[
-                { id: 'student', title: text.personaStudent, desc: text.personaStudentDesc, icon: GraduationCap },
-                { id: 'freelance', title: text.personaFreelance, desc: text.personaFreelanceDesc, icon: Laptop },
-                { id: 'junior', title: text.personaJunior, desc: text.personaJuniorDesc, icon: Briefcase }
-              ].map((p) => {
-                const Icon = p.icon;
-                const isSelected = selectedPersona === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedPersona(p.id)}
-                    className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3.5 transition-all cursor-pointer ${
-                      isSelected
-                        ? 'border-stone-900 bg-amber-50/50 ring-2 ring-stone-900/10'
-                        : 'border-stone-200 hover:border-stone-300 bg-stone-50'
-                    }`}
-                  >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      isSelected ? 'bg-stone-900 text-amber-400' : 'bg-stone-200 text-stone-600'
-                    }`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-stone-900">{p.title}</h4>
-                      <p className="text-xs text-stone-500 leading-snug">{p.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. alex@example.com"
+                  autoComplete="email"
+                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl pl-10 pr-4 text-sm sm:text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                Create Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  autoComplete="new-password"
+                  className="w-full min-h-[48px] bg-stone-50 border border-stone-300 rounded-xl pl-10 pr-11 text-sm sm:text-base text-stone-900 placeholder-stone-400 focus:bg-white focus:border-stone-900 outline-none transition-colors"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Persona Selection */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                Financial Persona
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'student', title: 'Student', icon: GraduationCap },
+                  { id: 'freelance', title: 'Creator', icon: Laptop },
+                  { id: 'junior', title: 'Professional', icon: Briefcase },
+                ].map((p) => {
+                  const Icon = p.icon;
+                  const isSelected = selectedPersona === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelectedPersona(p.id)}
+                      className={`p-2.5 rounded-xl border-2 text-center flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                        isSelected
+                          ? 'border-stone-900 bg-amber-50/70 text-stone-900 font-bold'
+                          : 'border-stone-200 hover:border-stone-300 bg-stone-50 text-stone-600'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="text-xs">{p.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <button
-              type="button"
-              onClick={handleComplete}
-              className="w-full min-h-[52px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md mt-4 active:scale-[0.98]"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md mt-4 active:scale-[0.98] disabled:opacity-50"
             >
-              <span>{text.completeBtn}</span>
-              <ArrowRight className="w-4 h-4 text-amber-400" />
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <ArrowRight className="w-4 h-4 text-amber-400" />
+                </>
+              )}
             </button>
-          </div>
+          </form>
         )}
 
       </div>
 
+      {/* Security Footer Note */}
       <div className="mt-5 text-center text-xs text-stone-500 flex items-center justify-center gap-1.5">
         <Lock className="w-3.5 h-3.5 text-emerald-600" />
-        <span>{text.securityNote}</span>
+        <span>Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN access</span>
       </div>
-
     </div>
   );
 }

@@ -83,6 +83,13 @@ def get_dashboard_summary(
             expected_savings = float(getattr(current_user, "expected_monthly_savings", 5000.0) or 5000.0)
             actual_savings = float(supa_summary["net_balance"])
 
+            target_user_id = current_user.id
+            if hasattr(current_user, "email") and current_user.email:
+                local_u = db.query(User).filter(User.email == current_user.email.lower().strip()).first()
+                if local_u:
+                    target_user_id = local_u.id
+            alerts = get_budget_alerts(db, target_user_id, today.month, today.year)
+
             return DashboardSummaryOut(
                 total_income=supa_summary["total_income"],
                 total_expenses=supa_summary["total_expenses"],
@@ -95,7 +102,7 @@ def get_dashboard_summary(
                 savings_variance=round(actual_savings - expected_savings, 2),
                 current_streak=3,
                 longest_streak=7,
-                budget_alerts=[],
+                budget_alerts=alerts,
                 recent_transactions=recent_txns_out,
                 category_spending=cat_spend_out,
                 monthly_trend=trend_out

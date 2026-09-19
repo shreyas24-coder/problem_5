@@ -43,6 +43,7 @@ export default function SpendPage() {
   const [formCategory, setFormCategory] = useState('Food & Dining');
   const [formMode, setFormMode] = useState('UPI');
   const [formDate, setFormDate] = useState(new Date().toISOString().split('T')[0]);
+  const [allocationSuccess, setAllocationSuccess] = useState(null);
 
   const fetchTransactions = async () => {
     try {
@@ -98,10 +99,13 @@ export default function SpendPage() {
     e.preventDefault();
     if (!formTitle.trim() || !formAmount || Number(formAmount) <= 0) return;
 
+    const enteredAmount = Number(formAmount);
+    const isIncomeTxn = formType === 'income';
+
     try {
-      await transactionsApi.create({
+      const res = await transactionsApi.create({
         description: formTitle.trim(),
-        amount: Number(formAmount),
+        amount: enteredAmount,
         type: formType.toUpperCase(),
         category: formCategory,
         payment_method: formMode,
@@ -112,6 +116,22 @@ export default function SpendPage() {
       setIsModalOpen(false);
       setFormTitle('');
       setFormAmount('');
+
+      if (isIncomeTxn) {
+        const allocResult = res?.allocation_result || {
+          income_amount: enteredAmount,
+          allocations: {
+            "Food & Dining": Math.round(enteredAmount * 0.25),
+            "Bills & Utilities": Math.round(enteredAmount * 0.15),
+            "Commute & Travel": Math.round(enteredAmount * 0.10),
+            "Shopping & Tech": Math.round(enteredAmount * 0.15),
+            "Social & Entertainment": Math.round(enteredAmount * 0.15),
+            "Savings & Investments": Math.round(enteredAmount * 0.20),
+          },
+          deposited_goal: res?.allocation_result?.deposited_goal || null
+        };
+        setAllocationSuccess(allocResult);
+      }
     } catch (err) {
       alert(`Failed to save transaction: ${err.message}`);
     }
@@ -480,6 +500,49 @@ export default function SpendPage() {
                 </div>
               </div>
 
+              {/* 50/30/20 Live Auto-Allocation Preview for Income */}
+              {formType === 'income' && Number(formAmount) > 0 && (
+                <div className="p-3.5 bg-amber-50/90 border border-amber-200 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-black text-stone-900 flex items-center gap-1.5">
+                      ⚡ 50/30/20 Auto-Allocation Preview
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded-md">
+                      Auto-Allocated
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
+                    <div className="bg-white/95 p-2 rounded-xl border border-stone-200">
+                      <span className="text-stone-500 block">🍽️ Food (25%)</span>
+                      <span className="font-bold text-stone-900">₹{(Number(formAmount) * 0.25).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div className="bg-white/95 p-2 rounded-xl border border-stone-200">
+                      <span className="text-stone-500 block">💡 Bills (15%)</span>
+                      <span className="font-bold text-stone-900">₹{(Number(formAmount) * 0.15).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div className="bg-white/95 p-2 rounded-xl border border-stone-200">
+                      <span className="text-stone-500 block">🚌 Travel (10%)</span>
+                      <span className="font-bold text-stone-900">₹{(Number(formAmount) * 0.10).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div className="bg-white/95 p-2 rounded-xl border border-stone-200">
+                      <span className="text-stone-500 block">🛍️ Shopping (15%)</span>
+                      <span className="font-bold text-stone-900">₹{(Number(formAmount) * 0.15).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div className="bg-white/95 p-2 rounded-xl border border-stone-200">
+                      <span className="text-stone-500 block">🎬 Social (15%)</span>
+                      <span className="font-bold text-stone-900">₹{(Number(formAmount) * 0.15).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div className="bg-emerald-50/95 p-2 rounded-xl border border-emerald-200">
+                      <span className="text-emerald-700 font-bold block">💎 Savings (20%)</span>
+                      <span className="font-black text-emerald-800">₹{(Number(formAmount) * 0.20).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-stone-600 italic">
+                    20% portion is automatically deposited into your primary savings goal.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
                   {formType === 'income' ? 'Source / Description' : 'Merchant / Expense Description'}
@@ -543,11 +606,81 @@ export default function SpendPage() {
                 type="submit"
                 className="w-full min-h-[50px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md mt-4 active:scale-98"
               >
-                <span>{formType === 'income' ? 'Record Income (+)' : 'Log Expense (-)'}</span>
+                <span>{formType === 'income' ? 'Record Income & Auto-Allocate' : 'Log Expense (-)'}</span>
                 <CheckCircle2 className="w-4 h-4 text-amber-400" />
               </button>
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* 7. Celebratory 50/30/20 Auto-Allocation Success Modal */}
+      {allocationSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-stone-300 shadow-2xl p-6 sm:p-7 text-stone-900 text-center">
+            
+            <button
+              type="button"
+              onClick={() => setAllocationSuccess(null)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mb-3 shadow-inner">
+              <Sparkles className="w-7 h-7 text-amber-700" />
+            </div>
+
+            <h3 className="text-xl font-black text-stone-900 tracking-tight">
+              Income Automatically Allocated!
+            </h3>
+            <p className="text-xs text-stone-500 mt-1 mb-4">
+              ₹{allocationSuccess.income_amount?.toLocaleString()} has been divided across your monthly budget envelopes according to the 50/30/20 rule.
+            </p>
+
+            {/* Goal Deposit Notification */}
+            {allocationSuccess.deposited_goal ? (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-left mb-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 font-bold text-lg">
+                  🎯
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-emerald-900 block">
+                    +₹{allocationSuccess.deposited_goal.deposited_amount?.toLocaleString()} Locked in Goal!
+                  </span>
+                  <span className="text-[11px] text-emerald-700 font-medium">
+                    Transferred directly to <strong>{allocationSuccess.deposited_goal.title}</strong> ({allocationSuccess.deposited_goal.progress_percentage}% achieved)
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs text-stone-600 mb-4 text-left">
+                💎 20% (₹{allocationSuccess.allocations?.['Savings & Investments']?.toLocaleString()}) added to your General Available Savings.
+              </div>
+            )}
+
+            {/* Envelope Breakdown list */}
+            <div className="bg-stone-50 rounded-2xl p-3.5 border border-stone-200 text-left space-y-2 mb-5">
+              <div className="flex items-center justify-between text-[11px] font-bold uppercase text-stone-500 border-b border-stone-200 pb-1.5">
+                <span>Category Envelopes</span>
+                <span>Expanded Limit</span>
+              </div>
+              {Object.entries(allocationSuccess.allocations || {}).map(([cat, amt]) => (
+                <div key={cat} className="flex items-center justify-between text-xs">
+                  <span className="text-stone-700 font-medium">{cat}</span>
+                  <span className="font-bold text-stone-900">+₹{amt?.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setAllocationSuccess(null)}
+              className="w-full min-h-[48px] rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm cursor-pointer shadow-md transition-all active:scale-98"
+            >
+              Done & View Cashflow
+            </button>
           </div>
         </div>
       )}

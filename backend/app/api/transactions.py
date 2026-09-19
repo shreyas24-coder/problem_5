@@ -14,6 +14,7 @@ from app.schemas.transaction import (
     TransactionTypeEnum,
 )
 from app.services.auth_service import get_current_user
+from app.services.financial_engine import auto_allocate_income
 
 router = APIRouter(prefix="/transactions", tags=["Transactions History & Management"])
 
@@ -25,7 +26,9 @@ def create_transaction(
     db: Session = Depends(get_db),
 ):
     """
-    Manually record an income or expenditure entry in Supabase.
+    Manually record an income or expenditure entry in Supabase and local DB.
+    When an income is entered, automatically allocates budget envelopes across
+    categories and routes 20% to savings / goals.
     """
     if txn_in.type == TransactionTypeEnum.GOAL_TRANSFER:
         raise HTTPException(
@@ -48,6 +51,13 @@ def create_transaction(
                 linked_goal_id=str(txn_in.goal_id) if txn_in.goal_id else None,
                 timestamp=datetime.datetime.combine(txn_in.date, datetime.time.min).replace(tzinfo=datetime.timezone.utc).isoformat()
             )
+            alloc_res = None
+            if txn_in.type == TransactionTypeEnum.INCOME:
+                try:
+                    alloc_res = auto_allocate_income(db=db, user=current_user, income_amount=txn_in.amount, txn_date=txn_in.date)
+                except Exception:
+                    pass
+
             return TransactionOut(
                 id=str(supa_txn["id"]),
                 user_id=str(supa_txn["user_id"]),
@@ -58,7 +68,8 @@ def create_transaction(
                 payment_method="UPI",
                 date=txn_in.date,
                 goal_id=supa_txn.get("linked_goal_id"),
-                created_at=None
+                created_at=None,
+                allocation_result=alloc_res,
             )
         except Exception:
             pass
@@ -79,6 +90,15 @@ def create_transaction(
     db.add(txn)
     db.commit()
     db.refresh(txn)
+
+    # 3. Automatic Income Allocation (50/30/20 Rule: Categories & Savings)
+    if txn_in.type == TransactionTypeEnum.INCOME:
+        try:
+            alloc_res = auto_allocate_income(db=db, user=current_user, income_amount=txn_in.amount, txn_date=txn_in.date)
+            setattr(txn, "allocation_result", alloc_res)
+        except Exception:
+            pass
+
     return txn
 
 

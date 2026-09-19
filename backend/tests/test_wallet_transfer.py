@@ -30,29 +30,37 @@ def test_goal_wallet_transfer_mechanic(client, auth_headers):
     assert dep_fail.status_code == 400
     assert "Insufficient General Available Savings" in dep_fail.json()["detail"]
 
-    # 3. Add income of 50,000 and expense of 10,000 -> General available = 40,000
-    client.post(
+    # 3. Add income of 50,000 and expense of 10,000
+    # Under 50/30/20 auto-allocation:
+    # 20% of 50,000 (₹10,000) is automatically deposited into the active goal!
+    # Liquid available = 50,000 - 10,000 (expense) - 10,000 (auto-allocated goal deposit) = 30,000.
+    inc_res = client.post(
         "/api/transactions/",
         headers=auth_headers,
         json={"type": "INCOME", "amount": 50000.0, "category": "Salary", "date": today},
     )
+    assert inc_res.status_code == 201
+    inc_data = inc_res.json()
+    assert inc_data.get("allocation_result") is not None
+    assert inc_data["allocation_result"]["allocations"]["Savings & Investments"] == 10000.0
+
     client.post(
         "/api/transactions/",
         headers=auth_headers,
         json={"type": "EXPENSE", "amount": 10000.0, "category": "Rent", "date": today},
     )
 
-    # Check dashboard before transfer
+    # Check dashboard before additional manual transfer
     dash_res1 = client.get("/api/dashboard/", headers=auth_headers)
-    assert dash_res1.json()["net_balance"] == 40000.0
-    assert dash_res1.json()["general_available_savings"] == 40000.0
-    assert dash_res1.json()["locked_goal_savings"] == 0.0
+    assert dash_res1.json()["net_balance"] == 30000.0
+    assert dash_res1.json()["general_available_savings"] == 30000.0
+    assert dash_res1.json()["locked_goal_savings"] == 10000.0
 
-    # 4. Deposit 25,000 into MacBook goal
+    # 4. Deposit additional 15,000 into MacBook goal (total in goal becomes 25,000)
     dep_ok = client.post(
         f"/api/goals/{goal_id}/deposit",
         headers=auth_headers,
-        json={"amount": 25000.0},
+        json={"amount": 15000.0},
     )
     assert dep_ok.status_code == 200
     dep_data = dep_ok.json()
@@ -67,14 +75,11 @@ def test_goal_wallet_transfer_mechanic(client, auth_headers):
     assert dash_res2.json()["locked_goal_savings"] == 25000.0  # Funds locked in goal
     assert dash_res2.json()["general_available_savings"] == 15000.0  # Equals net_balance in Model A
 
-
-    # Verify a GOAL_TRANSFER transaction was recorded in transaction history
+    # Verify GOAL_TRANSFER transactions were recorded in transaction history (auto-transfer + manual)
     txns_res = client.get("/api/transactions/?type=GOAL_TRANSFER", headers=auth_headers)
     assert txns_res.status_code == 200
     txns = txns_res.json()
-    assert len(txns) == 1
-    assert txns[0]["type"] == "GOAL_TRANSFER"
-    assert txns[0]["amount"] == 25000.0
+    assert len(txns) == 2
 
     # 5. Withdraw 5,000 back to general savings
     with_ok = client.post(

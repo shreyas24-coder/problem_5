@@ -89,3 +89,49 @@ def test_update_and_delete_transaction(client, auth_headers):
     # Verify not found
     get_res = client.get(f"/api/transactions/{txn_id}", headers=auth_headers)
     assert get_res.status_code == 404
+
+
+def test_auto_income_allocation_50_30_20(client, auth_headers):
+    today = str(datetime.date.today())
+
+    # 1. Create a goal so the 20% savings portion has a destination
+    goal_res = client.post(
+        "/api/goals/",
+        headers=auth_headers,
+        json={
+            "title": "Emergency Fund",
+            "target_amount": 50000.0,
+            "category": "General",
+        },
+    )
+    assert goal_res.status_code == 201
+    goal = goal_res.json()
+    assert goal["current_amount"] == 0.0
+
+    # 2. Record an income of 10,000
+    inc_res = client.post(
+        "/api/transactions/",
+        headers=auth_headers,
+        json={"type": "INCOME", "amount": 10000.0, "category": "Salary", "date": today},
+    )
+    assert inc_res.status_code == 201
+    inc_data = inc_res.json()
+
+    # 3. Verify allocation_result in response
+    alloc = inc_data.get("allocation_result")
+    assert alloc is not None
+    assert alloc["income_amount"] == 10000.0
+    assert alloc["allocations"]["Food & Dining"] == 2500.0
+    assert alloc["allocations"]["Bills & Utilities"] == 1500.0
+    assert alloc["allocations"]["Commute & Travel"] == 1000.0
+    assert alloc["allocations"]["Shopping & Tech"] == 1500.0
+    assert alloc["allocations"]["Social & Entertainment"] == 1500.0
+    assert alloc["allocations"]["Savings & Investments"] == 2000.0
+    assert alloc["deposited_goal"] is not None
+    assert alloc["deposited_goal"]["deposited_amount"] == 2000.0
+
+    # 4. Verify goal received the deposit
+    check_goal = client.get(f"/api/goals/{goal['id']}", headers=auth_headers)
+    assert check_goal.status_code == 200
+    assert check_goal.json()["current_amount"] == 2000.0
+
