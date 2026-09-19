@@ -8,6 +8,7 @@ from sqlalchemy import func, extract, desc
 from app.database import get_db
 from app.models.user import User
 from app.models.transaction import Transaction
+from app.models.budget import BudgetBoundary
 from app.schemas.dashboard import DashboardSummaryOut, CategorySpending, MonthlyTrendPoint
 from app.schemas.transaction import TransactionOut
 from app.services.auth_service import get_current_user
@@ -63,7 +64,9 @@ def get_dashboard_summary(
                 CategorySpending(
                     category=c["category"],
                     total_amount=c["total_amount"],
-                    percentage=c["percentage"]
+                    percentage=c["percentage"],
+                    budget_limit=c.get("budget_limit", 0.0),
+                    budget_used_pct=c.get("budget_used_pct", c.get("percentage", 0.0))
                 )
                 for c in supa_summary.get("category_spending", [])
             ]
@@ -75,7 +78,8 @@ def get_dashboard_summary(
                     year=m["year"],
                     income=m["income"],
                     expense=m["expense"],
-                    net_savings=m["net_savings"]
+                    net_savings=m["net_savings"],
+                    goal_deposits=m.get("goal_deposits", 0.0)
                 )
                 for m in supa_summary.get("monthly_trend", [])
             ]
@@ -97,6 +101,7 @@ def get_dashboard_summary(
                 net_balance=supa_summary["net_balance"],
                 general_available_savings=supa_summary["general_available_savings"],
                 locked_goal_savings=supa_summary["locked_goal_savings"],
+                total_savings=supa_summary.get("total_savings", 0.0),
                 expected_monthly_savings=expected_savings,
                 actual_current_month_savings=actual_savings,
                 savings_variance=round(actual_savings - expected_savings, 2),
@@ -149,26 +154,54 @@ def get_dashboard_summary(
         .all()
     )
 
-    # Category-wise expenses
+    # Category-wise expenses — current month only so budget % is meaningful
     cat_rows = (
         db.query(
             Transaction.category,
             func.coalesce(func.sum(Transaction.amount), 0.0).label("total"),
         )
-        .filter(Transaction.user_id == current_user.id, Transaction.type == "EXPENSE")
+        .filter(
+            Transaction.user_id == current_user.id,
+            Transaction.type == "EXPENSE",
+            extract("month", Transaction.date) == today.month,
+            extract("year", Transaction.date) == today.year,
+        )
         .group_by(Transaction.category)
         .all()
     )
 
-    total_expense = totals["total_expenses"]
+    # Current-month total expenses (denominator for fallback %)
+    cur_month_total_expense = sum(float(amt) for _, amt in cat_rows)
+
+    # Budget limits for current month (category → limit_amount)
+    budget_rows = (
+        db.query(BudgetBoundary)
+        .filter(
+            BudgetBoundary.user_id == current_user.id,
+            BudgetBoundary.month == today.month,
+            BudgetBoundary.year == today.year,
+            BudgetBoundary.category.isnot(None),
+        )
+        .all()
+    )
+    budget_map = {b.category: float(b.limit_amount) for b in budget_rows}
+
     category_spending: List[CategorySpending] = []
     for cat, amount in cat_rows:
-        pct = (amount / total_expense * 100.0) if total_expense > 0 else 0.0
+        spent = float(amount)
+        limit = budget_map.get(cat, 0.0)
+        if limit > 0:
+            budget_used_pct = round(spent / limit * 100.0, 1)
+        else:
+            budget_used_pct = round((spent / cur_month_total_expense * 100.0) if cur_month_total_expense > 0 else 0.0, 1)
+        pct = round((spent / cur_month_total_expense * 100.0) if cur_month_total_expense > 0 else 0.0, 1)
         category_spending.append(
             CategorySpending(
                 category=cat,
-                total_amount=round(float(amount), 2),
-                percentage=round(pct, 1),
+                total_amount=round(spent, 2),
+                percentage=pct,
+                budget_limit=limit,
+                budget_used_pct=budget_used_pct,
             )
         )
     category_spending.sort(key=lambda x: x.total_amount, reverse=True)
@@ -205,6 +238,17 @@ def get_dashboard_summary(
             .scalar()
         ) or 0.0
 
+        goal_dep = (
+            db.query(func.coalesce(func.sum(Transaction.amount), 0.0))
+            .filter(
+                Transaction.user_id == current_user.id,
+                Transaction.type == "GOAL_TRANSFER",
+                extract("month", Transaction.date) == m,
+                extract("year", Transaction.date) == y,
+            )
+            .scalar()
+        ) or 0.0
+
         monthly_trend.append(
             MonthlyTrendPoint(
                 month_name=month_name[m][:3],
@@ -213,6 +257,7 @@ def get_dashboard_summary(
                 income=round(float(inc), 2),
                 expense=round(float(exp), 2),
                 net_savings=round(float(inc - exp), 2),
+                goal_deposits=round(float(goal_dep), 2),
             )
         )
 
@@ -223,6 +268,7 @@ def get_dashboard_summary(
         net_balance=totals["net_balance"],
         general_available_savings=totals["general_available_savings"],
         locked_goal_savings=totals["locked_goal_savings"],
+        total_savings=totals.get("total_savings", 0.0),
         expected_monthly_savings=expected_savings,
         actual_current_month_savings=actual_month_savings,
         savings_variance=round(savings_variance, 2),

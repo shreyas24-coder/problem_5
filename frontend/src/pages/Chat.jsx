@@ -33,7 +33,7 @@ export default function ChatPage() {
       id: 1,
       sender: 'bot',
       time: 'Just now',
-      text: `Hello ${displayName}! I am your Kavach AI Money Copilot. I can help you budget your irregular income, verify suspicious UPI collect requests, calculate savings velocity for your goals, or advise on daily spending caps. What can I help you with today?`,
+      text: `Hello ${displayName}! I am your MONEYCRAFT AI Money Copilot. I can help you budget your irregular income, verify suspicious UPI collect requests, calculate savings velocity for your goals, or advise on daily spending caps. What can I help you with today?`,
       suggestions: [
         "How to save ₹5,000 on a student stipend?",
         "Is this SMS a scam: 'Electricity unpaid, pay now'?",
@@ -84,7 +84,7 @@ export default function ChatPage() {
 
     if (q.includes('laptop') || q.includes('goal') || q.includes('buy') || q.includes('target')) {
       return {
-        text: "🎯 Custom Goal Deposits: For any purchase like an M2 laptop or phone, break it down into flexible deposits. With Kavach, you can now deposit ANY variable amount (like ₹250, ₹640, or ₹2,000) whenever you get extra freelance or pocket money!",
+        text: "🎯 Custom Goal Deposits: For any purchase like an M2 laptop or phone, break it down into flexible deposits. With MONEYCRAFT, you can now deposit ANY variable amount (like ₹250, ₹640, or ₹2,000) whenever you get extra freelance or pocket money!",
         action: { label: "Open Goals Planner", path: "/goals" }
       };
     }
@@ -161,7 +161,7 @@ export default function ChatPage() {
           </div>
           <div>
             <h1 className="text-lg font-black text-stone-900 tracking-tight flex items-center gap-1.5 leading-tight">
-              Kavach AI Copilot
+              MONEYCRAFT AI Copilot
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </h1>
             <p className="text-xs text-stone-500 font-medium">

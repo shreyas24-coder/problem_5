@@ -99,7 +99,7 @@ export default function LandingPage() {
       saveDesc: "Ask personalized questions on saving stipends, detecting UPI scams, and planning purchases with instant AI intelligence.",
       eduHeading: "Financial Smarts & Security News",
       eduSub: "Essential financial literacy, RBI payment alerts, and micro-investing rules curated for young earners.",
-      footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. Kavach stops the tap before the money leaves.",
+      footerStatText: "₹805 crore was lost to UPI fraud up to November of FY26. MONEYCRAFT stops the tap before the money leaves.",
       readyHeading: "Ready to take control of your digital money?",
       readySub: "Join thousands of students and young professionals who never worry before tapping UPI."
     },
@@ -243,7 +243,7 @@ export default function LandingPage() {
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-700 mb-1">
               <BookOpen className="w-4 h-4" />
-              <span>Kavach Academy & RBI Bulletins</span>
+              <span>MONEYCRAFT Academy & RBI Bulletins</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
               {text.eduHeading}
@@ -355,7 +355,7 @@ export default function LandingPage() {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <span className="text-xs text-stone-500 font-medium">Verified by Kavach Security Desk</span>
+                <span className="text-xs text-stone-500 font-medium">Verified by MONEYCRAFT Security Desk</span>
                 <button
                   type="button"
                   onClick={() => setSelectedArticle(null)}

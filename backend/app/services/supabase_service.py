@@ -100,8 +100,14 @@ class SupabaseService:
         timestamp: Optional[str] = None
     ) -> Dict[str, Any]:
         """Insert a transaction into Supabase."""
-        # Normalize type to UPPERCASE
-        clean_type = "INCOME" if txn_type.upper() in ["INCOME", "INFLOW", "CREDIT"] else "EXPENSE"
+        # Normalize type
+        t_up = txn_type.upper()
+        if t_up in ["INCOME", "INFLOW", "CREDIT"]:
+            clean_type = "INCOME"
+        elif t_up in ["GOAL_TRANSFER", "GOAL_DEPOSIT"]:
+            clean_type = "GOAL_TRANSFER"
+        else:
+            clean_type = "EXPENSE"
         
         row = {
             "user_id": str(user_id),
@@ -134,7 +140,8 @@ class SupabaseService:
         user_id: str,
         title: str,
         target_amount: float,
-        goal_type: Optional[str] = None
+        goal_type: Optional[str] = None,
+        target_date: Optional[str] = None
     ) -> Dict[str, Any]:
         """Create a savings goal in Supabase."""
         # Allowed values for goal_type constraint: 'SPECIFIC_PURCHASE', 'GENERAL', or None
@@ -153,8 +160,18 @@ class SupabaseService:
             "current_amount": 0.0,
             "goal_type": clean_type
         }
-        res = supabase.table("savings_goals").insert(row).execute()
-        return res.data[0] if res.data else row
+        if target_date:
+            row["target_date"] = str(target_date)
+
+        try:
+            res = supabase.table("savings_goals").insert(row).execute()
+            return res.data[0] if res.data else row
+        except Exception:
+            if "target_date" in row:
+                del row["target_date"]
+                res = supabase.table("savings_goals").insert(row).execute()
+                return res.data[0] if res.data else row
+            raise
 
     @staticmethod
     def deposit_to_goal(user_id: str, goal_id: str, amount: float) -> Dict[str, Any]:
@@ -180,13 +197,14 @@ class SupabaseService:
         SupabaseService.create_transaction(
             user_id=user_id,
             amount=amount,
-            txn_type="EXPENSE",
+            txn_type="GOAL_TRANSFER",
             merchant_name=f"Goal Lockbox: {goal.get('title', 'Goal')}",
             category="Savings Goal",
             linked_goal_id=goal_id
         )
 
         return updated_goal
+
 
     @staticmethod
     def withdraw_from_goal(user_id: str, goal_id: str, amount: float) -> Dict[str, Any]:
@@ -237,6 +255,29 @@ class SupabaseService:
         res = supabase.table("scam_logs").insert(row).execute()
         return res.data[0] if res.data else row
 
+    # --- BUDGET BOUNDARIES ---
+
+    @staticmethod
+    def get_budget_boundaries(
+        user_id: str,
+        month: int,
+        year: int
+    ) -> list:
+        """Fetch category budget boundaries from Supabase for a given user/month/year."""
+        try:
+            res = (
+                supabase.table("budget_boundaries")
+                .select("*")
+                .eq("user_id", str(user_id))
+                .eq("month", month)
+                .eq("year", year)
+                .execute()
+            )
+            # Filter rows where category is not null (skip overall budget rows)
+            return [r for r in (res.data or []) if r.get("category")]
+        except Exception:
+            return []
+
     # --- DASHBOARD & METRICS ---
 
     @staticmethod
@@ -252,28 +293,52 @@ class SupabaseService:
         total_goal_deposits = sum(float(g.get("current_amount", 0.0)) for g in goals)
 
         # Accounting Model:
-        # Liquid Balance = total_income - total_expenses
-        net_balance = max(0.0, total_income - total_expenses)
-        general_available_savings = net_balance
+        # Liquid Balance = total_income - total_expenses - total_goal_deposits
+        # Money locked into personal goals is deducted from spendable liquid funds
+        net_balance = round(total_income - total_expenses - total_goal_deposits, 2)
+        general_available_savings = round(max(0.0, net_balance), 2)
 
         savings_rate = 0.0
         if total_income > 0:
             savings_rate = round((total_goal_deposits / total_income) * 100.0, 1)
 
-        # Category Breakdown
+        # Category Breakdown — current month only so budget % is meaningful
+        now_local = datetime.datetime.now(datetime.timezone.utc)
+        cur_month, cur_year = now_local.month, now_local.year
         cat_totals: Dict[str, float] = {}
         for t in txns:
             if t.get("type") == "EXPENSE":
+                ts = t.get("timestamp")
+                if ts:
+                    try:
+                        dt = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                        if dt.month != cur_month or dt.year != cur_year:
+                            continue
+                    except Exception:
+                        pass
                 c = t.get("category") or "General"
                 cat_totals[c] = cat_totals.get(c, 0.0) + float(t["amount"])
 
+        cur_month_total = sum(cat_totals.values())
+
+        # Fetch budget limits for current month
+        budget_rows = SupabaseService.get_budget_boundaries(user_id, cur_month, cur_year)
+        budget_map = {r["category"]: float(r["limit_amount"]) for r in budget_rows}
+
         category_spending = []
         for c, amt in sorted(cat_totals.items(), key=lambda x: x[1], reverse=True):
-            pct = round((amt / total_expenses * 100.0), 1) if total_expenses > 0 else 0.0
+            pct = round((amt / cur_month_total * 100.0), 1) if cur_month_total > 0 else 0.0
+            limit = budget_map.get(c, 0.0)
+            if limit > 0:
+                budget_used_pct = round(amt / limit * 100.0, 1)
+            else:
+                budget_used_pct = pct
             category_spending.append({
                 "category": c,
                 "total_amount": round(amt, 2),
-                "percentage": pct
+                "percentage": pct,
+                "budget_limit": limit,
+                "budget_used_pct": budget_used_pct,
             })
 
         # 6-Month Monthly Trends
@@ -289,6 +354,7 @@ class SupabaseService:
             # Filter txns for that month/year
             m_inc = 0.0
             m_exp = 0.0
+            m_goal = 0.0
             for t in txns:
                 ts = t.get("timestamp")
                 if ts:
@@ -299,6 +365,8 @@ class SupabaseService:
                                 m_inc += float(t["amount"])
                             elif t.get("type") == "EXPENSE":
                                 m_exp += float(t["amount"])
+                            elif t.get("type") == "GOAL_TRANSFER":
+                                m_goal += float(t["amount"])
                     except Exception:
                         pass
 
@@ -308,13 +376,17 @@ class SupabaseService:
                 "year": y,
                 "income": round(m_inc, 2),
                 "expense": round(m_exp, 2),
-                "net_savings": round(m_inc - m_exp, 2)
+                "net_savings": round(m_inc - m_exp, 2),
+                "goal_deposits": round(m_goal, 2),
             })
+
+        total_savings = round(max(0.0, net_balance) + total_goal_deposits, 2)
 
         return {
             "net_balance": round(net_balance, 2),
             "general_available_savings": round(general_available_savings, 2),
             "locked_goal_savings": round(total_goal_deposits, 2),
+            "total_savings": total_savings,
             "total_income": round(total_income, 2),
             "total_expenses": round(total_expenses, 2),
             "total_goal_deposits": round(total_goal_deposits, 2),

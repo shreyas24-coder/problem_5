@@ -134,12 +134,12 @@ export default function AuthPage() {
         </div>
 
         <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-          {mode === 'signin' ? 'Sign In to Kavach' : 'Create Your Account'}
+          {mode === 'signin' ? 'Sign In to MONEYCRAFT' : 'Create Your Account'}
         </h2>
         <p className="text-xs sm:text-sm text-stone-600 mt-1 mb-6">
           {mode === 'signin'
             ? 'Access your personal financial copilot, scam shield, and goals.'
-            : 'Join Kavach to safeguard digital transactions and optimize savings.'}
+            : 'Join MONEYCRAFT to safeguard digital transactions and optimize savings.'}
         </p>
 
         {/* Mode Switcher Tabs */}
