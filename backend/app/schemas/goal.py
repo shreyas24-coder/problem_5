@@ -19,7 +19,7 @@ class GoalBase(BaseModel):
 
 
 class GoalCreate(GoalBase):
-    initial_deposit: Optional[float] = Field(default=0.0, ge=0, description="Initial funds to lock into this goal upon creation")
+    pass
 
 
 class GoalUpdate(BaseModel):
@@ -44,19 +44,6 @@ class GoalTransferResponse(BaseModel):
     goal_status: GoalStatusEnum
 
 
-class GoalDailyStatusOut(BaseModel):
-    goal_id: Union[int, str]
-    title: str
-    target_amount: float
-    current_amount: float
-    remaining_amount: float
-    target_date: Optional[datetime.date] = None
-    days_remaining: Optional[int] = None
-    daily_target: float = 0.0
-    saved_today: float = 0.0
-    is_daily_target_met: bool = False
-
-
 class GoalOut(GoalBase):
     id: Union[int, str]
     user_id: Union[int, str]
@@ -64,10 +51,6 @@ class GoalOut(GoalBase):
     status: GoalStatusEnum
     progress_percentage: float = 0.0
     remaining_amount: float = 0.0
-    daily_target: Optional[float] = 0.0
-    saved_today: Optional[float] = 0.0
-    days_remaining: Optional[int] = None
-    is_daily_target_met: Optional[bool] = False
     created_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None
 

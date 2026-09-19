@@ -8,11 +8,4 @@ __pycache__/
 **/*.pyc
 .pytest_cache/
 .env.local
-.env
-*.env
-**/.env
-**/*.env
-backend/.env
-fintech.db
-*.db
 

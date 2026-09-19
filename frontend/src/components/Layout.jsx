@@ -112,7 +112,7 @@ export default function Layout({ user, onSignOut, onLogin }) {
               </div>
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-xl font-black tracking-tight text-stone-900 dark:text-white flex items-center gap-1.5 leading-tight">
-                  MONEYCRAFT
+                  Kavach
                   <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </span>
                 <span className="text-[10px] font-bold text-stone-500 dark:text-slate-400 tracking-wider -mt-0.5 uppercase">
@@ -126,7 +126,7 @@ export default function Layout({ user, onSignOut, onLogin }) {
           <div className="w-2/4 flex items-center justify-center text-center">
             <div className="inline-flex items-center gap-2 py-1 px-3.5 bg-stone-100/90 dark:bg-slate-800/90 border border-stone-200/80 dark:border-slate-700 rounded-full shadow-xs">
               <span className="text-sm sm:text-base font-black text-stone-900 dark:text-white tracking-tight">
-                🛡️ MONEYCRAFT
+                🛡️ Kavach
               </span>
               <span className="text-stone-300 dark:text-slate-600">•</span>
               <span className="text-[11px] sm:text-xs font-bold text-stone-600 dark:text-slate-300 tracking-wide uppercase">
@@ -210,7 +210,7 @@ export default function Layout({ user, onSignOut, onLogin }) {
                     </div>
                     <div>
                       <span className="text-lg font-black tracking-tight text-stone-900 dark:text-white flex items-center gap-1 leading-tight">
-                        MONEYCRAFT
+                        Kavach
                         <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       </span>
                       <span className="text-[10px] font-bold text-stone-500 dark:text-slate-400 uppercase tracking-wider block">

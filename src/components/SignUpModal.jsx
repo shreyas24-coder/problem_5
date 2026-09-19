@@ -26,7 +26,7 @@ export default function SignUpModal({ isOpen, onClose, onComplete, lang = 'en' }
 
   const t = {
     en: {
-      title: "Join MONEYCRAFT",
+      title: "Join Kavach",
       subtitle: "Set up your free UPI protection copilot in under 60 seconds.",
       step1Title: "Basic Information",
       step1Sub: "Enter your details linked with your primary UPI number.",
@@ -41,7 +41,7 @@ export default function SignUpModal({ isOpen, onClose, onComplete, lang = 'en' }
       autoFillBtn: "Auto-Fill 2426",
       verifyBtn: "Verify & Continue",
       step3Title: "How do you earn & spend?",
-      step3Sub: "MONEYCRAFT personalizes your payout cycles based on your lifestyle.",
+      step3Sub: "Kavach personalizes your payout cycles based on your lifestyle.",
       personaStudent: "College Student / Intern",
       personaStudentDesc: "Irregular stipends, allowances, college projects",
       personaFreelance: "Freelancer / Creator",
@@ -50,7 +50,7 @@ export default function SignUpModal({ isOpen, onClose, onComplete, lang = 'en' }
       personaJuniorDesc: "First salary, rent splits, weekend social spends",
       completeBtn: "Activate Protection",
       step4Title: "You're Protected!",
-      step4Sub: "MONEYCRAFT Copilot is now active. Your UPI intents are safeguarded before PIN entry.",
+      step4Sub: "Kavach Copilot is now active. Your UPI intents are safeguarded before PIN entry.",
       exploreBtn: "Open Scam Shield",
       securityBadge: "Bank-grade 256-bit encryption • Non-custodial • Zero UPI PIN storage"
     },

@@ -84,29 +84,28 @@ def get_user_financial_totals(db: Session, user_id: int) -> Dict[str, float]:
         .scalar()
     ) or 0.0
 
-    # locked_goal_savings: canonical source of truth of funds held in active goals
+    # net_balance = true liquid money (what's actually spendable right now)
+    net_balance = float(income) - float(expense) - float(goal_deposits) + float(goal_withdrawals)
+
+    # locked_goal_savings: canonical source of truth — always equals
+    # (total_goal_deposits - total_goal_withdrawals) under correct operation.
     locked_savings = (
         db.query(func.coalesce(func.sum(FinancialGoal.current_amount), 0.0))
         .filter(FinancialGoal.user_id == user_id, FinancialGoal.status != "CANCELLED")
         .scalar()
     ) or 0.0
 
-    total_goal_lock = max(float(locked_savings), float(goal_deposits) - float(goal_withdrawals))
-
-    # net_balance = true liquid money (what's actually spendable right now, with goals deducted)
-    net_balance = float(income) - float(expense) - total_goal_lock
-
     # In Model A, net_balance IS the general available savings.
+    # Do NOT subtract locked_savings again — the goal_deposits deduction already handles it.
     general_savings = net_balance
 
     return {
         "total_income": float(income),
         "total_expenses": float(expense),
-        "total_goal_deposits": float(total_goal_lock),
+        "total_goal_deposits": float(goal_deposits),
         "net_balance": round(net_balance, 2),
         "locked_goal_savings": float(locked_savings),
         "general_available_savings": round(general_savings, 2),
-        "total_savings": round(max(0.0, general_savings) + locked_savings, 2),
     }
 
 

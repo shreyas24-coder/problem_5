@@ -3,12 +3,6 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-from pathlib import Path
-
-_BACKEND_DIR = Path(__file__).resolve().parent.parent
-_ENV_PATH = _BACKEND_DIR / ".env"
-
-
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Technofora '26 - Smart Personal Finance & Secure Digital Transactions"
     API_V1_STR: str = "/api"
@@ -40,7 +34,7 @@ class Settings(BaseSettings):
         return ["*"]
 
     model_config = SettingsConfigDict(
-        env_file=(str(_ENV_PATH), ".env"),
+        env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore"
@@ -48,4 +42,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

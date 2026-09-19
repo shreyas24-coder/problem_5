@@ -1,7 +1,7 @@
 # Technofora '26 — Problem Statement 5 (FinTech)
-## MONEYCRAFT — Smart Personal Finance & Secure Digital Transactions
+## Kavach — Smart Personal Finance & Secure Digital Transactions
 
-MONEYCRAFT is a modern, mobile-first money copilot designed for India's digital-payment generation. It connects spending tracking, goal-based saving with the **Wallet-Transfer** lockbox mechanic, beginner-friendly financial education, and real-time AI pre-transaction fraud defense.
+Kavach is a modern, mobile-first money copilot designed for India's digital-payment generation. It connects spending tracking, goal-based saving with the **Wallet-Transfer** lockbox mechanic, beginner-friendly financial education, and real-time AI pre-transaction fraud defense.
 
 ![Status](https://img.shields.io/badge/Status-Full%20Stack%20Integrated-success)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688)

@@ -9,7 +9,6 @@ class SavingsTrackerOut(BaseModel):
     net_accumulated_balance: float      # True liquid balance (income - expenses - goal deposits + withdrawals)
     general_available_savings: float    # Equals net_accumulated_balance in Model A
     locked_goal_savings: float
-    total_savings: float = 0.0          # Combined total savings (Liquid Balance + Goal Savings)
     expected_monthly_savings: float
     actual_monthly_savings: float
     savings_rate_percentage: float

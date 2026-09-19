@@ -28,7 +28,7 @@ export default function AuthPage() {
   const t = {
     en: {
       backHome: "Back to Home",
-      title: "Sign Up for MONEYCRAFT",
+      title: "Sign Up for Kavach",
       sub: "Create your free account to unlock Scam Shield, Stipend Budgeting, and Goals.",
       step1Title: "1. Your Primary Details",
       step1Sub: "Enter your full name and primary UPI mobile number.",
@@ -44,7 +44,7 @@ export default function AuthPage() {
       autoFillOtpBtn: "Auto-Fill 2426",
       verifyBtn: "Verify & Continue",
       step3Title: "3. Choose Your Money Lifestyle",
-      step3Sub: "MONEYCRAFT personalizes your payout cycles based on your lifestyle.",
+      step3Sub: "Kavach personalizes your payout cycles based on your lifestyle.",
       personaStudent: "College Student / Intern",
       personaStudentDesc: "Irregular stipends, allowances, college projects",
       personaFreelance: "Freelancer / Creator",

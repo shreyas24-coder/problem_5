@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   const t = {
     en: {
-      welcome: user ? `Welcome back, ${user.name.split(' ')[0]} 👋` : "Welcome to MONEYCRAFT Copilot 👋",
+      welcome: user ? `Welcome back, ${user.name.split(' ')[0]} 👋` : "Welcome to Kavach Copilot 👋",
       subtitle: "Here's your live digital money pulse, spending burn rate, and savings growth.",
       inflowCard: "Current Inflow",
       inflowSub: "Stipend (RazorpayX)",

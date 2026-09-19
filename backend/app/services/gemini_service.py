@@ -129,11 +129,9 @@ async def analyze_security_message(
     """
     result: Optional[Dict[str, Any]] = None
 
-    api_key = settings.GEMINI_API_KEY.strip() if settings.GEMINI_API_KEY else ""
-    if api_key:
+    if settings.GEMINI_API_KEY:
         try:
-            model_name = settings.GEMINI_MODEL.strip() if settings.GEMINI_MODEL else "gemini-2.5-flash"
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}"
             
             # Format history
             contents = []

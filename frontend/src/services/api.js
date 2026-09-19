@@ -1,5 +1,5 @@
 /**
- * Centralized API Service for Technofora '26 FinTech Platform (MONEYCRAFT)
+ * Centralized API Service for Technofora '26 FinTech Platform (Kavach)
  * Communicates with FastAPI backend on /api endpoints with automatic JWT injection.
  */
 
@@ -219,11 +219,6 @@ export const goalsApi = {
       method: 'POST',
       body: JSON.stringify({ amount: Number(amount) }),
     });
-  },
-
-  // Daily Savings Suggestion & Status
-  getDailyStatus: async (id) => {
-    return await request(`/goals/${id}/daily-status`);
   },
 };
 

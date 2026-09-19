@@ -24,7 +24,7 @@ export default function ChatWidget({ user }) {
       id: 1,
       sender: 'bot',
       time: 'Just now',
-      text: `Hello ${user ? user.name.split(' ')[0] : 'there'}! I am your MONEYCRAFT FinTech Chatbot. I can answer questions about UPI fraud traps, irregular stipend budgeting, daily spend caps, or savings pace. What would you like to check today?`,
+      text: `Hello ${user ? user.name.split(' ')[0] : 'there'}! I am your Kavach FinTech Chatbot. I can answer questions about UPI fraud traps, irregular stipend budgeting, daily spend caps, or savings pace. What would you like to check today?`,
       suggestions: [
         "How to save ₹5,000 on a student stipend?",
         "Is this SMS a scam: 'Electricity unpaid, pay now'?",
@@ -77,7 +77,7 @@ export default function ChatWidget({ user }) {
 
     if (q.includes('laptop') || q.includes('goal') || q.includes('buy') || q.includes('target')) {
       return {
-        text: "🎯 Custom Goal Deposits: For any purchase like an M2 laptop or phone, break it down into flexible deposits. With MONEYCRAFT, you can now deposit ANY variable amount (like ₹250, ₹640, or ₹2,000) whenever you get extra freelance or pocket money!",
+        text: "🎯 Custom Goal Deposits: For any purchase like an M2 laptop or phone, break it down into flexible deposits. With Kavach, you can now deposit ANY variable amount (like ₹250, ₹640, or ₹2,000) whenever you get extra freelance or pocket money!",
         action: { label: "Open Goals Planner", path: "/goals" }
       };
     }
@@ -131,13 +131,13 @@ export default function ChatWidget({ user }) {
         {!isOpen && (
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 text-white rounded-full text-xs font-bold shadow-xl animate-fade-in border border-stone-700">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>MONEYCRAFT Chatbot</span>
+            <span>Kavach Chatbot</span>
           </div>
         )}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle MONEYCRAFT Chatbot"
+          aria-label="Toggle Kavach Chatbot"
           className="relative w-14 h-14 rounded-2xl bg-stone-900 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xl transition-all cursor-pointer hover:scale-105 active:scale-95 border-2 border-amber-400/40"
         >
           {isOpen ? (
@@ -163,7 +163,7 @@ export default function ChatWidget({ user }) {
               </div>
               <div>
                 <h3 className="text-sm font-black tracking-tight flex items-center gap-1.5 text-white">
-                  MONEYCRAFT Chatbot
+                  Kavach Chatbot
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 </h3>
                 <span className="text-[10px] text-stone-400 font-semibold block">
@@ -302,7 +302,7 @@ export default function ChatWidget({ user }) {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask MONEYCRAFT Chatbot anything..."
+                placeholder="Ask Kavach Chatbot anything..."
                 className="flex-1 min-h-[40px] px-3 bg-transparent text-xs sm:text-sm text-stone-900 placeholder-stone-400 outline-none"
               />
               <button

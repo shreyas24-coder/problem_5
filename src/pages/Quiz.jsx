@@ -107,7 +107,7 @@ export default function QuizPage() {
       retakeBtn: "Retake Quiz",
       scoreTitle: "Quiz Completed!",
       scoreSub: `You scored ${score} out of ${total} (${percentage}%)`,
-      tierMaster: "🛡️ MONEYCRAFT Grandmaster (Financial IQ: 100%)",
+      tierMaster: "🛡️ Kavach Grandmaster (Financial IQ: 100%)",
       tierSmart: "⚡ Smart Saver (Financial IQ: 75%)",
       tierRookie: "🌱 Rookie Defender (Keep Learning!)",
       goToDashboard: "Go to Dashboard",

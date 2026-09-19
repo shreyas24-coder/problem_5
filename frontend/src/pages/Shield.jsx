@@ -272,7 +272,7 @@ export default function ShieldPage() {
 
             <div className="pt-4 border-t border-red-500/50 flex flex-col sm:flex-row items-center justify-between gap-3">
               <span className="text-xs text-red-200 font-medium">
-                MONEYCRAFT will never ask for your UPI PIN. Never approve requests for unknown entities.
+                Kavach will never ask for your UPI PIN. Never approve requests for unknown entities.
               </span>
               <button
                 type="button"

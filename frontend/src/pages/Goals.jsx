@@ -40,9 +40,6 @@ export default function GoalsPage() {
   });
 
   // New Goal Form
-  const [goalMode, setGoalMode] = useState('purchase'); // 'purchase' | 'daily'
-  const [dailyAmtInput, setDailyAmtInput] = useState('200');
-  const [dailyDaysInput, setDailyDaysInput] = useState('30');
   const [newTitle, setNewTitle] = useState('');
   const [newTarget, setNewTarget] = useState('');
   const [newCategory, setNewCategory] = useState('Specific Purchase');
@@ -73,20 +70,15 @@ export default function GoalsPage() {
 
   const handleAddGoal = async (e) => {
     e.preventDefault();
-    const isDaily = goalMode === 'daily';
-    const finalTitle = isDaily ? (newTitle.trim() || `Daily Savings Habit (₹${dailyAmtInput}/day)`) : newTitle.trim();
-    const finalTarget = isDaily ? ((Number(dailyAmtInput) || 0) * (Number(dailyDaysInput) || 30)) : Number(newTarget);
-    const finalDeadline = isDaily ? (new Date(Date.now() + (Number(dailyDaysInput) || 30) * 86400000).toISOString().split('T')[0]) : (newDeadline || undefined);
-
-    if (!finalTitle || !finalTarget || finalTarget <= 0) return;
+    if (!newTitle.trim() || !newTarget || Number(newTarget) <= 0) return;
 
     try {
       await goalsApi.create({
-        title: finalTitle,
+        title: newTitle.trim(),
         description: newDescription.trim() || undefined,
-        category: isDaily ? 'Daily Habit' : newCategory,
-        target_amount: finalTarget,
-        target_date: finalDeadline
+        category: newCategory,
+        target_amount: Number(newTarget),
+        target_date: newDeadline || undefined
       });
 
       await loadData();
@@ -95,8 +87,7 @@ export default function GoalsPage() {
       setNewTarget('');
       setNewDescription('');
       setNewDeadline('');
-      setGoalMode('purchase');
-      setSuccessMsg(isDaily ? 'Daily Savings Goal created successfully!' : 'Goal created successfully!');
+      setSuccessMsg('Goal created successfully!');
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
       setErrorMsg(err.message || 'Failed to create goal');
@@ -167,21 +158,9 @@ export default function GoalsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              setGoalMode('daily');
-              setIsAddModalOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            <span>⚡ Make Daily Goal</span>
-          </button>
-          <button
-            onClick={() => {
-              setGoalMode('purchase');
-              setIsAddModalOpen(true);
-            }}
+            onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4 text-amber-400" />
@@ -223,111 +202,6 @@ export default function GoalsPage() {
           <button onClick={() => setSuccessMsg('')}><X className="w-4 h-4" /></button>
         </div>
       )}
-
-      {/* TODAY'S DAILY GOAL & ACHIEVEMENT TRACKER HERO CARD */}
-      {(() => {
-        const totalDailyTarget = goals.reduce((acc, g) => acc + (Number(g.daily_target) || 0), 0);
-        const totalSavedToday = goals.reduce((acc, g) => acc + (Number(g.saved_today) || 0), 0);
-        const isGoalAchieved = totalDailyTarget > 0 && totalSavedToday >= totalDailyTarget;
-        const progressPercent = totalDailyTarget > 0 ? Math.min(100, Math.round((totalSavedToday / totalDailyTarget) * 100)) : 0;
-        const remainingToSaveToday = Math.max(0, totalDailyTarget - totalSavedToday);
-        const streak = isGoalAchieved ? 4 : 3;
-
-        return (
-          <div className={`p-5 sm:p-6 rounded-3xl border-2 transition-all ${
-            isGoalAchieved
-              ? 'bg-gradient-to-br from-emerald-50 via-emerald-100/30 to-white border-emerald-300 shadow-md'
-              : 'bg-white border-stone-200 shadow-xs'
-          }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-xs ${
-                  isGoalAchieved ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-800'
-                }`}>
-                  {isGoalAchieved ? '🎉' : '🎯'}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black uppercase tracking-wider text-stone-500">
-                      Today's Daily Savings Goal
-                    </span>
-                    {isGoalAchieved ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300 animate-pulse">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        ACHIEVED TODAY!
-                      </span>
-                    ) : (
-                      <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
-                        {progressPercent}% Achieved
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight mt-0.5">
-                    ₹{totalSavedToday.toLocaleString()} <span className="text-stone-400 text-base font-bold">/ ₹{totalDailyTarget.toLocaleString()} today</span>
-                  </h2>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                <div className="px-3 py-1.5 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-1.5 text-xs font-black text-amber-900">
-                  <span>🔥 {streak} Day Streak</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setGoalMode('daily');
-                    setIsAddModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  Set Daily Habit
-                </button>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full h-3.5 bg-stone-100 rounded-full overflow-hidden p-0.5 border border-stone-200 mb-3">
-              <div
-                className={`h-full rounded-full transition-all duration-700 ${
-                  isGoalAchieved ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            {/* Subtext info */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <div className="text-stone-500 font-medium">
-                {isGoalAchieved ? (
-                  <span className="text-emerald-800 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Target crushed! You've achieved your daily savings target for today.
-                  </span>
-                ) : (
-                  <span>
-                    {remainingToSaveToday > 0 ? (
-                      <>Lock <strong className="text-stone-900 font-bold">₹{remainingToSaveToday.toLocaleString()}</strong> more today to achieve today's goal and keep your streak.</>
-                    ) : (
-                      'Set up a daily goal to start tracking daily savings habits.'
-                    )}
-                  </span>
-                )}
-              </div>
-
-              {!isGoalAchieved && remainingToSaveToday > 0 && goals.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setTransferModal({ isOpen: true, goal: goals[0], type: 'deposit', amount: String(remainingToSaveToday) })}
-                  className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 self-start sm:self-auto shrink-0"
-                >
-                  <ArrowDownLeft className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Lock ₹{remainingToSaveToday.toLocaleString()} to Achieve Daily Goal</span>
-                </button>
-              )}
-            </div>
-          </div>
-        );
-      })()}
 
       {/* 2. Goals Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -396,82 +270,6 @@ export default function GoalsPage() {
                   <span>{isDone ? 'Goal Achieved 🎉' : `₹${remaining.toLocaleString()} remaining`}</span>
                   {goal.target_date && <span>Target: {goal.target_date}</span>}
                 </div>
-
-                {/* --- DAILY SAVINGS SUGGESTION & TRACKER --- */}
-                {(() => {
-                  const dailyTarget = goal.daily_target !== undefined && goal.daily_target !== null
-                    ? Number(goal.daily_target)
-                    : (goal.target_date && remaining > 0
-                        ? Math.max(0, Math.round(remaining / Math.max(1, Math.ceil((new Date(goal.target_date) - new Date()) / (1000 * 60 * 60 * 24)))))
-                        : 0);
-
-                  const savedToday = Number(goal.saved_today || 0);
-                  const isDailyTargetMet = goal.is_daily_target_met ?? (dailyTarget > 0 && savedToday >= dailyTarget);
-                  const dailyPercent = dailyTarget > 0 ? Math.min(100, Math.round((savedToday / dailyTarget) * 100)) : 0;
-
-                  return (
-                    <div className={`mt-4 p-3.5 rounded-2xl border transition-all ${
-                      isDailyTargetMet
-                        ? 'bg-emerald-50/90 border-emerald-300 shadow-xs'
-                        : 'bg-stone-50 border-stone-200'
-                    }`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm">🎯</span>
-                          <span className="text-xs font-black text-stone-800 tracking-tight">
-                            Daily Target:{' '}
-                            <span className={isDailyTargetMet ? 'text-emerald-700' : 'text-stone-900'}>
-                              {dailyTarget > 0 ? `₹${Math.round(dailyTarget).toLocaleString()}` : '—'}
-                            </span>
-                          </span>
-                        </div>
-
-                        {isDailyTargetMet && dailyTarget > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            Target Met!
-                          </span>
-                        ) : (
-                          <span className="text-[11px] font-bold text-stone-500">
-                            {goal.days_remaining ? `${goal.days_remaining}d left` : 'Today'}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Mini Progress Bar */}
-                      {dailyTarget > 0 && (
-                        <div className="w-full h-2 bg-stone-200/80 rounded-full overflow-hidden mb-2">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              isDailyTargetMet ? 'bg-emerald-500' : 'bg-amber-500'
-                            }`}
-                            style={{ width: `${dailyPercent}%` }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Fraction Tracking Indicator & Success State */}
-                      <div className="flex items-center justify-between text-[11px]">
-                        {dailyTarget > 0 ? (
-                          <>
-                            <span className={`font-bold ${isDailyTargetMet ? 'text-emerald-700' : 'text-stone-600'}`}>
-                              ₹{savedToday.toLocaleString()} / ₹{Math.round(dailyTarget).toLocaleString()} saved today
-                            </span>
-                            <span className={`font-medium ${isDailyTargetMet ? 'text-emerald-600 font-bold' : 'text-stone-400'}`}>
-                              {isDailyTargetMet
-                                ? '✓ Target Met'
-                                : `₹${Math.max(0, Math.round(dailyTarget - savedToday)).toLocaleString()} to go`}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-stone-400 italic">
-                            {isDone ? 'Goal achieved 🎉' : 'Set target date for daily plan'}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
               </div>
 
               {/* Wallet-Transfer Action Buttons */}
@@ -603,9 +401,7 @@ export default function GoalsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl border-2 border-stone-300">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black text-stone-900">
-                {goalMode === 'daily' ? 'Set Daily Savings Goal' : 'Create Financial Goal'}
-              </h3>
+              <h3 className="text-xl font-black text-stone-900">Create Financial Goal</h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="text-stone-400 hover:text-stone-800"
@@ -614,193 +410,57 @@ export default function GoalsPage() {
               </button>
             </div>
 
-            {/* Goal Mode Switcher */}
-            <div className="grid grid-cols-2 p-1 bg-stone-100 rounded-xl mb-4 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => setGoalMode('purchase')}
-                className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  goalMode === 'purchase'
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                <span>🎯 Purchase Goal</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setGoalMode('daily');
-                  if (!newTitle) setNewTitle('Daily Savings Habit');
-                }}
-                className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  goalMode === 'daily'
-                    ? 'bg-white text-emerald-800 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                <span>⚡ Daily Habit Goal</span>
-              </button>
-            </div>
-
             <form onSubmit={handleAddGoal} className="space-y-4">
-              {goalMode === 'daily' ? (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Daily Goal Title</label>
-                    <input
-                      type="text"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="e.g. Daily Savings Habit"
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-emerald-600 outline-none"
-                      required
-                    />
-                  </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Goal Title</label>
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="e.g. MacBook Pro M3 or Goa Roadtrip"
+                  className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                  required
+                />
+              </div>
 
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-xs font-bold uppercase text-stone-600">Daily Target Amount (₹/day)</label>
-                      <span className="text-[11px] font-black text-emerald-700">₹{dailyAmtInput}/day</span>
-                    </div>
-                    <input
-                      type="number"
-                      min="10"
-                      step="10"
-                      value={dailyAmtInput}
-                      onChange={(e) => setDailyAmtInput(e.target.value)}
-                      placeholder="200"
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-black text-stone-900 focus:bg-white focus:border-emerald-600 outline-none"
-                      required
-                    />
-                    <div className="flex gap-1.5 mt-1.5">
-                      {[100, 200, 500, 1000].map(amt => (
-                        <button
-                          key={amt}
-                          type="button"
-                          onClick={() => setDailyAmtInput(String(amt))}
-                          className="flex-1 py-1 bg-stone-100 hover:bg-stone-200 rounded-lg text-xs font-bold text-stone-700"
-                        >
-                          ₹{amt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Target Amount (₹)</label>
+                <input
+                  type="number"
+                  min="100"
+                  value={newTarget}
+                  onChange={(e) => setNewTarget(e.target.value)}
+                  placeholder="e.g. 85000"
+                  className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                  required
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Habit Duration (Days)</label>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {[
-                        { label: '7 Days', val: '7' },
-                        { label: '30 Days', val: '30' },
-                        { label: '90 Days', val: '90' },
-                        { label: '1 Year', val: '365' }
-                      ].map(d => (
-                        <button
-                          key={d.val}
-                          type="button"
-                          onClick={() => setDailyDaysInput(d.val)}
-                          className={`py-1.5 text-xs font-bold rounded-lg border transition-all ${
-                            dailyDaysInput === d.val
-                              ? 'bg-emerald-600 text-white border-emerald-700'
-                              : 'bg-stone-50 text-stone-700 border-stone-200'
-                          }`}
-                        >
-                          {d.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Category</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                >
+                  <option value="Specific Purchase">Specific Purchase (Laptop, Phone, Gear)</option>
+                  <option value="Emergency">Emergency Buffer (3-6 mo living costs)</option>
+                  <option value="Milestone">Milestone (Trip, Course, Moving)</option>
+                </select>
+              </div>
 
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1">
-                    <div className="flex justify-between font-bold text-stone-900">
-                      <span>Total Goal to Accumulate:</span>
-                      <span className="text-emerald-800 font-black">
-                        ₹{((Number(dailyAmtInput) || 0) * (Number(dailyDaysInput) || 30)).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-stone-500 font-medium">
-                      <span>Target End Date:</span>
-                      <span>{new Date(Date.now() + (Number(dailyDaysInput) || 30) * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Goal Title</label>
-                    <input
-                      type="text"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="e.g. MacBook Pro M3 or Goa Roadtrip"
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
-                      required
-                    />
-                  </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Description (Optional)</label>
+                <input
+                  type="text"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="e.g. For college projects and coding hackathons"
+                  className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Target Amount (₹)</label>
-                    <input
-                      type="number"
-                      min="100"
-                      value={newTarget}
-                      onChange={(e) => setNewTarget(e.target.value)}
-                      placeholder="e.g. 85000"
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Category</label>
-                    <select
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
-                    >
-                      <option value="Specific Purchase">Specific Purchase (Laptop, Phone, Gear)</option>
-                      <option value="Emergency">Emergency Buffer (3-6 mo living costs)</option>
-                      <option value="Milestone">Milestone (Trip, Course, Moving)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Description (Optional)</label>
-                    <input
-                      type="text"
-                      value={newDescription}
-                      onChange={(e) => setNewDescription(e.target.value)}
-                      placeholder="e.g. For college projects and coding hackathons"
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Target Deadline</label>
-                    <input
-                      type="date"
-                      value={newDeadline}
-                      onChange={(e) => setNewDeadline(e.target.value)}
-                      className="w-full h-11 bg-stone-50 border border-stone-300 rounded-xl px-4 text-sm font-bold text-stone-900 focus:bg-white focus:border-stone-900 outline-none"
-                    />
-                  </div>
-                </>
-              )}
-
-              <button
-                type="submit"
-                className={`w-full h-12 text-white font-bold text-sm shadow-md mt-2 flex items-center justify-center gap-2 cursor-pointer rounded-xl transition-all ${
-                  goalMode === 'daily'
-                    ? 'bg-emerald-700 hover:bg-emerald-800'
-                    : 'bg-stone-900 hover:bg-stone-800'
-                }`}
-              >
-                <span>{goalMode === 'daily' ? '⚡ Activate Daily Savings Habit' : 'Create Lockbox'}</span>
-                <ArrowRight className="w-4 h-4 text-amber-400" />
-              </button>
-            </form>
-
+              <div>
                 <label className="block text-xs font-bold uppercase text-stone-600 mb-1">Target Deadline</label>
                 <input
                   type="date"
